@@ -1,0 +1,8 @@
+user.authenticate.endpoint=
+user_id.name=
+oauth20.port=
+oauth20.host=
+expires_in.client_credentials=
+expires_in.password=
+db_host=
+
