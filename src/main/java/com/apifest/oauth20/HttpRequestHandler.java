@@ -68,6 +68,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
     protected Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 
+    protected static Logger accessTokensLog = LoggerFactory.getLogger("accessTokens");
+
     protected AuthorizationServer auth = new AuthorizationServer();
 
     @Override
@@ -163,6 +165,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 String jsonString = mapper.writeValueAsString(accessToken);
                 log.debug("access token:" + jsonString);
                 response = createOkResponse(jsonString);
+                accessTokensLog.info("token {}", jsonString);
             }
         } catch(OAuthException ex) {
             response = createOAuthExceptionResponse(ex);
@@ -191,6 +194,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             JSONObject obj = new JSONObject();
             obj.put("redirect_uri", redirectURI);
             response = createOkResponse(obj.toString());
+            accessTokensLog.info("authCode {}", obj.toString());
         } catch (OAuthException ex) {
             response = createOAuthExceptionResponse(ex);
         } catch (JSONException e) {
