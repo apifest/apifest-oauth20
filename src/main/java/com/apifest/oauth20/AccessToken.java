@@ -195,7 +195,7 @@ public class AccessToken implements Serializable {
         return accessToken;
     }
 
-    public boolean isExpired() {
+    public boolean tokenExpired() {
         Long expiresIn = Long.valueOf(getExpiresIn())*1000;//expires_in is in seconds
         Long currentTime = System.currentTimeMillis();
         if(expiresIn + getCreated() < currentTime) {

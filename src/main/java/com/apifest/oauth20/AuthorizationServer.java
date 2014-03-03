@@ -187,7 +187,7 @@ public class AuthorizationServer {
     public AccessToken isValidToken(String token) {
         AccessToken accessToken = db.findAccessToken(token);
         if(accessToken != null) {
-            if(accessToken.isExpired()) {
+            if(accessToken.tokenExpired()) {
                 db.updateAccessTokenValidStatus(accessToken.getToken(), false);
                 return null;
             }
@@ -236,7 +236,7 @@ public class AuthorizationServer {
         String token = getAccessToken(req);
         AccessToken accessToken = db.findAccessToken(token);
         if(accessToken != null) {
-            if(accessToken.isExpired()) {
+            if(accessToken.tokenExpired()) {
                 log.debug("access token {} is expired", token);
                 return true;
             }

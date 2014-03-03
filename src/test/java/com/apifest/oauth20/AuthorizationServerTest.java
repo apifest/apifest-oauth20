@@ -674,7 +674,7 @@ public class AuthorizationServerTest {
         AccessToken accessToken = mock(AccessToken.class);
         given(accessToken.getToken()).willReturn(token);
         given(authServer.db.findAccessToken(accessToken.getToken())).willReturn(accessToken);
-        given(accessToken.isExpired()).willReturn(true);
+        given(accessToken.tokenExpired()).willReturn(true);
 
         // WHEN
         AccessToken result = authServer.isValidToken(token);
@@ -739,7 +739,7 @@ public class AuthorizationServerTest {
         ChannelBuffer buff = ChannelBuffers.copiedBuffer(token.getBytes());
         willReturn(buff).given(req).getContent();
         AccessToken accessToken = mock(AccessToken.class);
-        willReturn(true).given(accessToken).isExpired();
+        willReturn(true).given(accessToken).tokenExpired();
         willReturn(accessToken).given(authServer.db).findAccessToken("172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7");
 
         // WHEN
@@ -759,7 +759,7 @@ public class AuthorizationServerTest {
         ChannelBuffer buff = ChannelBuffers.copiedBuffer(token.getBytes());
         willReturn(buff).given(req).getContent();
         AccessToken accessToken = mock(AccessToken.class);
-        willReturn(false).given(accessToken).isExpired();
+        willReturn(false).given(accessToken).tokenExpired();
         willReturn(clientId).given(accessToken).getClientId();
         willReturn(accessToken).given(authServer.db).findAccessToken("172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7");
 
@@ -781,7 +781,7 @@ public class AuthorizationServerTest {
         ChannelBuffer buff = ChannelBuffers.copiedBuffer(token.getBytes());
         willReturn(buff).given(req).getContent();
         AccessToken accessToken = mock(AccessToken.class);
-        willReturn(false).given(accessToken).isExpired();
+        willReturn(false).given(accessToken).tokenExpired();
         willReturn("0345901231313").given(accessToken).getClientId();
         willReturn(accessToken).given(authServer.db).findAccessToken("172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7");
 

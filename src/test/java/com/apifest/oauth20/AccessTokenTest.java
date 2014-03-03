@@ -92,7 +92,7 @@ public class AccessTokenTest {
         willReturn("899").given(accessToken).getExpiresIn();
 
         // WHEN
-        boolean expired = accessToken.isExpired();
+        boolean expired = accessToken.tokenExpired();
 
         // THEN
         assertTrue(expired);
@@ -110,7 +110,7 @@ public class AccessTokenTest {
         willReturn("899").given(accessToken).getExpiresIn();
 
         // WHEN
-        boolean expired = accessToken.isExpired();
+        boolean expired = accessToken.tokenExpired();
 
         // THEN
         assertFalse(expired);
