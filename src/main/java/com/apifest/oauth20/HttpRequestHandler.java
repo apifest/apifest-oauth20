@@ -165,7 +165,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 String jsonString = mapper.writeValueAsString(accessToken);
                 log.debug("access token:" + jsonString);
                 response = createOkResponse(jsonString);
-                accessTokensLog.info("token {}", jsonString);
+                accessTokensLog.debug("token {}", jsonString);
             }
         } catch(OAuthException ex) {
             response = createOAuthExceptionResponse(ex);

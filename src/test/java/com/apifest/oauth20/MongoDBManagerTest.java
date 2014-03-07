@@ -39,42 +39,42 @@ import com.mongodb.DBObject;
 /**
  * @author Rossitsa Borissova
  */
-public class DBManagerTest {
+public class MongoDBManagerTest {
 
-    DBManager dbManager;
+    MongoDBManager dbManager;
     DB db;
     DBCollection coll;
 
     @BeforeMethod
     public void setup() {
-        dbManager = spy(new DBManager());
-        DBManager.log = mock(Logger.class);
+        dbManager = spy(new MongoDBManager());
+        MongoDBManager.log = mock(Logger.class);
         db = mock(DB.class);
         coll = mock(DBCollection.class);
-        dbManager.db = db;
+        MongoDBManager.db = db;
     }
 
     @Test
     public void when_insert_client_credentials_invoke_insert_object() throws Exception {
         // GIVEN
         ClientCredentials cred = new ClientCredentials("Test");
-        willDoNothing().given(dbManager).storeObject(cred, DBManager.CLIENTS_COLLECTION_NAME);
+        willDoNothing().given(dbManager).storeObject(cred, MongoDBManager.CLIENTS_COLLECTION_NAME);
 
         // WHEN
         dbManager.storeClientCredentials(cred);
 
         // THEN
-        verify(dbManager).storeObject(cred, DBManager.CLIENTS_COLLECTION_NAME);
+        verify(dbManager).storeObject(cred, MongoDBManager.CLIENTS_COLLECTION_NAME);
     }
 
     @Test
     public void when_insert_client_credentials_invoke_insert_on_collection() throws Exception {
         // GIVEN
         ClientCredentials cred = new ClientCredentials("Test");
-        given(db.getCollection(DBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
+        given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
 
         // WHEN
-        dbManager.storeObject(cred, DBManager.CLIENTS_COLLECTION_NAME);
+        dbManager.storeObject(cred, MongoDBManager.CLIENTS_COLLECTION_NAME);
 
         // THEN
         verify(coll).insert(any(DBObject.class));
@@ -93,13 +93,13 @@ public class DBManagerTest {
         map.put("type", 1);
         map.put("status", 1);
         willReturn(map).given(bson).toMap();
-        willReturn(bson).given(dbManager).findObjectById(cred.getId(), DBManager.ID_NAME, DBManager.CLIENTS_COLLECTION_NAME);
+        willReturn(bson).given(dbManager).findObjectById(cred.getId(), MongoDBManager.ID_NAME, MongoDBManager.CLIENTS_COLLECTION_NAME);
 
         // WHEN
         dbManager.findClientCredentials(cred.getId());
 
         // THEN
-        verify(dbManager).findObjectById(cred.getId(), DBManager.ID_NAME, DBManager.CLIENTS_COLLECTION_NAME);
+        verify(dbManager).findObjectById(cred.getId(), MongoDBManager.ID_NAME, MongoDBManager.CLIENTS_COLLECTION_NAME);
     }
 
 
@@ -108,10 +108,10 @@ public class DBManagerTest {
         ClientCredentials cred = new ClientCredentials("Test");
         DBCursor cursor = mock(DBCursor.class);
         given(coll.find(any(DBObject.class))).willReturn(cursor);
-        given(db.getCollection(DBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
+        given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
 
         // WHEN
-        dbManager.findObjectById(cred.getId(), DBManager.CLIENTS_ID_NAME, DBManager.CLIENTS_COLLECTION_NAME);
+        dbManager.findObjectById(cred.getId(), MongoDBManager.CLIENTS_ID_NAME, MongoDBManager.CLIENTS_COLLECTION_NAME);
 
         // THEN
         verify(coll).find(any(DBObject.class));
@@ -123,7 +123,7 @@ public class DBManagerTest {
      // GIVEN
         ClientCredentials cred = new ClientCredentials("Test");
         willReturn(null).given(dbManager).findObjectById
-            (cred.getId(), DBManager.ID_NAME, DBManager.CLIENTS_COLLECTION_NAME);
+            (cred.getId(), MongoDBManager.ID_NAME, MongoDBManager.CLIENTS_COLLECTION_NAME);
 
         // WHEN
         ClientCredentials result = dbManager.findClientCredentials(cred.getId());
@@ -136,10 +136,10 @@ public class DBManagerTest {
     public void when_json_contains_id_invoke_constructDbId() throws Exception {
         // GIVEN
         ClientCredentials cred = new ClientCredentials("Test");
-        given(db.getCollection(DBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
+        given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
 
         // WHEN
-        dbManager.storeObject(cred, DBManager.CLIENTS_COLLECTION_NAME);
+        dbManager.storeObject(cred, MongoDBManager.CLIENTS_COLLECTION_NAME);
 
         // THEN
         verify(dbManager).constructDbId(any(JSONObject.class));
@@ -150,10 +150,10 @@ public class DBManagerTest {
         // GIVEN
         AuthCode code = new AuthCode(AuthCode.generate(), "763273054098803",
                 "http://example.com", "xyz", "basic", "code", "1234");
-        given(db.getCollection(DBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
+        given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
 
         // WHEN
-        dbManager.storeObject(code, DBManager.CLIENTS_COLLECTION_NAME);
+        dbManager.storeObject(code, MongoDBManager.CLIENTS_COLLECTION_NAME);
 
         // THEN
         verify(dbManager, times(0)).constructDbId(any(JSONObject.class));
@@ -165,7 +165,7 @@ public class DBManagerTest {
         // GIVEN
         String clientId = "clientId";
         String clientSecret = "clientSecret";
-        given(db.getCollection(DBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
+        given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
         BSONObject bson = mock(BSONObject.class);
         given(bson.get("secret")).willReturn(clientSecret);
         willReturn(bson).given(dbManager).getObject(any(DBCollection.class), any(BasicDBObject.class));
@@ -182,7 +182,7 @@ public class DBManagerTest {
         // GIVEN
         String clientId = "clientId";
         String clientSecret = "clientSecret";
-        given(db.getCollection(DBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
+        given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
         BSONObject bson = mock(BSONObject.class);
         given(bson.get("secret")).willReturn("somthing_else");
         willReturn(bson).given(dbManager).getObject(any(DBCollection.class), any(BasicDBObject.class));

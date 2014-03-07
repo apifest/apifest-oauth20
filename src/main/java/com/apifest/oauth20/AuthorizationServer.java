@@ -44,7 +44,7 @@ public class AuthorizationServer {
 
     protected static Logger log = LoggerFactory.getLogger(AuthorizationServer.class);
 
-    protected DBManager db = new DBManager();
+    protected DBManager db = DBManagerFactory.getInstance();
 
     public ClientCredentials issueClientCredentials(HttpRequest req) throws OAuthException {
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());

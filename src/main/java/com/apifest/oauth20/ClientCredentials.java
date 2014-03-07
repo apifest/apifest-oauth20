@@ -38,22 +38,22 @@ public class ClientCredentials implements Serializable {
     private static final int CLIENT_SECRET_LENGTH = 32;
 
     @JsonProperty("client_id")
-    private String id;
+    private String id = "";
 
     @JsonProperty("client_secret")
-    private String secret;
+    private String secret = "";
 
     @JsonIgnore
-    private String name;
+    private String name = "";
 
     @JsonIgnore
     private Long created;
 
     @JsonIgnore
-    private String uri;
+    private String uri = "";
 
     @JsonIgnore
-    private String descr;
+    private String descr = "";
 
     //client types - public or confidential
     @JsonIgnore
@@ -157,6 +157,19 @@ public class ClientCredentials implements Serializable {
         creds.type = ((Integer) map.get("type")).intValue();
         creds.status = ((Integer) map.get("status")).intValue();
         creds.created = (Long) map.get("created");
+        return creds;
+    }
+
+    public static ClientCredentials loadFromStringMap(Map<String, String> map) {
+        ClientCredentials creds = new ClientCredentials();
+        creds.name = map.get("name");
+        creds.id = map.get("_id");
+        creds.secret = map.get("secret");
+        creds.uri = map.get("uri");
+        creds.descr = map.get("descr");
+        creds.type = Integer.valueOf(map.get("type"));
+        creds.status = Integer.valueOf(map.get("status"));
+        creds.created = Long.valueOf(map.get("created"));
         return creds;
     }
 

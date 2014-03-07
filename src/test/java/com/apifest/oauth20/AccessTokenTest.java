@@ -77,7 +77,7 @@ public class AccessTokenTest {
         AccessToken accessToken = new AccessToken("Bearer", "599", "basic", false);
 
         // THEN
-        assertNull(accessToken.getRefreshToken());
+        assert("".equals(accessToken.getRefreshToken()));
     }
 
     @Test
