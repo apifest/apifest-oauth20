@@ -33,7 +33,7 @@ public class AuthChecks {
 
     protected static Logger log = LoggerFactory.getLogger(AuthorizationServer.class);
 
-    protected DBManager db = new DBManager();
+    protected DBManager db = DBManagerFactory.getInstance();
 
     protected String getBasicAuthenticationClientId(HttpRequest req) {
         // extract Basic Authentication header

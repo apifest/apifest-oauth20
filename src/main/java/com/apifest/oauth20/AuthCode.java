@@ -164,5 +164,20 @@ public class AuthCode {
         authCode.id = ((ObjectId) map.get("_id")).toString();
         return authCode;
     }
+
+    public static AuthCode loadFromStringMap(Map<String, String> map) {
+        AuthCode authCode = new AuthCode();
+        authCode.code = map.get("code");
+        authCode.clientId = map.get("clientId");
+        authCode.redirectUri = map.get("redirectUri");
+        authCode.state = map.get("state");
+        authCode.scope = map.get("scope");
+        authCode.type = map.get("type");
+        authCode.valid = Boolean.valueOf(map.get("valid"));
+        authCode.userId = map.get("userId");
+        authCode.created = Long.valueOf(map.get("created"));
+        authCode.id = map.get("_id");
+        return authCode;
+    }
 }
 

@@ -539,7 +539,7 @@ public class AuthorizationServerTest {
         AccessToken result = authServer.issueAccessToken(req);
 
         // THEN
-        assertNull(result.getRefreshToken());
+        assert("".equals(result.getRefreshToken()));
     }
 
     @Test

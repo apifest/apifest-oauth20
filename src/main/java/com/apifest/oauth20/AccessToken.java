@@ -40,33 +40,33 @@ public class AccessToken implements Serializable {
     private static final int ACCESS_TOKEN_LENGTH = 64;
 
     @JsonProperty("access_token")
-    private String token;
+    private String token = "";
 
     // not included when client_credentials
     @JsonProperty("refresh_token")
-    private String refreshToken;
+    private String refreshToken = "";
 
     @JsonProperty("expires_in")
-    private String expiresIn;
+    private String expiresIn = "";
 
     // bearer or mac
     @JsonProperty("token_type")
-    private String type;
+    private String type = "";
 
     @JsonProperty("scope")
-    private String scope;
+    private String scope = "";
 
     @JsonIgnore
     private boolean valid;
 
     @JsonIgnore
-    private String clientId;
+    private String clientId = "";
 
     @JsonIgnore
-    private String codeId;
+    private String codeId = "";
 
     @JsonIgnore
-    private String userId;
+    private String userId = "";
 
     @JsonIgnore
     private Long created;
@@ -192,6 +192,20 @@ public class AccessToken implements Serializable {
         accessToken.codeId = (String) map.get("codeId");
         accessToken.userId = (String) map.get("userId");
         accessToken.created = (Long) map.get("created");
+        return accessToken;
+    }
+    public static AccessToken loadFromStringMap(Map<String, String> map) {
+        AccessToken accessToken = new AccessToken();
+        accessToken.token = map.get("token");
+        accessToken.refreshToken = map.get("refreshToken");
+        accessToken.expiresIn = map.get("expiresIn");
+        accessToken.type = map.get("type");
+        accessToken.scope = map.get("scope");
+        accessToken.valid = Boolean.parseBoolean(map.get("valid"));
+        accessToken.clientId = map.get("clientId");
+        accessToken.codeId = map.get("codeId");
+        accessToken.userId = map.get("userId");
+        accessToken.created = Long.parseLong(map.get("created"));
         return accessToken;
     }
 

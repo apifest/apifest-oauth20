@@ -49,6 +49,9 @@ public final class OAuthServer {
     private static String host;
     private static int portInt;
     private static String dbHost;
+    private static String database;
+    private static String redisSentinels;
+    private static String redisMaster;
 
     //expires_in in sec for grant type password
     private static int expiresInPassword = 900;
@@ -127,6 +130,9 @@ public final class OAuthServer {
             props.load(in);
             userAuthEndpoint = props.getProperty("user.authenticate.endpoint");
             userIdJsonName =  props.getProperty("user_id.name");
+            database = props.getProperty("oauth20.database","mongodb");
+            redisSentinels = props.getProperty("redis.sentinels");
+            redisMaster = props.getProperty("redis.master");
             if(userIdJsonName == null) {
                 userIdJsonName = "user_id";
             }
@@ -204,7 +210,20 @@ public final class OAuthServer {
     public static int getExpiresInClientCredentials() {
         return expiresInClientCredentials;
     }
+
     public static String getDbHost() {
         return dbHost;
+    }
+
+    public static String getDatabase() {
+        return database;
+    }
+
+    public static String getRedisSentinels() {
+        return redisSentinels;
+    }
+
+    public static String getRedisMaster() {
+        return redisMaster;
     }
 }
