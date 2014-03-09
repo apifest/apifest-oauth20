@@ -6,4 +6,4 @@ oauth20.database=
 expires_in.client_credentials=
 expires_in.password=
 db_host=
-
+oauth20.database=

@@ -91,6 +91,7 @@ public class RedisDBManager implements DBManager {
         authCodeMap.put("created", authCode.getCreated().toString());
         Jedis jedis = pool.getResource();
         jedis.hmset("acc:" + authCode.getCode(), authCodeMap);
+        // REVISIT: expires on auth code
         jedis.expire("acc:" + authCode.getCode(), 120);
         jedis.hset("acuri:" + authCode.getCode() + authCode.getRedirectUri(), "ac", authCode.getCode());
         jedis.expire("acuri:" + authCode.getCode() + authCode.getRedirectUri(), 120);
@@ -119,9 +120,9 @@ public class RedisDBManager implements DBManager {
         authCodeMap.put("created", accessToken.getToken());
         Jedis jedis = pool.getResource();
         jedis.hmset("at:" + accessToken.getToken(), authCodeMap);
-        jedis.expire("at:" + accessToken.getToken(), 120);
+        jedis.expire("at:" + accessToken.getToken(), Integer.valueOf(accessToken.getExpiresIn()));
         jedis.hset("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(), "access_token", accessToken.getToken());
-        jedis.expire("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(), 120);
+        jedis.expire("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(), Integer.valueOf(accessToken.getExpiresIn()));
         pool.returnResource(jedis);
     }
 
