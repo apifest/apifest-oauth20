@@ -28,7 +28,7 @@ public class DBManagerFactory {
                 dbManager = new RedisDBManager();
                 ((RedisDBManager)dbManager).setupDBManager();
             }
-            if("mongo".equalsIgnoreCase(OAuthServer.getDatabase())) {
+            if("mongodb".equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new MongoDBManager();
             }
         }

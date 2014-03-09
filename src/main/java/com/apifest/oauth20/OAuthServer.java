@@ -131,6 +131,9 @@ public final class OAuthServer {
             userAuthEndpoint = props.getProperty("user.authenticate.endpoint");
             userIdJsonName =  props.getProperty("user_id.name");
             database = props.getProperty("oauth20.database","mongodb");
+            if(database == null || database.length() == 0) {
+                database = "mongodb";
+            }
             redisSentinels = props.getProperty("redis.sentinels");
             redisMaster = props.getProperty("redis.master");
             if(userIdJsonName == null) {
