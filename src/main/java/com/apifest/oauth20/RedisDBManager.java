@@ -71,7 +71,7 @@ public class RedisDBManager implements DBManager {
         credentials.put("descr", clientCreds.getDescr());
         credentials.put("type", String.valueOf(clientCreds.getType()));
         credentials.put("status", String.valueOf(clientCreds.getStatus()));
-        credentials.put("created", String.valueOf(clientCreds.getName()));
+        credentials.put("created", String.valueOf(clientCreds.getCreated()));
         jedis.hmset("cc:" + clientCreds.getId(), credentials);
         pool.returnResource(jedis);
     }
@@ -79,7 +79,8 @@ public class RedisDBManager implements DBManager {
     @Override
     public void storeAuthCode(AuthCode authCode) {
         Map<String, String> authCodeMap = new HashMap<String, String>();
-        authCodeMap.put("_id", authCode.getId());
+        // authCode.id -> generate random or do not use it
+        authCodeMap.put("_id", (authCode.getId() != null) ? authCode.getId() : "");
         authCodeMap.put("code", authCode.getCode());
         authCodeMap.put("clientId", authCode.getClientId());
         authCodeMap.put("redirectUri", authCode.getRedirectUri());
@@ -92,9 +93,9 @@ public class RedisDBManager implements DBManager {
         Jedis jedis = pool.getResource();
         jedis.hmset("acc:" + authCode.getCode(), authCodeMap);
         // REVISIT: expires on auth code
-        jedis.expire("acc:" + authCode.getCode(), 120);
+        jedis.expire("acc:" + authCode.getCode(), 1800);
         jedis.hset("acuri:" + authCode.getCode() + authCode.getRedirectUri(), "ac", authCode.getCode());
-        jedis.expire("acuri:" + authCode.getCode() + authCode.getRedirectUri(), 120);
+        jedis.expire("acuri:" + authCode.getCode() + authCode.getRedirectUri(), 1800);
         pool.returnResource(jedis);
     }
 
@@ -107,19 +108,19 @@ public class RedisDBManager implements DBManager {
 
     @Override
     public void storeAccessToken(AccessToken accessToken) {
-        Map<String, String> authCodeMap = new HashMap<String, String>();
-        authCodeMap.put("token", accessToken.getToken());
-        authCodeMap.put("refreshToken", accessToken.getRefreshToken());
-        authCodeMap.put("expiresIn", accessToken.getToken());
-        authCodeMap.put("type", accessToken.getToken());
-        authCodeMap.put("scope", accessToken.getToken());
-        authCodeMap.put("valid", accessToken.getToken());
-        authCodeMap.put("clientId", accessToken.getToken());
-        authCodeMap.put("codeId", accessToken.getToken());
-        authCodeMap.put("userId", accessToken.getToken());
-        authCodeMap.put("created", accessToken.getToken());
+        Map<String, String> accessTokenMap = new HashMap<String, String>();
+        accessTokenMap.put("token", accessToken.getToken());
+        accessTokenMap.put("refreshToken", accessToken.getRefreshToken());
+        accessTokenMap.put("expiresIn", accessToken.getExpiresIn());
+        accessTokenMap.put("type", accessToken.getType());
+        accessTokenMap.put("scope", accessToken.getScope());
+        accessTokenMap.put("valid", String.valueOf(accessToken.isValid()));
+        accessTokenMap.put("clientId", accessToken.getClientId());
+        accessTokenMap.put("codeId", accessToken.getCodeId());
+        accessTokenMap.put("userId", accessToken.getUserId());
+        accessTokenMap.put("created", String.valueOf(accessToken.getCreated()));
         Jedis jedis = pool.getResource();
-        jedis.hmset("at:" + accessToken.getToken(), authCodeMap);
+        jedis.hmset("at:" + accessToken.getToken(), accessTokenMap);
         jedis.expire("at:" + accessToken.getToken(), Integer.valueOf(accessToken.getExpiresIn()));
         jedis.hset("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(), "access_token", accessToken.getToken());
         jedis.expire("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(), Integer.valueOf(accessToken.getExpiresIn()));
@@ -147,14 +148,23 @@ public class RedisDBManager implements DBManager {
         Jedis jedis = pool.getResource();
         Map<String, String> accessTokenMap = jedis.hgetAll("at:" + accessToken);
         pool.returnResource(jedis);
+        if(accessTokenMap.isEmpty()) {
+            return null;
+        }
         return AccessToken.loadFromStringMap(accessTokenMap);
     }
 
     @Override
     public AuthCode findAuthCode(String authCode, String redirectUri) {
         Jedis jedis = pool.getResource();
-        Map<String, String> authCodeMap = jedis.hgetAll("acuri:" + authCode + redirectUri);
+        // TODO: check by client_id too
+        Map<String, String> authCodeIdMap = jedis.hgetAll("acuri:" + authCode + redirectUri);
+        String authCodeId = authCodeIdMap.get("ac");
+        Map<String, String> authCodeMap = jedis.hgetAll("acc:" + authCodeId);
         pool.returnResource(jedis);
+        if(authCodeMap.isEmpty()) {
+            return null;
+        }
         return AuthCode.loadFromStringMap(authCodeMap);
     }
 
@@ -163,6 +173,9 @@ public class RedisDBManager implements DBManager {
         Jedis jedis = pool.getResource();
         Map<String, String> clientCredentialsMap = jedis.hgetAll("cc:" + clientId);
         pool.returnResource(jedis);
+        if(clientCredentialsMap.isEmpty()) {
+            return null;
+        }
         return ClientCredentials.loadFromStringMap(clientCredentialsMap);
     }
 }

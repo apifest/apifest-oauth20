@@ -53,7 +53,7 @@ public class AuthCode {
         this.code = code;
         this.clientId = clientId;
         this.redirectUri = redirectUri;
-        this.state = state;
+        this.state = (state != null) ? state : "";
         this.scope = scope;
         this.type = type;
         this.valid = true;

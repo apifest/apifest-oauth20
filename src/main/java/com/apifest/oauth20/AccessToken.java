@@ -96,6 +96,7 @@ public class AccessToken implements Serializable {
         }
         this.expiresIn = expiresIn;
         this.type = tokenType;
+        // TODO: if no scope defined, set default scope
         this.scope = scope;
         this.valid = true;
         this.created = (new Date()).getTime();
