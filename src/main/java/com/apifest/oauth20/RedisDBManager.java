@@ -30,7 +30,7 @@ import redis.clients.jedis.JedisSentinelPool;
 public class RedisDBManager implements DBManager {
     private static Set<String> sentinels;
     private static JedisSentinelPool pool;
-    private static String storeAuthCodeScriot = "";
+    private static String storeAuthCodeScript = "";
     private static String storeAuthCodeSHA;
 
     static {
@@ -44,7 +44,7 @@ public class RedisDBManager implements DBManager {
 
     public void setupDBManager() {
         Jedis jedis = pool.getResource();
-        storeAuthCodeSHA = jedis.scriptLoad(storeAuthCodeScriot);
+        storeAuthCodeSHA = jedis.scriptLoad(storeAuthCodeScript);
         pool.returnResource(jedis);
     }
 
@@ -133,6 +133,10 @@ public class RedisDBManager implements DBManager {
         String accessToken = jedis.hget("atr:" + refreshToken + clientId, "access_token");
         Map<String, String> accessTokenMap = jedis.hgetAll("at:" + accessToken);
         pool.returnResource(jedis);
+        // REVISIT: check valid=true
+        if(accessTokenMap.isEmpty() || "false".equals(accessTokenMap.get("valid"))) {
+            return null;
+        }
         return AccessToken.loadFromStringMap(accessTokenMap);
     }
 
@@ -148,7 +152,8 @@ public class RedisDBManager implements DBManager {
         Jedis jedis = pool.getResource();
         Map<String, String> accessTokenMap = jedis.hgetAll("at:" + accessToken);
         pool.returnResource(jedis);
-        if(accessTokenMap.isEmpty()) {
+        // REVISIT: Check valid=true
+        if(accessTokenMap.isEmpty() || "false".equals(accessTokenMap.get("valid"))) {
             return null;
         }
         return AccessToken.loadFromStringMap(accessTokenMap);
@@ -162,7 +167,7 @@ public class RedisDBManager implements DBManager {
         String authCodeId = authCodeIdMap.get("ac");
         Map<String, String> authCodeMap = jedis.hgetAll("acc:" + authCodeId);
         pool.returnResource(jedis);
-        if(authCodeMap.isEmpty()) {
+        if(authCodeMap.isEmpty() || "false".equals(authCodeMap.get("valid"))) {
             return null;
         }
         return AuthCode.loadFromStringMap(authCodeMap);
