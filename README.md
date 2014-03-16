@@ -59,7 +59,7 @@ You can define this host and port in apifest-oauth.properties file -
 
 ***oauth20.host*** and ***oauth20.port***
 
-* **Setup the type of the DB (MongoDB or Redis)
+* **Setup the type of the DB (MongoDB or Redis)**
 
 You can define the type of the DB to be used (by default MongoDB is used) - valid values are "mongodb" and "redis" (without quotes) - 
 
