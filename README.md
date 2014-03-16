@@ -103,7 +103,7 @@ The name of the JSON field containing that information is defined in property na
 ***user_id.name***
 
   
-** 2. Start ApiFest OAuth 2.0 Server **
+**2. Start ApiFest OAuth 2.0 Server**
 
 You can start ApiFest OAuth 2.0 Server with the following command:
 
