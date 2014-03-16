@@ -27,7 +27,7 @@ It enables the usage of access tokens in ApiFest Mapping Server.
 - generate access token using refresh token - grant_type=refresh_token;
 - revoke access token;
 - validate access token;
-- pluggable storage (currently supports MongoDB);
+- pluggable storage (currently supports MongoDB and Redis);
 - unlimited horizontal scalability;
 
 
@@ -43,6 +43,9 @@ expires_in.password=
 db_host=
 user.authenticate.endpoint=
 user_id.name=
+oauth20.database=
+redis.sentinels=
+redis.master=
 ```
 
 The path to the apifest.properties file should be passed as a system variable:
@@ -56,11 +59,27 @@ You can define this host and port in apifest-oauth.properties file -
 
 ***oauth20.host*** and ***oauth20.port***
 
-* **Setup DB host**
+* **Setup the type of the DB (MongoDB or Redis)
 
-Defines the DB (currently MongoDB supported only) host in the following properties in apifest-oauth.properties file:
+You can define the type of the DB to be used (by default MongoDB is used) - valid values are "mongodb" and "redis" (without quotes) - 
+
+***oauth20.database***
+
+* **Setup DB host (MongoDB)**
+
+If MongoDB is used, define the host of the database in the following property in apifest-oauth.properties file:
 
 ***db_host***
+
+* **Setup Redis**
+
+If Redis is used, define Redis sentinels list(as comma-separated list) in the following property in apifest-oauth.properties file:
+
+***redis.sentinels***
+
+You can define the name of Redis master in the following property in apifest-oauth.properties file:
+
+***redis.master***
 
 * **Setup expires in times**
 
@@ -83,6 +102,7 @@ The name of the JSON field containing that information is defined in property na
 
 ***user_id.name***
 
+  
 ** 2. Start ApiFest OAuth 2.0 Server **
 
 You can start ApiFest OAuth 2.0 Server with the following command:
