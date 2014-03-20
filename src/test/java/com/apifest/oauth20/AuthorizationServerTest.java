@@ -219,7 +219,7 @@ public class AuthorizationServerTest {
                 "NWQFB-zGkQBHVoqQkjiWkyRuAHZWkFfn#sNeBhJVgOsR=F_vAmJwoOh_ooe#ovaJVCOiZls_DzvkhOnRVrlDRSzZrbZIB_rwGXjpoeXdJlIjZQGhSR#";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
 
         // WHEN
         String errorMsg = null;
@@ -253,7 +253,7 @@ public class AuthorizationServerTest {
                 "NWQFB-zGkQBHVoqQkjiWkyRuAHZWkFfn#sNeBhJVgOsR=F_vAmJwoOh_ooe#ovaJVCOiZls_DzvkhOnRVrlDRSzZrbZIB_rwGXjpoeXdJlIjZQGhSR#";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
 
         // WHEN
         authServer.issueAccessToken(req);
@@ -271,7 +271,7 @@ public class AuthorizationServerTest {
                 "NWQFB-zGkQBHVoqQkjiWkyRuAHZWkFfn#sNeBhJVgOsR=F_vAmJwoOh_ooe#ovaJVCOiZls_DzvkhOnRVrlDRSzZrbZIB_rwGXjpoeXdJlIjZQGhSR#";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
-        willReturn("203598599234220").given(authServer).getBasicAuthenticationClientId(req);
+        willReturn("203598599234220").given(authServer).getBasicAuthorizationClientId(req);
 
         // WHEN
         try {
@@ -281,7 +281,7 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        verify(authServer).getBasicAuthenticationClientId(req);
+        verify(authServer).getBasicAuthorizationClientId(req);
     }
 
     @Test
@@ -295,7 +295,7 @@ public class AuthorizationServerTest {
                 "&grant_type=authorization_code&code=not_valid_code";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
 
         // WHEN
         String errorMsg = null;
@@ -330,7 +330,7 @@ public class AuthorizationServerTest {
                 "NWQFB-zGkQBHVoqQkjiWkyRuAHZWkFfn#sNeBhJVgOsR=F_vAmJwoOh_ooe#ovaJVCOiZls_DzvkhOnRVrlDRSzZrbZIB_rwGXjpoeXdJlIjZQGhSR#";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
 
         // WHEN
         AccessToken token = authServer.issueAccessToken(req);
@@ -410,7 +410,7 @@ public class AuthorizationServerTest {
         HttpRequest req = mock(HttpRequest.class);
 
         // WHEN
-        authServer.getBasicAuthenticationClientId(req);
+        authServer.getBasicAuthorizationClientId(req);
 
         // THEN
         verify(req).getHeader(HttpHeaders.AUTHORIZATION);
@@ -422,7 +422,7 @@ public class AuthorizationServerTest {
         HttpRequest req = mock(HttpRequest.class);
 
         // WHEN
-        String clientId = authServer.getBasicAuthenticationClientId(req);
+        String clientId = authServer.getBasicAuthorizationClientId(req);
 
         // THEN
         assertNull(clientId);
@@ -440,7 +440,7 @@ public class AuthorizationServerTest {
         willReturn(true).given(authServer.db).validClient(clientId, clientSecret);
 
         // WHEN
-        String result = authServer.getBasicAuthenticationClientId(req);
+        String result = authServer.getBasicAuthorizationClientId(req);
 
         // THEN
         assertEquals(result, clientId);
@@ -451,7 +451,7 @@ public class AuthorizationServerTest {
     public void when_client_id_null_throw_exception() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        willReturn(null).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(null).given(authServer).getBasicAuthorizationClientId(req);
 
         // WHEN
         String errorMsg = null;
@@ -485,7 +485,7 @@ public class AuthorizationServerTest {
                 "NWQFB-zGkQBHVoqQkjiWkyRuAHZWkFfn#sNeBhJVgOsR=F_vAmJwoOh_ooe#ovaJVCOiZls_DzvkhOnRVrlDRSzZrbZIB_rwGXjpoeXdJlIjZQGhSR#";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
 
         // WHEN
         String errorMsg = null;
@@ -509,7 +509,7 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         AccessToken accessToken = mock(AccessToken.class);
         willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
         willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken, clientId);
@@ -532,7 +532,7 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
 
         // WHEN
@@ -550,7 +550,7 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
         willReturn("123456").given(authServer).authenticateUser("rossi", "test");
 
@@ -569,7 +569,7 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willReturn(null).given(authServer).authenticateUser("rossi", "test");
 
         // WHEN
@@ -592,7 +592,7 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willThrow(new IOException("cannot connect")).given(authServer).authenticateUser("rossi", "test");
 
         // WHEN
@@ -615,7 +615,7 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willReturn("3232232122").given(authServer).authenticateUser("rossi", "test");
 
         // WHEN
@@ -633,7 +633,7 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
 
         // WHEN
         authServer.issueAccessToken(req);
@@ -652,7 +652,7 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         AccessToken accessToken = mock(AccessToken.class);
         willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
         willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken, clientId);
@@ -688,7 +688,7 @@ public class AuthorizationServerTest {
     public void when_revoke_token_get_client_id_from_req_header() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        willReturn(null).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(null).given(authServer).getBasicAuthorizationClientId(req);
 
         // WHEN
         try {
@@ -698,14 +698,14 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        verify(authServer).getBasicAuthenticationClientId(req);
+        verify(authServer).getBasicAuthorizationClientId(req);
     }
 
     @Test(expectedExceptions = OAuthException.class)
     public void when_revoke_token_with_client_id_null_will_throw_exception() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        willReturn(null).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(null).given(authServer).getBasicAuthorizationClientId(req);
 
         // WHEN
         authServer.revokeToken(req);
@@ -716,7 +716,7 @@ public class AuthorizationServerTest {
         // GIVEN
         String clientId = "203598599234220";
         HttpRequest req = mock(HttpRequest.class);
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         String token = "{\"access_token\":\"172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7\"}";
         ChannelBuffer buff = ChannelBuffers.copiedBuffer(token.getBytes());
         willReturn(buff).given(req).getContent();
@@ -734,7 +734,7 @@ public class AuthorizationServerTest {
         // GIVEN
         String clientId = "203598599234220";
         HttpRequest req = mock(HttpRequest.class);
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         String token = "{\"access_token\":\"172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7\"}";
         ChannelBuffer buff = ChannelBuffers.copiedBuffer(token.getBytes());
         willReturn(buff).given(req).getContent();
@@ -754,7 +754,7 @@ public class AuthorizationServerTest {
         // GIVEN
         String clientId = "203598599234220";
         HttpRequest req = mock(HttpRequest.class);
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         String token = "{\"access_token\":\"172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7\"}";
         ChannelBuffer buff = ChannelBuffers.copiedBuffer(token.getBytes());
         willReturn(buff).given(req).getContent();
@@ -776,7 +776,7 @@ public class AuthorizationServerTest {
         // GIVEN
         String clientId = "203598599234220";
         HttpRequest req = mock(HttpRequest.class);
-        willReturn(clientId).given(authServer).getBasicAuthenticationClientId(req);
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         String token = "{\"access_token\":\"172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7\"}";
         ChannelBuffer buff = ChannelBuffers.copiedBuffer(token.getBytes());
         willReturn(buff).given(req).getContent();

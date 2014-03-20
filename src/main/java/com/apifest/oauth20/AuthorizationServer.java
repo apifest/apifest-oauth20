@@ -80,7 +80,7 @@ public class AuthorizationServer {
     }
 
     public AccessToken issueAccessToken(HttpRequest req) throws OAuthException {
-        String clientId = getBasicAuthenticationClientId(req);
+        String clientId = getBasicAuthorizationClientId(req);
         if(clientId == null){
             throw new OAuthException(ErrorResponse.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
         }
@@ -157,8 +157,8 @@ public class AuthorizationServer {
         return ua.authenticate(username, password);
     }
 
-    protected String getBasicAuthenticationClientId(HttpRequest req) {
-        // extract Basic Authentication header
+    protected String getBasicAuthorizationClientId(HttpRequest req) {
+        // extract Basic Authorization header
         String authHeader = req.getHeader(HttpHeaders.AUTHORIZATION);
         String clientId = null;
         if(authHeader != null && authHeader.contains(BASIC)) {
@@ -228,7 +228,7 @@ public class AuthorizationServer {
     }
 
     public boolean revokeToken(HttpRequest req) throws OAuthException {
-        String clientId = getBasicAuthenticationClientId(req);
+        String clientId = getBasicAuthorizationClientId(req);
         if(clientId == null){
             throw new OAuthException(ErrorResponse.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
         }

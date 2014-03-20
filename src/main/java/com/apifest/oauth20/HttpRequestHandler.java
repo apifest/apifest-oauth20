@@ -64,6 +64,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected static final String APPLICATION_INFO_URI = "/oauth20/application";
     protected static final String ACCESS_TOKEN_REVOKE_URI = "/oauth20/token/revoke";
 
+    protected static final String OAUTH_CLIENT_SCOPE_URI = "/oauth20/scopes";
+
     private static final String APPLICATION_JSON = "application/json";
 
     protected Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
@@ -103,6 +105,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 response = handleApplicationInfo(req);
             } else if(ACCESS_TOKEN_REVOKE_URI.equals(rawUri) && method.equals(HttpMethod.POST)){
                 response = handleTokenRevoke(req);
+            } else if(OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.POST)){
+                response = handleRegisterScope(req);
             } else {
                 response = createNotFoundResponse();
             }
@@ -233,9 +237,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             revoked = auth.revokeToken(req);
         } catch (OAuthException e) {
             log.error("cannot revoke token", e);
+            //TODO: return not OK response
         }
         String json = "{\"revoked\":\"" + revoked + "\"}";
         return createOkResponse(json);
+    }
+
+    protected HttpResponse handleRegisterScope(HttpRequest req) {
+
+        return createOkResponse("");
     }
 
     protected HttpResponse createNotFoundResponse() {
