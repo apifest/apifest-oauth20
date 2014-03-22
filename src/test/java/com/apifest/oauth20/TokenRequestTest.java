@@ -59,7 +59,7 @@ public class TokenRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg, String.format(ErrorResponse.MANDATORY_PARAM_MISSING, TokenRequest.GRANT_TYPE));
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.GRANT_TYPE));
     }
 
     @Test
@@ -81,7 +81,7 @@ public class TokenRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg, ErrorResponse.GRANT_TYPE_NOT_SUPPORTED);
+        assertEquals(errorMsg, Response.GRANT_TYPE_NOT_SUPPORTED);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class TokenRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg, String.format(ErrorResponse.MANDATORY_PARAM_MISSING, TokenRequest.CODE));
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.CODE));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class TokenRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg, String.format(ErrorResponse.MANDATORY_PARAM_MISSING,TokenRequest.REDIRECT_URI));
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING,TokenRequest.REDIRECT_URI));
     }
 
     @Test
@@ -145,7 +145,7 @@ public class TokenRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg, String.format(ErrorResponse.MANDATORY_PARAM_MISSING, TokenRequest.CLIENT_ID));
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.CLIENT_ID));
     }
 
     @Test
@@ -179,7 +179,7 @@ public class TokenRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg, String.format(ErrorResponse.MANDATORY_PARAM_MISSING, TokenRequest.REFRESH_TOKEN));
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.REFRESH_TOKEN));
     }
 
     @Test
@@ -200,7 +200,7 @@ public class TokenRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg, String.format(ErrorResponse.MANDATORY_PARAM_MISSING, TokenRequest.USERNAME));
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.USERNAME));
     }
 
     @Test
@@ -221,6 +221,6 @@ public class TokenRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg, String.format(ErrorResponse.MANDATORY_PARAM_MISSING, TokenRequest.PASSWORD));
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.PASSWORD));
     }
 }

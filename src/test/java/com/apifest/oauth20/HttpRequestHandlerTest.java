@@ -31,6 +31,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
@@ -79,7 +80,7 @@ public class HttpRequestHandlerTest {
         HttpRequest req = mock(HttpRequest.class);
         given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=TestDemoApp");
         AuthorizationServer auth = mock(AuthorizationServer.class);
-        willThrow(new OAuthException(ErrorResponse.APPNAME_IS_NULL, HttpResponseStatus.BAD_REQUEST))
+        willThrow(new OAuthException(Response.APPNAME_IS_NULL, HttpResponseStatus.BAD_REQUEST))
             .given(auth).issueClientCredentials(req);
         handler.auth = auth;
 
@@ -88,7 +89,7 @@ public class HttpRequestHandlerTest {
 
         // THEN
         String res = new String(response.getContent().array());
-        assertTrue(res.contains(ErrorResponse.APPNAME_IS_NULL));
+        assertTrue(res.contains(Response.APPNAME_IS_NULL));
     }
 
     @Test
@@ -101,10 +102,10 @@ public class HttpRequestHandlerTest {
         handler.auth = auth;
 
         // WHEN
-        handler.handleRegister(req);
+        HttpResponse response = handler.handleRegister(req);
 
         // THEN
-        verify(handler).createOkResponse(ErrorResponse.CANNOT_REGISTER_APP);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), Response.CANNOT_REGISTER_APP);
     }
 
     @Test
@@ -112,47 +113,15 @@ public class HttpRequestHandlerTest {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
         AuthorizationServer auth = mock(AuthorizationServer.class);
-        OAuthException ex = new OAuthException(ErrorResponse.APPNAME_IS_NULL, HttpResponseStatus.BAD_REQUEST);
-        given(auth.issueClientCredentials(req)).willThrow(ex);
+        OAuthException ex = new OAuthException(Response.APPNAME_IS_NULL, HttpResponseStatus.BAD_REQUEST);
+        willThrow(ex).given(auth).issueClientCredentials(req);
         handler.auth = auth;
-        HttpResponse response = mock(HttpResponse.class);
-        willReturn(response).given(handler).createOAuthExceptionResponse(ex);
 
         // WHEN
-        handler.handleRegister(req);
+        HttpResponse response = handler.handleRegister(req);
 
         // THEN
-        verify(handler).createOAuthExceptionResponse(ex);
-    }
-
-
-    @Test
-    public void when_get_exception_response_get_exception_HTTP_status() throws Exception {
-        // GIVEN
-        OAuthException ex = mock(OAuthException.class);
-        willReturn(ErrorResponse.APPNAME_IS_NULL).given(ex).getMessage();
-        willReturn(HttpResponseStatus.BAD_REQUEST).given(ex).getHttpStatus();
-
-        // WHEN
-        HttpResponse response = handler.createOAuthExceptionResponse(ex);
-
-        // THEN
-        assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
-        assertEquals(response.getHeader(HttpHeaders.Names.CACHE_CONTROL), HttpHeaders.Values.NO_STORE);
-        assertEquals(response.getHeader(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
-        verify(ex).getMessage();
-    }
-
-
-    @Test
-    public void when_get_not_found_response_return_response_with_404_status() throws Exception {
-        // WHEN
-        HttpResponse response = handler.createNotFoundResponse();
-
-        // THEN
-        assertEquals(response.getStatus(), HttpResponseStatus.NOT_FOUND);
-        assertEquals(response.getHeader(HttpHeaders.Names.CACHE_CONTROL), HttpHeaders.Values.NO_STORE);
-        assertEquals(response.getHeader(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
+        assertEquals(response.getStatus(), ex.getHttpStatus());
     }
 
     @Test

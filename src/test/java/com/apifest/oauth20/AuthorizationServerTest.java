@@ -66,7 +66,7 @@ public class AuthorizationServerTest {
 
         // THEN
         assertEquals(status, HttpResponseStatus.BAD_REQUEST);
-        assertEquals(message, ErrorResponse.INVALID_CLIENT_ID);
+        assertEquals(message, Response.INVALID_CLIENT_ID);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class AuthorizationServerTest {
 
         // THEN
         assertEquals(status, HttpResponseStatus.BAD_REQUEST);
-        assertEquals(message, ErrorResponse.RESPONSE_TYPE_NOT_SUPPORTED);
+        assertEquals(message, Response.RESPONSE_TYPE_NOT_SUPPORTED);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class AuthorizationServerTest {
 
         // THEN
         assertEquals(status, HttpResponseStatus.BAD_REQUEST);
-        assertEquals(message, ErrorResponse.INVALID_REDIRECT_URI);
+        assertEquals(message, Response.INVALID_REDIRECT_URI);
     }
 
     @Test
@@ -231,7 +231,7 @@ public class AuthorizationServerTest {
 
         // THEN
         verify(authServer).findAuthCode(any(TokenRequest.class));
-        assertEquals(errorMsg, ErrorResponse.INVALID_CLIENT_ID);
+        assertEquals(errorMsg, Response.INVALID_CLIENT_ID);
     }
 
     @Test
@@ -306,7 +306,7 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, ErrorResponse.INVALID_AUTH_CODE);
+        assertEquals(errorMsg, Response.INVALID_AUTH_CODE);
     }
 
     @Test
@@ -371,7 +371,7 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, ErrorResponse.APPNAME_IS_NULL);
+        assertEquals(errorMsg, Response.APPNAME_IS_NULL);
     }
 
 
@@ -462,7 +462,7 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, ErrorResponse.INVALID_CLIENT_ID);
+        assertEquals(errorMsg, Response.INVALID_CLIENT_ID);
     }
     @Test
     public void when_issue_token_and_redirect_id_not_the_same_as_auth_code_return_error() throws Exception {
@@ -497,7 +497,7 @@ public class AuthorizationServerTest {
 
         // THEN
         verify(authServer).findAuthCode(any(TokenRequest.class));
-        assertEquals(errorMsg, ErrorResponse.INVALID_REDIRECT_URI);
+        assertEquals(errorMsg, Response.INVALID_REDIRECT_URI);
     }
 
     @Test
@@ -581,7 +581,7 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, ErrorResponse.INVALID_USERNAME_PASSWORD);
+        assertEquals(errorMsg, Response.INVALID_USERNAME_PASSWORD);
     }
 
     @Test
@@ -604,7 +604,7 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, ErrorResponse.CANNOT_AUTHENTICATE_USER);
+        assertEquals(errorMsg, Response.CANNOT_AUTHENTICATE_USER);
     }
 
     @Test

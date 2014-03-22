@@ -19,6 +19,8 @@
  */
 package com.apifest.oauth20;
 
+import java.util.List;
+
 public interface DBManager {
     boolean validClient(String clientId, String clientSecret);
     void storeClientCredentials(ClientCredentials clientCreds);
@@ -30,4 +32,7 @@ public interface DBManager {
     AccessToken findAccessToken(String accessToken);
     AuthCode findAuthCode(String authCode, String redirectUri);
     ClientCredentials findClientCredentials(String clientId);
+
+    boolean storeScope(Scope scope);
+    List<Scope> getAllScopes();
 }

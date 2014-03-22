@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -41,6 +42,7 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+import org.jboss.netty.util.CharsetUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -56,7 +58,7 @@ import com.apifest.oauth20.ClientCredentials;
  */
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
-    public static final String NOT_FOUND_CONTENT = "{\"error\":\"Not found\"}";
+//    public static final String NOT_FOUND_CONTENT = "{\"error\":\"Not found\"}";
     protected static final String OAUTH_REGISTER_CLIENT_URI = "/oauth20/register";
     protected static final String AUTH_CODE_GENERATE_URI = "/oauth20/authorize";
     protected static final String ACCESS_TOKEN_GENERATE_URI = "/oauth20/token";
@@ -66,7 +68,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
     protected static final String OAUTH_CLIENT_SCOPE_URI = "/oauth20/scopes";
 
-    private static final String APPLICATION_JSON = "application/json";
+//    private static final String APPLICATION_JSON = "application/json";
 
     protected Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 
@@ -107,8 +109,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 response = handleTokenRevoke(req);
             } else if(OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.POST)){
                 response = handleRegisterScope(req);
-            } else {
-                response = createNotFoundResponse();
+            } else if(OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.GET)){
+                response = handleGetScopes(req);
+            }else {
+                response = Response.createNotFoundResponse();
             }
             ChannelFuture future = channel.write(response);
             future.addListener(ChannelFutureListener.CLOSE);
@@ -135,10 +139,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 log.error("Cannot extract application name", e);
             }
             log.debug(json.toString());
-            response = createOkResponse(json.toString());
+            response = Response.createOkResponse(json.toString());
         } else {
             // REVISIT: Think about another HTTP status
-            response = createOkResponse(ErrorResponse.INVALID_CLIENT_ID);
+            response = Response.createOkResponse(Response.INVALID_CLIENT_ID);
         }
         return response;
     }
@@ -153,9 +157,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         if(token != null) {
             JSONObject json = new JSONObject(token);
             log.debug(json.toString());
-            response = createOkResponse(json.toString());
+            response = Response.createOkResponse(json.toString());
         } else {
-            response = createUnauthorizedResponse();
+            response = Response.createUnauthorizedResponse();
         }
         return response;
     }
@@ -168,11 +172,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonString = mapper.writeValueAsString(accessToken);
                 log.debug("access token:" + jsonString);
-                response = createOkResponse(jsonString);
+                response = Response.createOkResponse(jsonString);
                 accessTokensLog.debug("token {}", jsonString);
             }
         } catch(OAuthException ex) {
-            response = createOAuthExceptionResponse(ex);
+            response = Response.createOAuthExceptionResponse(ex);
         } catch (JsonGenerationException e1) {
            log.error("error generating JSON, {}", e1);
         } catch (JsonMappingException e1) {
@@ -182,7 +186,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
         if(response == null) {
             // REVISIT: Think about another HTTP status
-            response = createOkResponse(ErrorResponse.CANNOT_ISSUE_TOKEN);
+            response = Response.createOkResponse(Response.CANNOT_ISSUE_TOKEN);
         }
         return response;
     }
@@ -197,10 +201,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             // return auth_code
             JSONObject obj = new JSONObject();
             obj.put("redirect_uri", redirectURI);
-            response = createOkResponse(obj.toString());
+            response = Response.createOkResponse(obj.toString());
             accessTokensLog.info("authCode {}", obj.toString());
         } catch (OAuthException ex) {
-            response = createOAuthExceptionResponse(ex);
+            response = Response.createOAuthExceptionResponse(ex);
         } catch (JSONException e) {
             log.debug("problen JSON parsing", e);
         }
@@ -214,9 +218,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             ObjectMapper mapper = new ObjectMapper();
             String jsonString = mapper.writeValueAsString(creds);
             log.debug("credentials:" + jsonString);
-            response = createOkResponse(jsonString);
+            response = Response.createOkResponse(jsonString);
         } catch(OAuthException ex) {
-            response = createOAuthExceptionResponse(ex);
+            response = Response.createOAuthExceptionResponse(ex);
         } catch (JsonGenerationException e1) {
            log.error("error generating JSON, {}", e1);
         } catch (JsonMappingException e1) {
@@ -226,7 +230,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
         if(response == null) {
             // REVISIT: Think about another HTTP status
-            response = createOkResponse(ErrorResponse.CANNOT_REGISTER_APP);
+            response = Response.createOkResponse(Response.CANNOT_REGISTER_APP);
         }
         return response;
     }
@@ -240,50 +244,83 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             //TODO: return not OK response
         }
         String json = "{\"revoked\":\"" + revoked + "\"}";
-        return createOkResponse(json);
+        return Response.createOkResponse(json);
     }
 
     protected HttpResponse handleRegisterScope(HttpRequest req) {
-
-        return createOkResponse("");
+        ScopeService scopeService = new ScopeService();
+        return scopeService.registerScope(req);
     }
 
-    protected HttpResponse createNotFoundResponse() {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
-        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(NOT_FOUND_CONTENT.getBytes());
-        response.setContent(buf);
-        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
-        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
-        return response;
+    protected HttpResponse handleGetScopes(HttpRequest req) {
+        String content = req.getContent().toString(CharsetUtil.UTF_8);
+
+        List<Scope> scopes = DBManagerFactory.getInstance().getAllScopes();
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonString;
+        try {
+            jsonString = mapper.writeValueAsString(scopes);
+        } catch (JsonGenerationException e) {
+            log.error("cannot load scopes", e);
+            return Response.createBadRequestResponse();
+        } catch (JsonMappingException e) {
+            log.error("cannot load scopes", e);
+            return Response.createBadRequestResponse();
+        } catch (IOException e) {
+            log.error("cannot load scopes", e);
+            return Response.createBadRequestResponse();
+        }
+        return Response.createOkResponse(jsonString);
     }
 
-    protected HttpResponse createOkResponse(String jsonString) {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(jsonString.getBytes());
-        response.setContent(buf);
-        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
-        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
-        return response;
-    }
+//    protected HttpResponse createBadRequestResponse(String message) {
+//        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
+//        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
+//        if(message != null) {
+//            ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
+//            response.setContent(buf);
+//        }
+//        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
+//        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
+//        return response;
+//    }
 
-    protected HttpResponse createOAuthExceptionResponse(OAuthException ex) {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, ex.getHttpStatus());
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(ex.getMessage().getBytes());
-        response.setContent(buf);
-        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
-        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
-        return response;
-    }
+//    protected HttpResponse createNotFoundResponse() {
+//        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
+//        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
+//        ChannelBuffer buf = ChannelBuffers.copiedBuffer(NOT_FOUND_CONTENT.getBytes());
+//        response.setContent(buf);
+//        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
+//        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
+//        return response;
+//    }
+//
+//    protected HttpResponse createOkResponse(String jsonString) {
+//        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+//        ChannelBuffer buf = ChannelBuffers.copiedBuffer(jsonString.getBytes());
+//        response.setContent(buf);
+//        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
+//        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
+//        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
+//        return response;
+//    }
 
-    protected HttpResponse createUnauthorizedResponse() {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(ErrorResponse.INVALID_ACCESS_TOKEN.getBytes());
-        response.setContent(buf);
-        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
-        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
-        return response;
-    }
+//    protected HttpResponse createOAuthExceptionResponse(OAuthException ex) {
+//        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, ex.getHttpStatus());
+//        ChannelBuffer buf = ChannelBuffers.copiedBuffer(ex.getMessage().getBytes());
+//        response.setContent(buf);
+//        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
+//        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
+//        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
+//        return response;
+//    }
+//
+//    protected HttpResponse createUnauthorizedResponse() {
+//        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
+//        ChannelBuffer buf = ChannelBuffers.copiedBuffer(ErrorResponse.INVALID_ACCESS_TOKEN.getBytes());
+//        response.setContent(buf);
+//        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
+//        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
+//        return response;
+//    }
 }

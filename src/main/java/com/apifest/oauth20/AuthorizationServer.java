@@ -54,7 +54,7 @@ public class AuthorizationServer {
             creds = new ClientCredentials(appName);
             db.storeClientCredentials(creds);
         } else {
-            throw new OAuthException(ErrorResponse.APPNAME_IS_NULL, HttpResponseStatus.BAD_REQUEST);
+            throw new OAuthException(Response.APPNAME_IS_NULL, HttpResponseStatus.BAD_REQUEST);
         }
         return creds;
     }
@@ -64,7 +64,7 @@ public class AuthorizationServer {
         AuthRequest authRequest = new AuthRequest(req);
         log.debug("received client_id:" + authRequest.getClientId());
         if(!isValidClientId(authRequest.getClientId())){
-            throw new OAuthException(ErrorResponse.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
+            throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
         }
         authRequest.validate();
 
@@ -82,7 +82,7 @@ public class AuthorizationServer {
     public AccessToken issueAccessToken(HttpRequest req) throws OAuthException {
         String clientId = getBasicAuthorizationClientId(req);
         if(clientId == null){
-            throw new OAuthException(ErrorResponse.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
+            throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
         }
         TokenRequest tokenRequest = new TokenRequest(req);
         tokenRequest.setClientId(clientId);
@@ -98,11 +98,11 @@ public class AuthorizationServer {
             // TODO: REVISIT: Move client_id check to db query
             if(authCode != null) {
                 if(!tokenRequest.getClientId().equals(authCode.getClientId())) {
-                    throw new OAuthException(ErrorResponse.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
+                    throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
                 }
                 if(authCode.getRedirectUri() != null &&
                         !tokenRequest.getRedirectUri().equals(authCode.getRedirectUri())){
-                    throw new OAuthException(ErrorResponse.INVALID_REDIRECT_URI, HttpResponseStatus.BAD_REQUEST);
+                    throw new OAuthException(Response.INVALID_REDIRECT_URI, HttpResponseStatus.BAD_REQUEST);
                 } else {
                     // invalidate the auth code
                     db.updateAuthCodeValidStatus(authCode.getCode(), false);
@@ -113,7 +113,7 @@ public class AuthorizationServer {
                     db.storeAccessToken(accessToken);
                 }
             } else {
-                throw new OAuthException(ErrorResponse.INVALID_AUTH_CODE, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(Response.INVALID_AUTH_CODE, HttpResponseStatus.BAD_REQUEST);
             }
         } else if(TokenRequest.REFRESH_TOKEN.equals(tokenRequest.getGrantType())) {
             accessToken = db.findAccessTokenByRefreshToken(tokenRequest.getRefreshToken(), tokenRequest.getClientId());
@@ -125,7 +125,7 @@ public class AuthorizationServer {
                 db.storeAccessToken(newAccessToken);
                 return newAccessToken;
             } else {
-                throw new OAuthException(ErrorResponse.INVALID_REFRESH_TOKEN, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(Response.INVALID_REFRESH_TOKEN, HttpResponseStatus.BAD_REQUEST);
             }
         } else if(TokenRequest.CLIENT_CREDENTIALS.equals(tokenRequest.getGrantType())) {
             accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.CLIENT_CREDENTIALS),
@@ -142,11 +142,11 @@ public class AuthorizationServer {
                     accessToken.setClientId(tokenRequest.getClientId());
                     db.storeAccessToken(accessToken);
                 } else {
-                    throw new OAuthException(ErrorResponse.INVALID_USERNAME_PASSWORD, HttpResponseStatus.UNAUTHORIZED);
+                    throw new OAuthException(Response.INVALID_USERNAME_PASSWORD, HttpResponseStatus.UNAUTHORIZED);
                 }
             } catch (IOException e) {
                 log.error("Cannot authenticate user", e);
-                throw new OAuthException(ErrorResponse.CANNOT_AUTHENTICATE_USER, HttpResponseStatus.UNAUTHORIZED); //NOSONAR
+                throw new OAuthException(Response.CANNOT_AUTHENTICATE_USER, HttpResponseStatus.UNAUTHORIZED); //NOSONAR
             }
         }
         return accessToken;
@@ -230,7 +230,7 @@ public class AuthorizationServer {
     public boolean revokeToken(HttpRequest req) throws OAuthException {
         String clientId = getBasicAuthorizationClientId(req);
         if(clientId == null){
-            throw new OAuthException(ErrorResponse.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
+            throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
         }
 
         String token = getAccessToken(req);

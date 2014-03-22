@@ -17,11 +17,14 @@
 package com.apifest.oauth20;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.bson.BSONObject;
 import org.bson.types.ObjectId;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +63,9 @@ public class MongoDBManager implements DBManager{
     protected static final String REFRESH_TOKEN_ID_NAME = "refreshToken";
     protected static final String VALID_NAME = "valid";
     protected static final String REDIRECT_URI_NAME = "redirectUri";
+
+    protected static final String SCOPE_COLLECTION_NAME = "scopes";
+    protected static final String SCOPE_ID_NAME = "name";
 
     public MongoDBManager() {
         db = MongoUtil.getMongoClient().getDB("apifest");
@@ -241,6 +247,53 @@ public class MongoDBManager implements DBManager{
         return false;
     }
 
+    /**
+     * Stores OAuth20 scope.
+     * If the scope already exists, updates it.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean storeScope(Scope scope) {
+        String id = scope.getScope();
+        JSONObject json = new JSONObject(scope);
+        json.remove(Scope.SCOPE_FIELD);
+        boolean stored = false;
+        try {
+            // use scope name as _id
+            json.put(ID_NAME, id);
+            Map<String, Object> result = new ObjectMapper().readValue(json.toString(), Map.class);
+
+            // if scope already exits, updates is, otherwise creates the scope
+            BasicDBObject query = new BasicDBObject(ID_NAME, id);
+            BasicDBObject newObject = new BasicDBObject(result);
+            DBCollection coll = db.getCollection(SCOPE_COLLECTION_NAME);
+            coll.update(query, newObject, true, false);
+            stored = true;
+        } catch(IOException e) {
+            log.error("cannot store scope {}", scope.getScope(), e);
+        } catch (JSONException e) {
+            log.error("cannot store scope {}", scope.getScope(), e);
+        }
+        return stored;
+    }
+
+    /*
+     * @see com.apifest.oauth20.DBManager#getAllScopes()
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<Scope> getAllScopes() {
+        List<Scope> list = new ArrayList<Scope>();
+        DBCollection coll = db.getCollection(SCOPE_COLLECTION_NAME);
+        List<DBObject> result = coll.find().toArray();
+        for(DBObject obj : result) {
+            Map<String, Object> mapLoaded = obj.toMap();
+            Scope scope = Scope.loadFromMap(mapLoaded);
+            list.add(scope);
+        }
+        return list;
+    }
+
     protected Object findObjectByObjectId(String id, String collectionName) {
         DBCollection coll = db.getCollection(collectionName);
         ObjectId objId = new ObjectId(id);
@@ -296,5 +349,4 @@ public class MongoDBManager implements DBManager{
         }
         return result;
     }
-
 }

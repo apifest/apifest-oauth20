@@ -103,7 +103,7 @@ public class AuthRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg, ErrorResponse.RESPONSE_TYPE_NOT_SUPPORTED);
+        assertEquals(errorMsg, Response.RESPONSE_TYPE_NOT_SUPPORTED);
     }
 
     @Test
@@ -130,6 +130,6 @@ public class AuthRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg, ErrorResponse.INVALID_REDIRECT_URI);
+        assertEquals(errorMsg, Response.INVALID_REDIRECT_URI);
     }
 }

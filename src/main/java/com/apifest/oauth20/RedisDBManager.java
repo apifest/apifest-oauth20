@@ -21,6 +21,7 @@ package com.apifest.oauth20;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -183,4 +184,25 @@ public class RedisDBManager implements DBManager {
         }
         return ClientCredentials.loadFromStringMap(clientCredentialsMap);
     }
+
+    /* (non-Javadoc)
+     * @see com.apifest.oauth20.DBManager#storeScope(com.apifest.oauth20.Scope)
+     */
+    @Override
+    public boolean storeScope(Scope scope) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.apifest.oauth20.DBManager#getAllScopes()
+     */
+    @Override
+    public List<Scope> getAllScopes() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
+
 }
