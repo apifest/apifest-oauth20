@@ -34,5 +34,8 @@ public interface DBManager {
     ClientCredentials findClientCredentials(String clientId);
 
     boolean storeScope(Scope scope);
+
     List<Scope> getAllScopes();
+
+    Scope findScope(String scopeName);
 }

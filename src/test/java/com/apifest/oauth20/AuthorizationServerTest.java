@@ -345,7 +345,7 @@ public class AuthorizationServerTest {
     public void when_register_store_appName() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=TestDemoApp");
+        given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=TestDemoApp&scope=basic");
         willDoNothing().given(authServer.db).storeClientCredentials(any(ClientCredentials.class));
 
         // WHEN
@@ -360,7 +360,7 @@ public class AuthorizationServerTest {
     public void when_no_app_name_passed_return_error() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        given(req.getUri()).willReturn("http://example.com/oauth20/register");
+        given(req.getUri()).willReturn("http://example.com/oauth20/register?scope=basic");
 
         // WHEN
         String errorMsg = null;
@@ -371,9 +371,26 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, Response.APPNAME_IS_NULL);
+        assertEquals(errorMsg, Response.APPNAME_OR_SCOPE_IS_NULL);
     }
 
+    @Test
+    public void when_no_scope_passed_return_error() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=test");
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            authServer.issueClientCredentials(req);
+        } catch(OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, Response.APPNAME_OR_SCOPE_IS_NULL);
+    }
 
     @Test
     public void when_client_is_registered_return_app_name() throws Exception {

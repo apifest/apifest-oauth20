@@ -14,26 +14,21 @@
 * limitations under the License.
 */
 
-/**
- * @author Apostol Terziev
- */
 package com.apifest.oauth20;
 
-public class DBManagerFactory {
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
-    protected static DBManager dbManager;
+import org.testng.annotations.Test;
 
-    public static DBManager getInstance() {
-        if (dbManager == null) {
-            if("redis".equalsIgnoreCase(OAuthServer.getDatabase())) {
-                dbManager = new RedisDBManager();
-                ((RedisDBManager)dbManager).setupDBManager();
-            }
-            if("mongodb".equalsIgnoreCase(OAuthServer.getDatabase())) {
-                dbManager = new MongoDBManager();
-            }
-        }
-        return dbManager;
+/**
+ * @author Rossitsa Borissova
+ */
+public class MockDBManagerFactory extends DBManagerFactory {
+
+    public static void install() {
+        DBManagerFactory.dbManager = mock(DBManager.class);
     }
 
 }

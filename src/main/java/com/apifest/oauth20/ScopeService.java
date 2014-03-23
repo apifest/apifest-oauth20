@@ -17,13 +17,18 @@
 package com.apifest.oauth20;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,5 +81,68 @@ public class ScopeService {
             return Response.createBadRequestResponse(null);
         }
         return Response.createOkResponse(responseMsg);
+    }
+
+    /**
+     * Returns either all scopes or scopes for a specific client_id passed as query parameter.
+     *
+     * @param req request
+     * @return If query param client_id is passed, then the scopes for that client_id will be returned.
+     * Otherwise, all available scopes will be returned as a response.
+     */
+    public HttpResponse getScopes(HttpRequest req) {
+        QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
+        Map<String, List<String>> queryParams = dec.getParameters();
+        if(queryParams.containsKey("client_id")) {
+            return getScopes(queryParams.get("client_id").get(0));
+        }
+        List<Scope> scopes = DBManagerFactory.getInstance().getAllScopes();
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonString;
+        try {
+            jsonString = mapper.writeValueAsString(scopes);
+        } catch (JsonGenerationException e) {
+            log.error("cannot load scopes", e);
+            return Response.createBadRequestResponse();
+        } catch (JsonMappingException e) {
+            log.error("cannot load scopes", e);
+            return Response.createBadRequestResponse();
+        } catch (IOException e) {
+            log.error("cannot load scopes", e);
+            return Response.createBadRequestResponse();
+        }
+        return Response.createOkResponse(jsonString);
+    }
+
+    protected HttpResponse getScopes(String clientId) {
+        ClientCredentials credentials = DBManagerFactory.getInstance().findClientCredentials(clientId);
+        String jsonString;
+        if(credentials != null) {
+            //scopes are separated by comma
+            String scopes = credentials.getScope();
+            String [] s = scopes.split(",");
+            List<Scope> result = new ArrayList<Scope>();
+            for(String name : s) {
+                Scope scope = DBManagerFactory.getInstance().findScope(name);
+                result.add(scope);
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                jsonString = mapper.writeValueAsString(result);
+            } catch (JsonGenerationException e) {
+                log.error("cannot load scopes per clientId", e);
+                return Response.createBadRequestResponse();
+            } catch (JsonMappingException e) {
+                log.error("cannot load scopes per clientId", e);
+                return Response.createBadRequestResponse();
+            } catch (IOException e) {
+                log.error("cannot load scopes per clientId", e);
+                return Response.createBadRequestResponse();
+            }
+        } else {
+            return Response.createNotFoundResponse();
+        }
+        return Response.createOkResponse(jsonString);
     }
 }

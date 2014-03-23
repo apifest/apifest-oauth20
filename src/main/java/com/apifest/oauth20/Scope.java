@@ -74,10 +74,18 @@ public class Scope {
         return scope;
     }
 
+    public static Scope loadFromStringMap(Map<String, String> map) {
+        Scope scope = new Scope();
+        scope.scope = map.get("id");
+        scope.description = map.get(DESCRIPTION_FIELD);
+        scope.expiresIn = Integer.valueOf(map.get(EXPIRES_IN_FIELD));
+        return scope;
+    }
+
     public boolean validate() {
-        if((scope == null && scope.length() >= 2) ||
+        if((scope == null || scope.length() <= 2) ||
                  description == null ||
-                (expiresIn == null && expiresIn > 0)) {
+                (expiresIn == null || expiresIn <= 0)) {
             return false;
         }
         return true;

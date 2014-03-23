@@ -2,13 +2,13 @@
 ApiFest consists of two main parts - ApiFest OAuth 2.0 an OAuth 2.0 server and the ApiFest Mapping Server.
 
 ##ApiFest Mapping Server
-ApiFest Mapping Server (AMS) is for people who have APIs and want to expose them to the world in a safe and convinient way.
+ApiFest Mapping Server (AMS) is for people who have APIs and want to expose them to the world in a safe and convenient way.
 AMS is used to translate between the outside world and your internal systems. It helps you keep a consistent API facade.
 
 ###Features
 - mappings are described in xml;
 - can validate and authorize requests using the ApiFest OAuth20 Server;
-- out-of-the-box flexible mapping options;
+- out-of-the-box flexible mapping options - several versions support, different hosts to which API requests could be directed to;
 - easy to extend and customize;
 - customizable error messages and responses;
 - "online" change of all configurations;

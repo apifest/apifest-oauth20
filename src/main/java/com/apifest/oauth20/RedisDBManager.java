@@ -19,6 +19,7 @@
  */
 package com.apifest.oauth20;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -73,6 +74,7 @@ public class RedisDBManager implements DBManager {
         credentials.put("type", String.valueOf(clientCreds.getType()));
         credentials.put("status", String.valueOf(clientCreds.getStatus()));
         credentials.put("created", String.valueOf(clientCreds.getCreated()));
+        credentials.put("scope", String.valueOf(clientCreds.getScope()));
         jedis.hmset("cc:" + clientCreds.getId(), credentials);
         pool.returnResource(jedis);
     }
@@ -185,24 +187,52 @@ public class RedisDBManager implements DBManager {
         return ClientCredentials.loadFromStringMap(clientCredentialsMap);
     }
 
-    /* (non-Javadoc)
+    /*
      * @see com.apifest.oauth20.DBManager#storeScope(com.apifest.oauth20.Scope)
      */
     @Override
     public boolean storeScope(Scope scope) {
-        // TODO Auto-generated method stub
-        return false;
+        Map<String, String> scopeMap = new HashMap<String, String>();
+        scopeMap.put("id", scope.getScope());
+        scopeMap.put(Scope.DESCRIPTION_FIELD, scope.getDescription());
+        scopeMap.put(Scope.EXPIRES_IN_FIELD, String.valueOf(scope.getExpiresIn()));
+        Jedis jedis = pool.getResource();
+        jedis.hmset("sc:" + scope.getScope(), scopeMap);
+        return true;
     }
 
-    /* (non-Javadoc)
+    /*
      * @see com.apifest.oauth20.DBManager#getAllScopes()
      */
     @Override
     public List<Scope> getAllScopes() {
-        // TODO Auto-generated method stub
-        return null;
+        List<Scope> list = new ArrayList<Scope>();
+        Jedis jedis = pool.getResource();
+        Set<String> allScopes = jedis.keys("sc*");
+        for(String scope : allScopes) {
+            Map<String, String> scopeMap = jedis.hgetAll(scope);
+            if(scopeMap.isEmpty()) {
+                continue;
+            } else {
+                list.add(Scope.loadFromStringMap(scopeMap));
+            }
+        }
+        pool.returnResource(jedis);
+        return list;
     }
 
-
+    /*
+     * @see com.apifest.oauth20.DBManager#findScope(java.lang.String)
+     */
+    @Override
+    public Scope findScope(String scopeName) {
+        Jedis jedis = pool.getResource();
+        Map<String, String> scopeMap = jedis.hgetAll("sc:" + scopeName);
+        pool.returnResource(jedis);
+        if(scopeMap.isEmpty()) {
+            return null;
+        }
+        return Scope.loadFromStringMap(scopeMap);
+    }
 
 }

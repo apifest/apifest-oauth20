@@ -43,6 +43,10 @@ public class ClientCredentials implements Serializable {
     @JsonProperty("client_secret")
     private String secret = "";
 
+    //scopes are separated by comma
+    @JsonIgnore
+    private String scope = "";
+
     @JsonIgnore
     private String name = "";
 
@@ -63,8 +67,10 @@ public class ClientCredentials implements Serializable {
     @JsonIgnore
     private int status;
 
-    public ClientCredentials(String appName) {
+    public ClientCredentials(String appName, String scope) {
         this.name = appName;
+        this.scope = scope;
+
         this.id = generateClientId();
         this.secret = generateClientSecret();
         this.created = (new Date()).getTime();
@@ -134,6 +140,14 @@ public class ClientCredentials implements Serializable {
         return created;
     }
 
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
     private String generateClientId() {
         return RandomGenerator.generateDigitsString(CLIENT_ID_LENGTH);
     }
@@ -157,6 +171,7 @@ public class ClientCredentials implements Serializable {
         creds.type = ((Integer) map.get("type")).intValue();
         creds.status = ((Integer) map.get("status")).intValue();
         creds.created = (Long) map.get("created");
+        creds.scope = (String) map.get("scope");
         return creds;
     }
 
@@ -170,6 +185,7 @@ public class ClientCredentials implements Serializable {
         creds.type = Integer.valueOf(map.get("type"));
         creds.status = Integer.valueOf(map.get("status"));
         creds.created = Long.valueOf(map.get("created"));
+        creds.scope =  map.get("scope");
         return creds;
     }
 

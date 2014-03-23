@@ -61,7 +61,7 @@ public class HttpRequestHandlerTest {
         HttpRequest req = mock(HttpRequest.class);
         given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=TestDemoApp");
         AuthorizationServer auth = mock(AuthorizationServer.class);
-        ClientCredentials creds = new ClientCredentials("TestDemoApp");
+        ClientCredentials creds = new ClientCredentials("TestDemoApp", "basic");
         given(auth.issueClientCredentials(req)).willReturn(creds);
         handler.auth = auth;
 
@@ -78,9 +78,9 @@ public class HttpRequestHandlerTest {
     public void when_register_and_OAuth_exception_occurs_return_error() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=TestDemoApp");
+        given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=TestDemoApp&scope=basic");
         AuthorizationServer auth = mock(AuthorizationServer.class);
-        willThrow(new OAuthException(Response.APPNAME_IS_NULL, HttpResponseStatus.BAD_REQUEST))
+        willThrow(new OAuthException(Response.APPNAME_OR_SCOPE_IS_NULL, HttpResponseStatus.BAD_REQUEST))
             .given(auth).issueClientCredentials(req);
         handler.auth = auth;
 
@@ -89,7 +89,7 @@ public class HttpRequestHandlerTest {
 
         // THEN
         String res = new String(response.getContent().array());
-        assertTrue(res.contains(Response.APPNAME_IS_NULL));
+        assertTrue(res.contains(Response.APPNAME_OR_SCOPE_IS_NULL));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class HttpRequestHandlerTest {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
         AuthorizationServer auth = mock(AuthorizationServer.class);
-        OAuthException ex = new OAuthException(Response.APPNAME_IS_NULL, HttpResponseStatus.BAD_REQUEST);
+        OAuthException ex = new OAuthException(Response.APPNAME_OR_SCOPE_IS_NULL, HttpResponseStatus.BAD_REQUEST);
         willThrow(ex).given(auth).issueClientCredentials(req);
         handler.auth = auth;
 
@@ -168,5 +168,37 @@ public class HttpRequestHandlerTest {
 
         // THEN
         assertEquals(new String(response.getContent().array()), "{\"revoked\":\"false\"}");
+    }
+
+    @Test
+    public void when_register_scope_invoke_scope_service() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        ScopeService scopeService = mock(ScopeService.class);
+        willReturn(scopeService).given(handler).getScopeService();
+        HttpResponse res = mock(HttpResponse.class);
+        willReturn(res).given(scopeService).registerScope(req);
+
+        // WHEN
+        handler.handleRegisterScope(req);
+
+        // THEN
+        verify(scopeService).registerScope(req);
+    }
+
+    @Test
+    public void when_get_scope_invoke_scope_service() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        ScopeService scopeService = mock(ScopeService.class);
+        willReturn(scopeService).given(handler).getScopeService();
+        HttpResponse res = mock(HttpResponse.class);
+        willReturn(res).given(scopeService).getScopes(req);
+
+        // WHEN
+        handler.handleGetScopes(req);
+
+        // THEN
+        verify(scopeService).getScopes(req);
     }
 }

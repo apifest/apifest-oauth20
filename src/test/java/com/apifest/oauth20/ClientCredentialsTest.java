@@ -52,7 +52,7 @@ public class ClientCredentialsTest {
     @Test
     public void when_construct_generate_client_id_and_client_secret() throws Exception {
         // WHEN
-        ClientCredentials creds = new ClientCredentials("Demo");
+        ClientCredentials creds = new ClientCredentials("Demo", "basic");
 
         // THEN
         assertNotNull(creds.getId());
@@ -62,7 +62,7 @@ public class ClientCredentialsTest {
     @Test
     public void when_construct_set_date() throws Exception {
         // WHEN
-        ClientCredentials creds = new ClientCredentials("Demo");
+        ClientCredentials creds = new ClientCredentials("Demo", "basic");
 
         // THEN
         assertNotNull(creds.getCreated());
@@ -71,7 +71,7 @@ public class ClientCredentialsTest {
     @Test
     public void when_JSON_presentation_contains_created_value() throws Exception {
         // GIVEN
-        ClientCredentials creds = new ClientCredentials("Demo");
+        ClientCredentials creds = new ClientCredentials("Demo", "basic");
 
         // WHEN
         JSONObject json = new JSONObject(creds);

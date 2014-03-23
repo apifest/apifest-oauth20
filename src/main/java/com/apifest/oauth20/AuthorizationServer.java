@@ -18,6 +18,8 @@ package com.apifest.oauth20;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpHeaders;
@@ -39,6 +41,7 @@ import org.slf4j.LoggerFactory;
 public class AuthorizationServer {
 
     private static final String APPNAME_PARAMETER = "app_name";
+    private static final String SCOPE_PARAMETER = "scope";
     static final String BASIC = "Basic ";
     private static final String TOKEN_TYPE_BEARER = "Bearer";
 
@@ -49,12 +52,15 @@ public class AuthorizationServer {
     public ClientCredentials issueClientCredentials(HttpRequest req) throws OAuthException {
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
         ClientCredentials creds = null;
-        if(dec.getParameters() != null && dec.getParameters().get(APPNAME_PARAMETER) != null) {
+        Map<String, List<String>> queryParams = dec.getParameters();
+        if(queryParams != null && queryParams.get(APPNAME_PARAMETER) != null && queryParams.get(SCOPE_PARAMETER) != null) {
             String appName = dec.getParameters().get(APPNAME_PARAMETER).get(0);
-            creds = new ClientCredentials(appName);
+            String scope = dec.getParameters().get(SCOPE_PARAMETER).get(0);
+            // TODO: check the scopes are defined
+            creds = new ClientCredentials(appName, scope);
             db.storeClientCredentials(creds);
         } else {
-            throw new OAuthException(Response.APPNAME_IS_NULL, HttpResponseStatus.BAD_REQUEST);
+            throw new OAuthException(Response.APPNAME_OR_SCOPE_IS_NULL, HttpResponseStatus.BAD_REQUEST);
         }
         return creds;
     }

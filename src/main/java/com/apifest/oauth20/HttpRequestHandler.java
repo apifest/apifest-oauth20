@@ -23,33 +23,22 @@ import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
-import org.jboss.netty.util.CharsetUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.apifest.oauth20.AuthorizationServer;
-import com.apifest.oauth20.ClientCredentials;
 
 /**
  * Handler for requests received on the server.
@@ -58,7 +47,6 @@ import com.apifest.oauth20.ClientCredentials;
  */
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
-//    public static final String NOT_FOUND_CONTENT = "{\"error\":\"Not found\"}";
     protected static final String OAUTH_REGISTER_CLIENT_URI = "/oauth20/register";
     protected static final String AUTH_CODE_GENERATE_URI = "/oauth20/authorize";
     protected static final String ACCESS_TOKEN_GENERATE_URI = "/oauth20/token";
@@ -67,8 +55,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected static final String ACCESS_TOKEN_REVOKE_URI = "/oauth20/token/revoke";
 
     protected static final String OAUTH_CLIENT_SCOPE_URI = "/oauth20/scopes";
-
-//    private static final String APPLICATION_JSON = "application/json";
 
     protected Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 
@@ -248,79 +234,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     }
 
     protected HttpResponse handleRegisterScope(HttpRequest req) {
-        ScopeService scopeService = new ScopeService();
+        ScopeService scopeService = getScopeService();
         return scopeService.registerScope(req);
     }
 
     protected HttpResponse handleGetScopes(HttpRequest req) {
-        String content = req.getContent().toString(CharsetUtil.UTF_8);
-
-        List<Scope> scopes = DBManagerFactory.getInstance().getAllScopes();
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonString;
-        try {
-            jsonString = mapper.writeValueAsString(scopes);
-        } catch (JsonGenerationException e) {
-            log.error("cannot load scopes", e);
-            return Response.createBadRequestResponse();
-        } catch (JsonMappingException e) {
-            log.error("cannot load scopes", e);
-            return Response.createBadRequestResponse();
-        } catch (IOException e) {
-            log.error("cannot load scopes", e);
-            return Response.createBadRequestResponse();
-        }
-        return Response.createOkResponse(jsonString);
+        ScopeService scopeService = getScopeService();
+        return scopeService.getScopes(req);
     }
 
-//    protected HttpResponse createBadRequestResponse(String message) {
-//        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
-//        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-//        if(message != null) {
-//            ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
-//            response.setContent(buf);
-//        }
-//        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
-//        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
-//        return response;
-//    }
-
-//    protected HttpResponse createNotFoundResponse() {
-//        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
-//        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-//        ChannelBuffer buf = ChannelBuffers.copiedBuffer(NOT_FOUND_CONTENT.getBytes());
-//        response.setContent(buf);
-//        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
-//        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
-//        return response;
-//    }
-//
-//    protected HttpResponse createOkResponse(String jsonString) {
-//        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-//        ChannelBuffer buf = ChannelBuffers.copiedBuffer(jsonString.getBytes());
-//        response.setContent(buf);
-//        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-//        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
-//        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
-//        return response;
-//    }
-
-//    protected HttpResponse createOAuthExceptionResponse(OAuthException ex) {
-//        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, ex.getHttpStatus());
-//        ChannelBuffer buf = ChannelBuffers.copiedBuffer(ex.getMessage().getBytes());
-//        response.setContent(buf);
-//        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-//        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
-//        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
-//        return response;
-//    }
-//
-//    protected HttpResponse createUnauthorizedResponse() {
-//        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
-//        ChannelBuffer buf = ChannelBuffers.copiedBuffer(ErrorResponse.INVALID_ACCESS_TOKEN.getBytes());
-//        response.setContent(buf);
-//        response.setHeader(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
-//        response.setHeader(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
-//        return response;
-//    }
+    protected ScopeService getScopeService() {
+        return new ScopeService();
+    }
 }

@@ -22,9 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.bson.BSONObject;
-import org.bson.types.ObjectId;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -294,11 +291,14 @@ public class MongoDBManager implements DBManager{
         return list;
     }
 
-    protected Object findObjectByObjectId(String id, String collectionName) {
-        DBCollection coll = db.getCollection(collectionName);
-        ObjectId objId = new ObjectId(id);
-        BasicDBObject query = new BasicDBObject(ID_NAME, objId);
-        return getObject(coll, query);
+    /*
+     * @see com.apifest.oauth20.DBManager#findScope(java.lang.String)
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public Scope findScope(String scopeName) {
+        BSONObject result = (BSONObject) findObjectById(scopeName, ID_NAME, SCOPE_COLLECTION_NAME);
+        return Scope.loadFromMap(result.toMap());
     }
 
     @SuppressWarnings("unchecked")
@@ -349,4 +349,5 @@ public class MongoDBManager implements DBManager{
         }
         return result;
     }
+
 }
