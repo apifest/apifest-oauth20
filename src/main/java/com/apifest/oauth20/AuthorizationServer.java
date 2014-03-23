@@ -56,7 +56,13 @@ public class AuthorizationServer {
         if(queryParams != null && queryParams.get(APPNAME_PARAMETER) != null && queryParams.get(SCOPE_PARAMETER) != null) {
             String appName = dec.getParameters().get(APPNAME_PARAMETER).get(0);
             String scope = dec.getParameters().get(SCOPE_PARAMETER).get(0);
-            // TODO: check the scopes are defined
+            String [] scopeList = scope.split(",");
+            for(String s : scopeList) {
+                // TODO: add cache for scope
+                if(db.findScope(s) == null){
+                    throw new OAuthException(Response.SCOPE_NOT_EXIST, HttpResponseStatus.BAD_REQUEST);
+                }
+            }
             creds = new ClientCredentials(appName, scope);
             db.storeClientCredentials(creds);
         } else {

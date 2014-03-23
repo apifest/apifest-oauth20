@@ -340,21 +340,58 @@ public class AuthorizationServerTest {
         assertNotNull(token);
     }
 
-
     @Test
     public void when_register_store_appName() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
         given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=TestDemoApp&scope=basic");
         willDoNothing().given(authServer.db).storeClientCredentials(any(ClientCredentials.class));
+        willReturn(mock(Scope.class)).given(authServer.db).findScope("basic");
 
         // WHEN
-        ClientCredentials creds = authServer.issueClientCredentials(req);
+        authServer.issueClientCredentials(req);
 
         // THEN
         verify(authServer.db).storeClientCredentials(any(ClientCredentials.class));
     }
 
+    @Test
+    public void when_register_with_non_existing_scope_return_error_message() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=TestDemoApp&scope=basic");
+        willDoNothing().given(authServer.db).storeClientCredentials(any(ClientCredentials.class));
+        willReturn(null).given(authServer.db).findScope("basic");
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            authServer.issueClientCredentials(req);
+        } catch(OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        verify(authServer.db, never()).storeClientCredentials(any(ClientCredentials.class));
+        assertEquals(errorMsg, Response.SCOPE_NOT_EXIST);
+    }
+
+    @Test
+    public void when_register_with_several_scopes_check_all_scopes() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=TestDemoApp&scope=basic,extended");
+        willDoNothing().given(authServer.db).storeClientCredentials(any(ClientCredentials.class));
+        willReturn(mock(Scope.class)).given(authServer.db).findScope("basic");
+        willReturn(mock(Scope.class)).given(authServer.db).findScope("extended");
+
+        // WHEN
+        authServer.issueClientCredentials(req);
+
+        // THEN
+        verify(authServer.db).findScope("basic");
+        verify(authServer.db).findScope("extended");
+    }
 
     @Test
     public void when_no_app_name_passed_return_error() throws Exception {
