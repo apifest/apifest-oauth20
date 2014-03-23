@@ -118,4 +118,78 @@ public class ScopeServiceTest {
         verify(DBManagerFactory.dbManager).findScope("basic");
         verify(DBManagerFactory.dbManager).findScope("extended");
     }
+
+    @Test
+    public void when_scope_is_null_get_client_app_scope() throws Exception {
+        // GIVEN
+        String clientId = "826064099791766";
+        MockDBManagerFactory.install();
+        ClientCredentials creds = mock(ClientCredentials.class);
+        willReturn("basic").given(creds).getScope();
+        willReturn(creds).given(DBManagerFactory.getInstance()).findClientCredentials(clientId);
+
+        // WHEN
+        String scope = service.getValidScope(null, clientId);
+
+        // THEN
+        assertEquals(scope, "basic");
+    }
+
+    @Test
+    public void when_scope_is_valid_check_client_app_scope_contains_it() throws Exception {
+        // GIVEN
+        String clientId = "826064099791766";
+        MockDBManagerFactory.install();
+        ClientCredentials creds = mock(ClientCredentials.class);
+        willReturn("extended,basic").given(creds).getScope();
+        willReturn(creds).given(DBManagerFactory.getInstance()).findClientCredentials(clientId);
+
+        // WHEN
+        String scope = service.getValidScope("basic", clientId);
+
+        // THEN
+        assertEquals(scope, "basic");
+    }
+
+    @Test
+    public void when_scope_is_not_contained_in_client_app_scope_return_null() throws Exception {
+        // GIVEN
+        String clientId = "826064099791766";
+        MockDBManagerFactory.install();
+        ClientCredentials creds = mock(ClientCredentials.class);
+        willReturn("basic").given(creds).getScope();
+        willReturn(creds).given(DBManagerFactory.getInstance()).findClientCredentials(clientId);
+
+        // WHEN
+        String scope = service.getValidScope("extended", clientId);
+
+        // THEN
+        assertNull(scope);
+    }
+
+    @Test
+    public void when_scope_is_contained_return_true() throws Exception {
+        // GIVEN
+        String scope = "extended";
+        String scopeList = "basic,extended";
+
+        // WHEN
+        boolean allowed = service.scopeAllowed(scope, scopeList);
+
+        // THEN
+        assertTrue(allowed);
+    }
+
+    @Test
+    public void when_scope_is_not_contained_return_false() throws Exception {
+        // GIVEN
+        String scope = "payment";
+        String scopeList = "basic,extended";
+
+        // WHEN
+        boolean allowed = service.scopeAllowed(scope, scopeList);
+
+        // THEN
+        assertFalse(allowed);
+    }
 }

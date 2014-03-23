@@ -57,7 +57,7 @@ public class AuthCode {
         this.scope = scope;
         this.type = type;
         this.valid = true;
-        this.userId = userId;
+        this.userId = (userId != null) ? userId : "";
         this.created = (new Date()).getTime();
     }
 

@@ -45,6 +45,7 @@ public class ScopeService {
     private static final String MANDATORY_FIELDS_ERROR = "{\"error\":\"scope, description and expires_in are mandatory\"}";
     private static final String SCOPE_STORED_OK_MESSAGE = "{\"status\":\"scope successfully stored\"}";
     private static final String SCOPE_STORED_NOK_MESSAGE = "{\"status\":\"scope not stored\"}";
+    private static final String COMMA = ",";
 
     public HttpResponse registerScope(HttpRequest req) {
         String content = req.getContent().toString(CharsetUtil.UTF_8);
@@ -114,13 +115,41 @@ public class ScopeService {
         return Response.createOkResponse(jsonString);
     }
 
+    public String getValidScope(String scope, String clientId) {
+        String validScope = null;
+        ClientCredentials creds = DBManagerFactory.getInstance().findClientCredentials(clientId);
+        if(creds != null) {
+            if(scope == null || scope.length() == 0) {
+                // get client scope
+                validScope = creds.getScope();
+            } else {
+                // check that scope exists and is allowed for that client app
+                boolean scopeOk = scopeAllowed(scope, creds.getScope());
+                if(scopeOk) {
+                    validScope = scope;
+                }
+            }
+        }
+        return validScope;
+    }
+
+    public boolean scopeAllowed(String scope, String allowedScopes) {
+        String [] allScopes = allowedScopes.split(COMMA);
+        for(String s : allScopes) {
+            if(s.equals(scope)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected HttpResponse getScopes(String clientId) {
         ClientCredentials credentials = DBManagerFactory.getInstance().findClientCredentials(clientId);
         String jsonString;
         if(credentials != null) {
             //scopes are separated by comma
             String scopes = credentials.getScope();
-            String [] s = scopes.split(",");
+            String [] s = scopes.split(COMMA);
             List<Scope> result = new ArrayList<Scope>();
             for(String name : s) {
                 Scope scope = DBManagerFactory.getInstance().findScope(name);

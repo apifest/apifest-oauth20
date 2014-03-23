@@ -44,10 +44,12 @@ public class AuthorizationServer {
     private static final String SCOPE_PARAMETER = "scope";
     static final String BASIC = "Basic ";
     private static final String TOKEN_TYPE_BEARER = "Bearer";
+    protected static final String SCOPE_NOK_MESSAGE = "{\"status\":\"scope not valid\"}";
 
     protected static Logger log = LoggerFactory.getLogger(AuthorizationServer.class);
 
     protected DBManager db = DBManagerFactory.getInstance();
+    protected ScopeService scopeService = new ScopeService();
 
     public ClientCredentials issueClientCredentials(HttpRequest req) throws OAuthException {
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
@@ -80,8 +82,13 @@ public class AuthorizationServer {
         }
         authRequest.validate();
 
+        String scope = scopeService.getValidScope(authRequest.getScope(), authRequest.getClientId());
+        if(scope == null) {
+            throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
+        }
+
         AuthCode authCode = new AuthCode(generateCode(), authRequest.getClientId(), authRequest.getRedirectUri(),
-                authRequest.getState(), authRequest.getScope(), authRequest.getResponseType(), authRequest.getUserId());
+                authRequest.getState(), scope, authRequest.getResponseType(), authRequest.getUserId());
         log.debug("authCode: {}", authCode.getCode());
         db.storeAuthCode(authCode);
 
@@ -118,6 +125,7 @@ public class AuthorizationServer {
                 } else {
                     // invalidate the auth code
                     db.updateAuthCodeValidStatus(authCode.getCode(), false);
+                    // TODO: auth code expiration configurable
                     accessToken = new AccessToken(TOKEN_TYPE_BEARER, "599", authCode.getScope());
                     accessToken.setUserId(authCode.getUserId());
                     accessToken.setClientId(authCode.getClientId());
@@ -130,8 +138,18 @@ public class AuthorizationServer {
         } else if(TokenRequest.REFRESH_TOKEN.equals(tokenRequest.getGrantType())) {
             accessToken = db.findAccessTokenByRefreshToken(tokenRequest.getRefreshToken(), tokenRequest.getClientId());
             if(accessToken != null) {
+                String validScope = null;
+                if(tokenRequest.getScope() != null) {
+                    if(scopeService.scopeAllowed(tokenRequest.getScope(), accessToken.getScope())) {
+                        validScope = tokenRequest.getScope();
+                    } else {
+                        throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
+                    }
+                } else {
+                    validScope = accessToken.getScope();
+                }
                 db.updateAccessTokenValidStatus(accessToken.getToken(), false);
-                AccessToken newAccessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD), accessToken.getScope());
+                AccessToken newAccessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD), validScope);
                 newAccessToken.setUserId(accessToken.getUserId());
                 newAccessToken.setClientId(accessToken.getClientId());
                 db.storeAccessToken(newAccessToken);
@@ -140,13 +158,23 @@ public class AuthorizationServer {
                 throw new OAuthException(Response.INVALID_REFRESH_TOKEN, HttpResponseStatus.BAD_REQUEST);
             }
         } else if(TokenRequest.CLIENT_CREDENTIALS.equals(tokenRequest.getGrantType())) {
+            String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());
+            if(scope == null) {
+                throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
+            }
+
             accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.CLIENT_CREDENTIALS),
-                    tokenRequest.getScope(), false);
+                    scope, false);
             accessToken.setClientId(tokenRequest.getClientId());
             db.storeAccessToken(accessToken);
         } else if(TokenRequest.PASSWORD.equals(tokenRequest.getGrantType())) {
+            String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());
+            if(scope == null) {
+                throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
+            }
+
             accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD),
-                    tokenRequest.getScope());
+                    scope);
             try {
                 String userId = authenticateUser(tokenRequest.getUsername(), tokenRequest.getPassword());
                 if(userId != null) {

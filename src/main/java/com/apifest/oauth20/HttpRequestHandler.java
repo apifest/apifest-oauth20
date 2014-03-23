@@ -127,8 +127,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             log.debug(json.toString());
             response = Response.createOkResponse(json.toString());
         } else {
-            // REVISIT: Think about another HTTP status
-            response = Response.createOkResponse(Response.INVALID_CLIENT_ID);
+            response = Response.createBadRequestResponse(Response.INVALID_CLIENT_ID);
         }
         return response;
     }
@@ -171,8 +170,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             log.error("IO exception, {}", e1);
         }
         if(response == null) {
-            // REVISIT: Think about another HTTP status
-            response = Response.createOkResponse(Response.CANNOT_ISSUE_TOKEN);
+            response = Response.createBadRequestResponse(Response.CANNOT_ISSUE_TOKEN);
         }
         return response;
     }
@@ -215,8 +213,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             log.error("IO exception, {}", e1);
         }
         if(response == null) {
-            // REVISIT: Think about another HTTP status
-            response = Response.createOkResponse(Response.CANNOT_REGISTER_APP);
+            response = Response.createBadRequestResponse(Response.CANNOT_REGISTER_APP);
         }
         return response;
     }
@@ -227,7 +224,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             revoked = auth.revokeToken(req);
         } catch (OAuthException e) {
             log.error("cannot revoke token", e);
-            //TODO: return not OK response
+            Response.createBadRequestResponse();
         }
         String json = "{\"revoked\":\"" + revoked + "\"}";
         return Response.createOkResponse(json);
