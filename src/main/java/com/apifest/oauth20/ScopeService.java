@@ -52,7 +52,7 @@ public class ScopeService {
         String contentType = req.getHeader(HttpHeaders.Names.CONTENT_TYPE);
         String responseMsg = "";
         // check Content-Type
-        if (contentType != null && contentType.contains("application/json")) {
+        if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             ObjectMapper mapper = new ObjectMapper();
             try {
                 Scope scope = mapper.readValue(content, Scope.class);
@@ -79,7 +79,7 @@ public class ScopeService {
                 return Response.createBadRequestResponse(null);
             }
         } else {
-            return Response.createBadRequestResponse(null);
+            return Response.createBadRequestResponse(Response.UNSUPPORTED_MEDIA_TYPE);
         }
         return Response.createOkResponse(responseMsg);
     }
