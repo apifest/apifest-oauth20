@@ -16,12 +16,13 @@
 
 package com.apifest.oauth20;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 

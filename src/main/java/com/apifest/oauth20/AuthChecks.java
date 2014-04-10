@@ -37,7 +37,7 @@ public class AuthChecks {
 
     protected String getBasicAuthenticationClientId(HttpRequest req) {
         // extract Basic Authentication header
-        String authHeader = req.getHeader(HttpHeaders.AUTHORIZATION);
+        String authHeader = req.headers().get(HttpHeaders.AUTHORIZATION);
         String clientId = null;
         if(authHeader != null && authHeader.contains(BASIC)) {
             String value = authHeader.replace(BASIC,"");

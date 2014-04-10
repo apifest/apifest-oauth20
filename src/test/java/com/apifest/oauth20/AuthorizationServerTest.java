@@ -20,10 +20,10 @@ package com.apifest.oauth20;
 import java.io.IOException;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.Logger;
@@ -465,18 +465,24 @@ public class AuthorizationServerTest {
     public void when_get_clientId_from_Basic_Auth_call_get_Header_method() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("token").given(headers).get(anyString());
+        willReturn(headers).given(req).headers();
 
         // WHEN
         authServer.getBasicAuthorizationClientId(req);
 
         // THEN
-        verify(req).getHeader(HttpHeaders.AUTHORIZATION);
+        verify(req.headers()).get(HttpHeaders.Names.AUTHORIZATION);
     }
 
     @Test
     public void when_Basic_Auth_header_empty_return_null() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("token").given(headers).get(HttpHeaders.Names.AUTHORIZATION);
+        willReturn(headers).given(req).headers();
 
         // WHEN
         String clientId = authServer.getBasicAuthorizationClientId(req);
@@ -493,7 +499,12 @@ public class AuthorizationServerTest {
         String clientSecret = "7405036333557004234394sadasd214124";
         String basic = clientId + ":" + clientSecret;
         String headerValue = AuthorizationServer.BASIC + Base64.encodeBase64String(basic.getBytes());
-        willReturn(headerValue).given(req).getHeader(HttpHeaders.AUTHORIZATION);
+
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn(headerValue).given(headers).get(HttpHeaders.Names.AUTHORIZATION);
+        willReturn(headers).given(req).headers();
+
+
         willReturn(true).given(authServer.db).validClient(clientId, clientSecret);
 
         // WHEN

@@ -38,8 +38,8 @@ public class ResponseTest {
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.NOT_FOUND);
-        assertEquals(response.getHeader(HttpHeaders.Names.CACHE_CONTROL), HttpHeaders.Values.NO_STORE);
-        assertEquals(response.getHeader(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
+        assertEquals(response.headers().get(HttpHeaders.Names.CACHE_CONTROL), HttpHeaders.Values.NO_STORE);
+        assertEquals(response.headers().get(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
     }
 
     @Test
@@ -54,8 +54,8 @@ public class ResponseTest {
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
-        assertEquals(response.getHeader(HttpHeaders.Names.CACHE_CONTROL), HttpHeaders.Values.NO_STORE);
-        assertEquals(response.getHeader(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
+        assertEquals(response.headers().get(HttpHeaders.Names.CACHE_CONTROL), HttpHeaders.Values.NO_STORE);
+        assertEquals(response.headers().get(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
         verify(ex).getMessage();
     }
 }

@@ -16,12 +16,7 @@
 
 package com.apifest.oauth20;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
-
-import java.io.FileInputStream;
-import java.net.URL;
+import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 

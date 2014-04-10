@@ -16,15 +16,18 @@
 
 package com.apifest.oauth20;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
-
-import java.util.List;
+import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

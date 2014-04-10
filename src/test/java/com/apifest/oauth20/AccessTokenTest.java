@@ -16,10 +16,12 @@
 
 package com.apifest.oauth20;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.BDDMockito.*;
-import static org.testng.Assert.*;
+import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.Mockito.spy;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -34,7 +36,9 @@ import org.testng.annotations.Test;
 public class AccessTokenTest {
 
 
+
     @Test
+    @SuppressWarnings("unchecked")
     public void when_load_from_map_initialize_all_fields() throws Exception {
         // GIVEN
         String jsonStr = "{\"_id\" : \"51619e3182abb4b7b7e06d4a\", \"valid\" : true, \"scope\" : null, \"clientId\" : \"767316324475102\", " +

@@ -49,7 +49,7 @@ public class ScopeService {
 
     public HttpResponse registerScope(HttpRequest req) {
         String content = req.getContent().toString(CharsetUtil.UTF_8);
-        String contentType = req.getHeader(HttpHeaders.Names.CONTENT_TYPE);
+        String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
         String responseMsg = "";
         // check Content-Type
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {

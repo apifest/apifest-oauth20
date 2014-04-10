@@ -16,11 +16,7 @@
 
 package com.apifest.oauth20;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
-
-import org.testng.annotations.Test;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Rossitsa Borissova
