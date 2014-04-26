@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.oauth20;
 
@@ -29,7 +29,7 @@ import org.codehaus.jackson.annotate.JsonPropertyOrder;
  *
  * @author Rossitsa Borissova
  */
-@JsonPropertyOrder({"client_id","client_secret"})
+@JsonPropertyOrder({ "client_id", "client_secret" })
 public class ClientCredentials implements Serializable {
 
     private static final long serialVersionUID = 6443754960051591393L;
@@ -43,7 +43,7 @@ public class ClientCredentials implements Serializable {
     @JsonProperty("client_secret")
     private String secret = "";
 
-    //scopes are separated by comma
+    // scopes are separated by comma
     @JsonIgnore
     private String scope = "";
 
@@ -59,7 +59,7 @@ public class ClientCredentials implements Serializable {
     @JsonIgnore
     private String descr = "";
 
-    //client types - public or confidential
+    // client types - public or confidential
     @JsonIgnore
     private int type;
 
@@ -77,7 +77,7 @@ public class ClientCredentials implements Serializable {
     }
 
     private ClientCredentials() {
-        //used to load the class from Map
+        // used to load the class from Map
     }
 
     public String getId() {
@@ -153,12 +153,14 @@ public class ClientCredentials implements Serializable {
     }
 
     private String generateClientSecret() {
-        return RandomGenerator.generateCharsDigitsString(CLIENT_SECRET_LENGTH);
+        return RandomGenerator.generateRandomString();
     }
 
     /**
      * Used to create an instance when a record from DB is loaded.
-     * @param map Map that contains the record info
+     *
+     * @param map
+     *            Map that contains the record info
      * @return instance of ClientCredentials
      */
     public static ClientCredentials loadFromMap(Map<String, Object> map) {
@@ -185,7 +187,7 @@ public class ClientCredentials implements Serializable {
         creds.type = Integer.valueOf(map.get("type"));
         creds.status = Integer.valueOf(map.get("status"));
         creds.created = Long.valueOf(map.get("created"));
-        creds.scope =  map.get("scope");
+        creds.scope = map.get("scope");
         return creds;
     }
 

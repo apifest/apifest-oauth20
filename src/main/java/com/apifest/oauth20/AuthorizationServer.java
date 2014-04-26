@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.oauth20;
 
@@ -55,20 +55,23 @@ public class AuthorizationServer {
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
         ClientCredentials creds = null;
         Map<String, List<String>> queryParams = dec.getParameters();
-        if(queryParams != null && queryParams.get(APPNAME_PARAMETER) != null && queryParams.get(SCOPE_PARAMETER) != null) {
+        if (queryParams != null && queryParams.get(APPNAME_PARAMETER) != null
+                && queryParams.get(SCOPE_PARAMETER) != null) {
             String appName = dec.getParameters().get(APPNAME_PARAMETER).get(0);
             String scope = dec.getParameters().get(SCOPE_PARAMETER).get(0);
-            String [] scopeList = scope.split(",");
-            for(String s : scopeList) {
+            String[] scopeList = scope.split(",");
+            for (String s : scopeList) {
                 // TODO: add cache for scope
-                if(db.findScope(s) == null){
-                    throw new OAuthException(Response.SCOPE_NOT_EXIST, HttpResponseStatus.BAD_REQUEST);
+                if (db.findScope(s) == null) {
+                    throw new OAuthException(Response.SCOPE_NOT_EXIST,
+                            HttpResponseStatus.BAD_REQUEST);
                 }
             }
             creds = new ClientCredentials(appName, scope);
             db.storeClientCredentials(creds);
         } else {
-            throw new OAuthException(Response.APPNAME_OR_SCOPE_IS_NULL, HttpResponseStatus.BAD_REQUEST);
+            throw new OAuthException(Response.APPNAME_OR_SCOPE_IS_NULL,
+                    HttpResponseStatus.BAD_REQUEST);
         }
         return creds;
     }
@@ -77,18 +80,20 @@ public class AuthorizationServer {
     public String issueAuthorizationCode(HttpRequest req) throws OAuthException {
         AuthRequest authRequest = new AuthRequest(req);
         log.debug("received client_id:" + authRequest.getClientId());
-        if(!isValidClientId(authRequest.getClientId())){
+        if (!isValidClientId(authRequest.getClientId())) {
             throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
         }
         authRequest.validate();
 
-        String scope = scopeService.getValidScope(authRequest.getScope(), authRequest.getClientId());
-        if(scope == null) {
+        String scope = scopeService
+                .getValidScope(authRequest.getScope(), authRequest.getClientId());
+        if (scope == null) {
             throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
         }
 
-        AuthCode authCode = new AuthCode(generateCode(), authRequest.getClientId(), authRequest.getRedirectUri(),
-                authRequest.getState(), scope, authRequest.getResponseType(), authRequest.getUserId());
+        AuthCode authCode = new AuthCode(generateCode(), authRequest.getClientId(),
+                authRequest.getRedirectUri(), authRequest.getState(), scope,
+                authRequest.getResponseType(), authRequest.getUserId());
         log.debug("authCode: {}", authCode.getCode());
         db.storeAuthCode(authCode);
 
@@ -100,7 +105,7 @@ public class AuthorizationServer {
 
     public AccessToken issueAccessToken(HttpRequest req) throws OAuthException {
         String clientId = getBasicAuthorizationClientId(req);
-        if(clientId == null){
+        if (clientId == null) {
             throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
         }
         TokenRequest tokenRequest = new TokenRequest(req);
@@ -112,21 +117,22 @@ public class AuthorizationServer {
         tokenRequest.validate();
 
         AccessToken accessToken = null;
-        if(TokenRequest.AUTHORIZATION_CODE.equals(tokenRequest.getGrantType())) {
+        if (TokenRequest.AUTHORIZATION_CODE.equals(tokenRequest.getGrantType())) {
             AuthCode authCode = findAuthCode(tokenRequest);
             // TODO: REVISIT: Move client_id check to db query
-            if(authCode != null) {
-                if(!tokenRequest.getClientId().equals(authCode.getClientId())) {
-                    throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
+            if (authCode != null) {
+                if (!tokenRequest.getClientId().equals(authCode.getClientId())) {
+                    throw new OAuthException(Response.INVALID_CLIENT_ID,
+                            HttpResponseStatus.BAD_REQUEST);
                 }
-                if(authCode.getRedirectUri() != null &&
-                        !tokenRequest.getRedirectUri().equals(authCode.getRedirectUri())){
-                    throw new OAuthException(Response.INVALID_REDIRECT_URI, HttpResponseStatus.BAD_REQUEST);
+                if (authCode.getRedirectUri() != null
+                        && !tokenRequest.getRedirectUri().equals(authCode.getRedirectUri())) {
+                    throw new OAuthException(Response.INVALID_REDIRECT_URI,
+                            HttpResponseStatus.BAD_REQUEST);
                 } else {
                     // invalidate the auth code
                     db.updateAuthCodeValidStatus(authCode.getCode(), false);
-                    // TODO: auth code expiration configurable
-                    accessToken = new AccessToken(TOKEN_TYPE_BEARER, "599", authCode.getScope());
+                    accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD), authCode.getScope());
                     accessToken.setUserId(authCode.getUserId());
                     accessToken.setClientId(authCode.getClientId());
                     accessToken.setCodeId(authCode.getId());
@@ -135,12 +141,13 @@ public class AuthorizationServer {
             } else {
                 throw new OAuthException(Response.INVALID_AUTH_CODE, HttpResponseStatus.BAD_REQUEST);
             }
-        } else if(TokenRequest.REFRESH_TOKEN.equals(tokenRequest.getGrantType())) {
-            accessToken = db.findAccessTokenByRefreshToken(tokenRequest.getRefreshToken(), tokenRequest.getClientId());
-            if(accessToken != null) {
+        } else if (TokenRequest.REFRESH_TOKEN.equals(tokenRequest.getGrantType())) {
+            accessToken = db.findAccessTokenByRefreshToken(tokenRequest.getRefreshToken(),
+                    tokenRequest.getClientId());
+            if (accessToken != null) {
                 String validScope = null;
-                if(tokenRequest.getScope() != null) {
-                    if(scopeService.scopeAllowed(tokenRequest.getScope(), accessToken.getScope())) {
+                if (tokenRequest.getScope() != null) {
+                    if (scopeService.scopeAllowed(tokenRequest.getScope(), accessToken.getScope())) {
                         validScope = tokenRequest.getScope();
                     } else {
                         throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
@@ -149,44 +156,51 @@ public class AuthorizationServer {
                     validScope = accessToken.getScope();
                 }
                 db.updateAccessTokenValidStatus(accessToken.getToken(), false);
-                AccessToken newAccessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD), validScope);
+                AccessToken newAccessToken = new AccessToken(TOKEN_TYPE_BEARER,
+                        getExpiresIn(TokenRequest.PASSWORD), validScope);
                 newAccessToken.setUserId(accessToken.getUserId());
                 newAccessToken.setClientId(accessToken.getClientId());
                 db.storeAccessToken(newAccessToken);
                 return newAccessToken;
             } else {
-                throw new OAuthException(Response.INVALID_REFRESH_TOKEN, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(Response.INVALID_REFRESH_TOKEN,
+                        HttpResponseStatus.BAD_REQUEST);
             }
-        } else if(TokenRequest.CLIENT_CREDENTIALS.equals(tokenRequest.getGrantType())) {
-            String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());
-            if(scope == null) {
+        } else if (TokenRequest.CLIENT_CREDENTIALS.equals(tokenRequest.getGrantType())) {
+            String scope = scopeService.getValidScope(tokenRequest.getScope(),
+                    tokenRequest.getClientId());
+            if (scope == null) {
                 throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
             }
 
-            accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.CLIENT_CREDENTIALS),
-                    scope, false);
+            accessToken = new AccessToken(TOKEN_TYPE_BEARER,
+                    getExpiresIn(TokenRequest.CLIENT_CREDENTIALS), scope, false);
             accessToken.setClientId(tokenRequest.getClientId());
             db.storeAccessToken(accessToken);
-        } else if(TokenRequest.PASSWORD.equals(tokenRequest.getGrantType())) {
-            String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());
-            if(scope == null) {
+        } else if (TokenRequest.PASSWORD.equals(tokenRequest.getGrantType())) {
+            String scope = scopeService.getValidScope(tokenRequest.getScope(),
+                    tokenRequest.getClientId());
+            if (scope == null) {
                 throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
             }
 
             accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD),
                     scope);
             try {
-                String userId = authenticateUser(tokenRequest.getUsername(), tokenRequest.getPassword());
-                if(userId != null) {
+                String userId = authenticateUser(tokenRequest.getUsername(),
+                        tokenRequest.getPassword());
+                if (userId != null) {
                     accessToken.setUserId(userId);
                     accessToken.setClientId(tokenRequest.getClientId());
                     db.storeAccessToken(accessToken);
                 } else {
-                    throw new OAuthException(Response.INVALID_USERNAME_PASSWORD, HttpResponseStatus.UNAUTHORIZED);
+                    throw new OAuthException(Response.INVALID_USERNAME_PASSWORD,
+                            HttpResponseStatus.UNAUTHORIZED);
                 }
             } catch (IOException e) {
                 log.error("Cannot authenticate user", e);
-                throw new OAuthException(Response.CANNOT_AUTHENTICATE_USER, HttpResponseStatus.UNAUTHORIZED); //NOSONAR
+                throw new OAuthException(Response.CANNOT_AUTHENTICATE_USER,
+                        HttpResponseStatus.UNAUTHORIZED); // NOSONAR
             }
         }
         return accessToken;
@@ -201,18 +215,18 @@ public class AuthorizationServer {
         // extract Basic Authorization header
         String authHeader = req.headers().get(HttpHeaders.AUTHORIZATION);
         String clientId = null;
-        if(authHeader != null && authHeader.contains(BASIC)) {
-            String value = authHeader.replace(BASIC,"");
+        if (authHeader != null && authHeader.contains(BASIC)) {
+            String value = authHeader.replace(BASIC, "");
             Base64 decoder = new Base64();
-            byte [] decodedBytes = decoder.decode(value);
+            byte[] decodedBytes = decoder.decode(value);
             String decoded = new String(decodedBytes, Charset.forName("UTF-8"));
-            //client_id:client_secret - should be changed by client password
-            String [] str = decoded.split(":");
-            if(str.length == 2) {
+            // client_id:client_secret - should be changed by client password
+            String[] str = decoded.split(":");
+            if (str.length == 2) {
                 String authClientId = str[0];
                 String authClientSecret = str[1];
-                //check valid - DB call
-                if(db.validClient(authClientId, authClientSecret)) {
+                // check valid - DB call
+                if (db.validClient(authClientId, authClientSecret)) {
                     clientId = authClientId;
                 }
             }
@@ -221,13 +235,13 @@ public class AuthorizationServer {
     }
 
     protected AuthCode findAuthCode(TokenRequest tokenRequest) {
-       return db.findAuthCode(tokenRequest.getCode(), tokenRequest.getRedirectUri());
+        return db.findAuthCode(tokenRequest.getCode(), tokenRequest.getRedirectUri());
     }
 
     public AccessToken isValidToken(String token) {
         AccessToken accessToken = db.findAccessToken(token);
-        if(accessToken != null) {
-            if(accessToken.tokenExpired()) {
+        if (accessToken != null) {
+            if (accessToken.tokenExpired()) {
                 db.updateAccessTokenValidStatus(accessToken.getToken(), false);
                 return null;
             }
@@ -239,7 +253,7 @@ public class AuthorizationServer {
     public String getApplicationName(String clientId) {
         String appName = null;
         ClientCredentials creds = db.findClientCredentials(clientId);
-        if(creds != null) {
+        if (creds != null) {
             appName = creds.getName();
         }
         return appName;
@@ -250,17 +264,17 @@ public class AuthorizationServer {
     }
 
     protected boolean isValidClientId(String clientId) {
-        if(db.findClientCredentials(clientId) != null) {
-             return true;
+        if (db.findClientCredentials(clientId) != null) {
+            return true;
         }
         return false;
     }
 
     protected String getExpiresIn(String tokenGrantType) {
-        if(TokenRequest.CLIENT_CREDENTIALS.equals(tokenGrantType)) {
+        if (TokenRequest.CLIENT_CREDENTIALS.equals(tokenGrantType)) {
             return String.valueOf(OAuthServer.getExpiresInClientCredentials());
         }
-        if(TokenRequest.PASSWORD.equals(tokenGrantType)) {
+        if (TokenRequest.PASSWORD.equals(tokenGrantType)) {
             return String.valueOf(OAuthServer.getExpiresInPassword());
         } else {
             return String.valueOf(OAuthServer.getExpiresInPassword());
@@ -269,18 +283,18 @@ public class AuthorizationServer {
 
     public boolean revokeToken(HttpRequest req) throws OAuthException {
         String clientId = getBasicAuthorizationClientId(req);
-        if(clientId == null){
+        if (clientId == null) {
             throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
         }
 
         String token = getAccessToken(req);
         AccessToken accessToken = db.findAccessToken(token);
-        if(accessToken != null) {
-            if(accessToken.tokenExpired()) {
+        if (accessToken != null) {
+            if (accessToken.tokenExpired()) {
                 log.debug("access token {} is expired", token);
                 return true;
             }
-            if(clientId.equals(accessToken.getClientId())) {
+            if (clientId.equals(accessToken.getClientId())) {
                 db.updateAccessTokenValidStatus(accessToken.getToken(), false);
                 log.debug("access token {} set status invalid", token);
                 return true;

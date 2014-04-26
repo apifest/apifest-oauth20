@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.oauth20;
 
@@ -26,7 +26,7 @@ import org.codehaus.jackson.annotate.JsonPropertyOrder;
  *
  * @author Rossitsa Borissova
  */
-@JsonPropertyOrder({"name","description","expires_in"})
+@JsonPropertyOrder({ "name", "description", "expires_in" })
 public class Scope {
 
     static final String SCOPE_FIELD = "scope";
@@ -83,9 +83,8 @@ public class Scope {
     }
 
     public boolean validate() {
-        if((scope == null || scope.length() <= 2) ||
-                 description == null ||
-                (expiresIn == null || expiresIn <= 0)) {
+        boolean scopeValid = (scope == null || scope.length() <= 2);
+        if (scopeValid || description == null || (expiresIn == null || expiresIn <= 0)) {
             return false;
         }
         return true;

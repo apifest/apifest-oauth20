@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.oauth20;
 
@@ -64,10 +64,10 @@ public class AuthRequestTest {
         String clientId = "763273054098803";
         String state = "xyz";
         String scope = "basic";
-        given(request.getUri()).willReturn("http://example.com/authorize?response_type=" + responseType +
-                "&client_id=" + clientId +
-                "&state=" + state +
-                "&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom&scope=" + scope);
+        given(request.getUri()).willReturn(
+                "http://example.com/authorize?response_type=" + responseType + "&client_id="
+                        + clientId + "&state=" + state
+                        + "&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom&scope=" + scope);
 
         // WHEN
         AuthRequest authReq = new AuthRequest(request);
@@ -80,7 +80,6 @@ public class AuthRequestTest {
         assertEquals(authReq.getScope(), scope);
     }
 
-
     @Test
     public void when_validate_and_response_type_unsupported_return_errror() throws Exception {
         // GIVEN
@@ -89,10 +88,10 @@ public class AuthRequestTest {
         String clientId = "763273054098803";
         String state = "xyz";
         String scope = "basic";
-        given(request.getUri()).willReturn("http://example.com/authorize?response_type=" + responseType +
-                "&client_id=" + clientId +
-                "&state=" + state +
-                "&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom&scope=" + scope);
+        given(request.getUri()).willReturn(
+                "http://example.com/authorize?response_type=" + responseType + "&client_id="
+                        + clientId + "&state=" + state
+                        + "&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom&scope=" + scope);
 
         AuthRequest authReq = spy(new AuthRequest(request));
 
@@ -116,10 +115,10 @@ public class AuthRequestTest {
         String clientId = "763273054098803";
         String state = "xyz";
         String scope = "basic";
-        given(request.getUri()).willReturn("http://example.com/authorize?response_type=" + responseType +
-                "&client_id=" + clientId +
-                "&state=" + state +
-                "&redirect_uri=%3A%2F%2Fclient%2Eexample%2Ecom&scope=" + scope);
+        given(request.getUri()).willReturn(
+                "http://example.com/authorize?response_type=" + responseType + "&client_id="
+                        + clientId + "&state=" + state
+                        + "&redirect_uri=%3A%2F%2Fclient%2Eexample%2Ecom&scope=" + scope);
 
         AuthRequest authReq = spy(new AuthRequest(request));
 

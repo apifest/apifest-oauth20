@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * @author Apostol Terziev
@@ -38,7 +38,7 @@ public class RedisDBManager implements DBManager {
     static {
         sentinels = new HashSet<String>();
         String[] sentinelsList = OAuthServer.getRedisSentinels().split(",");
-        for(String sentinel : sentinelsList) {
+        for (String sentinel : sentinelsList) {
             sentinels.add(sentinel);
         }
         pool = new JedisSentinelPool(OAuthServer.getRedisMaster(), sentinels);
@@ -97,7 +97,8 @@ public class RedisDBManager implements DBManager {
         jedis.hmset("acc:" + authCode.getCode(), authCodeMap);
         // REVISIT: expires on auth code
         jedis.expire("acc:" + authCode.getCode(), 1800);
-        jedis.hset("acuri:" + authCode.getCode() + authCode.getRedirectUri(), "ac", authCode.getCode());
+        jedis.hset("acuri:" + authCode.getCode() + authCode.getRedirectUri(), "ac",
+                authCode.getCode());
         jedis.expire("acuri:" + authCode.getCode() + authCode.getRedirectUri(), 1800);
         pool.returnResource(jedis);
     }
@@ -125,8 +126,10 @@ public class RedisDBManager implements DBManager {
         Jedis jedis = pool.getResource();
         jedis.hmset("at:" + accessToken.getToken(), accessTokenMap);
         jedis.expire("at:" + accessToken.getToken(), Integer.valueOf(accessToken.getExpiresIn()));
-        jedis.hset("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(), "access_token", accessToken.getToken());
-        jedis.expire("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(), Integer.valueOf(accessToken.getExpiresIn()));
+        jedis.hset("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(),
+                "access_token", accessToken.getToken());
+        jedis.expire("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(),
+                Integer.valueOf(accessToken.getExpiresIn()));
         pool.returnResource(jedis);
     }
 
@@ -137,7 +140,7 @@ public class RedisDBManager implements DBManager {
         Map<String, String> accessTokenMap = jedis.hgetAll("at:" + accessToken);
         pool.returnResource(jedis);
         // REVISIT: check valid=true
-        if(accessTokenMap.isEmpty() || "false".equals(accessTokenMap.get("valid"))) {
+        if (accessTokenMap.isEmpty() || "false".equals(accessTokenMap.get("valid"))) {
             return null;
         }
         return AccessToken.loadFromStringMap(accessTokenMap);
@@ -156,7 +159,7 @@ public class RedisDBManager implements DBManager {
         Map<String, String> accessTokenMap = jedis.hgetAll("at:" + accessToken);
         pool.returnResource(jedis);
         // REVISIT: Check valid=true
-        if(accessTokenMap.isEmpty() || "false".equals(accessTokenMap.get("valid"))) {
+        if (accessTokenMap.isEmpty() || "false".equals(accessTokenMap.get("valid"))) {
             return null;
         }
         return AccessToken.loadFromStringMap(accessTokenMap);
@@ -170,7 +173,7 @@ public class RedisDBManager implements DBManager {
         String authCodeId = authCodeIdMap.get("ac");
         Map<String, String> authCodeMap = jedis.hgetAll("acc:" + authCodeId);
         pool.returnResource(jedis);
-        if(authCodeMap.isEmpty() || "false".equals(authCodeMap.get("valid"))) {
+        if (authCodeMap.isEmpty() || "false".equals(authCodeMap.get("valid"))) {
             return null;
         }
         return AuthCode.loadFromStringMap(authCodeMap);
@@ -181,7 +184,7 @@ public class RedisDBManager implements DBManager {
         Jedis jedis = pool.getResource();
         Map<String, String> clientCredentialsMap = jedis.hgetAll("cc:" + clientId);
         pool.returnResource(jedis);
-        if(clientCredentialsMap.isEmpty()) {
+        if (clientCredentialsMap.isEmpty()) {
             return null;
         }
         return ClientCredentials.loadFromStringMap(clientCredentialsMap);
@@ -209,9 +212,9 @@ public class RedisDBManager implements DBManager {
         List<Scope> list = new ArrayList<Scope>();
         Jedis jedis = pool.getResource();
         Set<String> allScopes = jedis.keys("sc*");
-        for(String scope : allScopes) {
+        for (String scope : allScopes) {
             Map<String, String> scopeMap = jedis.hgetAll(scope);
-            if(scopeMap.isEmpty()) {
+            if (scopeMap.isEmpty()) {
                 continue;
             } else {
                 list.add(Scope.loadFromStringMap(scopeMap));
@@ -229,7 +232,7 @@ public class RedisDBManager implements DBManager {
         Jedis jedis = pool.getResource();
         Map<String, String> scopeMap = jedis.hgetAll("sc:" + scopeName);
         pool.returnResource(jedis);
-        if(scopeMap.isEmpty()) {
+        if (scopeMap.isEmpty()) {
             return null;
         }
         return Scope.loadFromStringMap(scopeMap);

@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.oauth20;
 
@@ -93,15 +93,16 @@ public class MongoDBManagerTest {
         map.put("type", 1);
         map.put("status", 1);
         willReturn(map).given(bson).toMap();
-        willReturn(bson).given(dbManager).findObjectById(cred.getId(), MongoDBManager.ID_NAME, MongoDBManager.CLIENTS_COLLECTION_NAME);
+        willReturn(bson).given(dbManager).findObjectById(cred.getId(), MongoDBManager.ID_NAME,
+                MongoDBManager.CLIENTS_COLLECTION_NAME);
 
         // WHEN
         dbManager.findClientCredentials(cred.getId());
 
         // THEN
-        verify(dbManager).findObjectById(cred.getId(), MongoDBManager.ID_NAME, MongoDBManager.CLIENTS_COLLECTION_NAME);
+        verify(dbManager).findObjectById(cred.getId(), MongoDBManager.ID_NAME,
+                MongoDBManager.CLIENTS_COLLECTION_NAME);
     }
-
 
     @Test
     public void when_find_object_by_id_invoke_find_on_collection() throws Exception {
@@ -111,19 +112,19 @@ public class MongoDBManagerTest {
         given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
 
         // WHEN
-        dbManager.findObjectById(cred.getId(), MongoDBManager.CLIENTS_ID_NAME, MongoDBManager.CLIENTS_COLLECTION_NAME);
+        dbManager.findObjectById(cred.getId(), MongoDBManager.CLIENTS_ID_NAME,
+                MongoDBManager.CLIENTS_COLLECTION_NAME);
 
         // THEN
         verify(coll).find(any(DBObject.class));
     }
 
-
     @Test
     public void when_no_object_found_find_by_id_return_null() throws Exception {
-     // GIVEN
+        // GIVEN
         ClientCredentials cred = new ClientCredentials("Test", "basic");
-        willReturn(null).given(dbManager).findObjectById
-            (cred.getId(), MongoDBManager.ID_NAME, MongoDBManager.CLIENTS_COLLECTION_NAME);
+        willReturn(null).given(dbManager).findObjectById(cred.getId(), MongoDBManager.ID_NAME,
+                MongoDBManager.CLIENTS_COLLECTION_NAME);
 
         // WHEN
         ClientCredentials result = dbManager.findClientCredentials(cred.getId());
@@ -148,8 +149,8 @@ public class MongoDBManagerTest {
     @Test
     public void when_json_contains_NO_id_NOT_invoke_constructDbId() throws Exception {
         // GIVEN
-        AuthCode code = new AuthCode(AuthCode.generate(), "763273054098803",
-                "http://example.com", "xyz", "basic", "code", "1234");
+        AuthCode code = new AuthCode(AuthCode.generate(), "763273054098803", "http://example.com",
+                "xyz", "basic", "code", "1234");
         given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
 
         // WHEN
@@ -159,7 +160,6 @@ public class MongoDBManagerTest {
         verify(dbManager, times(0)).constructDbId(any(JSONObject.class));
     }
 
-
     @Test
     public void when_valid_client_check_clientId_and_secret() throws Exception {
         // GIVEN
@@ -168,7 +168,8 @@ public class MongoDBManagerTest {
         given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
         BSONObject bson = mock(BSONObject.class);
         given(bson.get("secret")).willReturn(clientSecret);
-        willReturn(bson).given(dbManager).getObject(any(DBCollection.class), any(BasicDBObject.class));
+        willReturn(bson).given(dbManager).getObject(any(DBCollection.class),
+                any(BasicDBObject.class));
 
         // WHEN
         boolean result = dbManager.validClient(clientId, clientSecret);
@@ -185,7 +186,8 @@ public class MongoDBManagerTest {
         given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
         BSONObject bson = mock(BSONObject.class);
         given(bson.get("secret")).willReturn("somthing_else");
-        willReturn(bson).given(dbManager).getObject(any(DBCollection.class), any(BasicDBObject.class));
+        willReturn(bson).given(dbManager).getObject(any(DBCollection.class),
+                any(BasicDBObject.class));
 
         // WHEN
         boolean result = dbManager.validClient(clientId, clientSecret);

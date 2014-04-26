@@ -95,26 +95,36 @@ public final class OAuthServer {
 
     protected static boolean loadConfig() {
         String propertiesFilePath = System.getProperty("properties.file");
-        InputStream in;
+        InputStream in = null;
         boolean loaded = false;
-        if(propertiesFilePath == null) {
-            in = Thread.currentThread().getContextClassLoader().getResourceAsStream("apifest-oauth.properties");
-            if(in != null) {
-                loadProperties(in);
-                loaded = true;
+        try {
+            if (propertiesFilePath == null) {
+                in = Thread.currentThread().getContextClassLoader().getResourceAsStream("apifest-oauth.properties");
+                if(in != null) {
+                    loadProperties(in);
+                    loaded = true;
+                } else {
+                    log.error("Cannot load properties file");
+                    return false;
+                }
             } else {
-                log.error("Cannot load properties file");
-                return false;
+                File file = new File(propertiesFilePath);
+                try {
+                    in = new FileInputStream(file);
+                    loadProperties(in);
+                    loaded = true;
+                } catch (FileNotFoundException e) {
+                    log.error("Cannot find properties file {}", propertiesFilePath);
+                    return false;
+                }
             }
-        } else {
-            File file = new File(propertiesFilePath);
-            try {
-                in = new FileInputStream(file);
-                loadProperties(in);
-                loaded = true;
-            } catch (FileNotFoundException e) {
-                log.error("Cannot find properties file {}", propertiesFilePath);
-                return false;
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    log.error("cannot close input stream", e);
+                }
             }
         }
         if(userAuthEndpoint == null) {

@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.oauth20;
 
@@ -40,7 +40,7 @@ import com.mongodb.MongoClient;
  *
  * @author Rossitsa Borissova
  */
-public class MongoDBManager implements DBManager{
+public class MongoDBManager implements DBManager {
 
     protected static MongoClient mongoClient;
     protected static DB db;
@@ -70,6 +70,7 @@ public class MongoDBManager implements DBManager{
 
     /**
      * Stores client credentials in the DB.
+     *
      * @param clientCreds
      */
     public void storeClientCredentials(ClientCredentials clientCreds) {
@@ -82,6 +83,7 @@ public class MongoDBManager implements DBManager{
 
     /**
      * Loads a client credentials from DB by passed clientId.
+     *
      * @param clientId client id
      * @return client credential object that will be stored in the DB
      */
@@ -89,7 +91,7 @@ public class MongoDBManager implements DBManager{
     @Override
     public ClientCredentials findClientCredentials(String clientId) {
         BSONObject result = (BSONObject) findObjectById(clientId, ID_NAME, CLIENTS_COLLECTION_NAME);
-        if(result != null){
+        if (result != null) {
             Map<String, Object> mapLoaded = result.toMap();
             ClientCredentials loadedCreds = ClientCredentials.loadFromMap(mapLoaded);
             log.debug(loadedCreds.getName());
@@ -101,6 +103,7 @@ public class MongoDBManager implements DBManager{
 
     /**
      * Stores auth codes in the DB.
+     *
      * @param authCode that will be stored in the DB
      */
     public void storeAuthCode(AuthCode authCode) {
@@ -113,6 +116,7 @@ public class MongoDBManager implements DBManager{
 
     /**
      * Loads an auth code record from DB by passed authCode with status valid=true.
+     *
      * @param authCode authCode
      * @return auth code object
      */
@@ -124,7 +128,7 @@ public class MongoDBManager implements DBManager{
         keys.put(REDIRECT_URI_NAME, redirectUri);
         keys.put(VALID_NAME, true);
         DBCursor list = db.getCollection(AUTH_CODE_COLLECTION_NAME).find(new BasicDBObject(keys));
-        while(list.hasNext()) {
+        while (list.hasNext()) {
             DBObject result = list.next();
             Map<String, Object> mapLoaded = result.toMap();
             AuthCode loadedAuthCode = AuthCode.loadFromMap(mapLoaded);
@@ -138,6 +142,7 @@ public class MongoDBManager implements DBManager{
 
     /**
      * Stores access tokens in the DB.
+     *
      * @param authCode that will be stored in the DB
      */
     public void storeAccessToken(AccessToken accessToken) {
@@ -150,6 +155,7 @@ public class MongoDBManager implements DBManager{
 
     /**
      * Loads an access token record from DB by passed accessToken
+     *
      * @param accessToken access token
      * @return access token object
      */
@@ -159,16 +165,16 @@ public class MongoDBManager implements DBManager{
     public AccessToken findAccessToken(String accessToken) {
         BasicDBObject dbObject = new BasicDBObject();
         dbObject.put(ACCESS_TOKEN_ID_NAME, accessToken);
-        //dbObject.put(CLIENTS_ID_NAME, clientId);
+        // dbObject.put(CLIENTS_ID_NAME, clientId);
         dbObject.put(VALID_NAME, true);
         DBCollection coll = db.getCollection(ACCESS_TOKEN_COLLECTION_NAME);
         List<DBObject> list = coll.find(dbObject).toArray();
-        if(list.size() > 1) {
-            //throw exception
+        if (list.size() > 1) {
+            // throw exception
             log.warn("Several access tokens found");
             return null;
         }
-        if(list.size() > 0) {
+        if (list.size() > 0) {
             Map<String, Object> mapLoaded = list.get(0).toMap();
             return AccessToken.loadFromMap(mapLoaded);
         } else {
@@ -179,6 +185,7 @@ public class MongoDBManager implements DBManager{
 
     /**
      * Loads an access token record from DB by passed refreshToken
+     *
      * @param refreshToken refresh token
      * @param clientId client id
      * @return access token object
@@ -192,7 +199,7 @@ public class MongoDBManager implements DBManager{
         dbObject.put(VALID_NAME, true);
         DBCollection coll = db.getCollection(ACCESS_TOKEN_COLLECTION_NAME);
         List<DBObject> list = coll.find(dbObject).toArray();
-        if(list != null && list.size() == 1){
+        if (list != null && list.size() == 1) {
             Map<String, Object> mapLoaded = list.get(0).toMap();
             AccessToken loadedAccessToken = AccessToken.loadFromMap(mapLoaded);
             log.debug(loadedAccessToken.getToken());
@@ -204,15 +211,15 @@ public class MongoDBManager implements DBManager{
 
     @Override
     public void updateAccessTokenValidStatus(String accessToken, boolean valid) {
-          BasicDBObject dbObject = new BasicDBObject();
-          dbObject.put("token", accessToken);
-          DBCollection coll = db.getCollection(ACCESS_TOKEN_COLLECTION_NAME);
-          List<DBObject> list = coll.find(dbObject).toArray();
-          if(list.size() > 0) {
-              DBObject newObject = list.get(0);
-              newObject.put("valid", valid);
-              coll.findAndModify(dbObject, newObject);
-          }
+        BasicDBObject dbObject = new BasicDBObject();
+        dbObject.put("token", accessToken);
+        DBCollection coll = db.getCollection(ACCESS_TOKEN_COLLECTION_NAME);
+        List<DBObject> list = coll.find(dbObject).toArray();
+        if (list.size() > 0) {
+            DBObject newObject = list.get(0);
+            newObject.put("valid", valid);
+            coll.findAndModify(dbObject, newObject);
+        }
     }
 
     public void updateAuthCodeValidStatus(String authCode, boolean valid) {
@@ -220,7 +227,7 @@ public class MongoDBManager implements DBManager{
         dbObject.put("code", authCode);
         DBCollection coll = db.getCollection(AUTH_CODE_COLLECTION_NAME);
         List<DBObject> list = coll.find(dbObject).toArray();
-        if(list.size() > 0) {
+        if (list.size() > 0) {
             DBObject newObject = list.get(0);
             newObject.put("valid", valid);
             coll.findAndModify(dbObject, newObject);
@@ -229,6 +236,7 @@ public class MongoDBManager implements DBManager{
 
     /**
      * Validates passed clientId and clientSecret.
+     *
      * @param clientId client id of the client
      * @param clientSecret client secret of the client
      * @return true when such a client exists, otherwise false
@@ -238,15 +246,14 @@ public class MongoDBManager implements DBManager{
         DBCollection coll = db.getCollection(CLIENTS_COLLECTION_NAME);
         BasicDBObject query = new BasicDBObject(ID_NAME, clientId);
         BSONObject result = (BSONObject) getObject(coll, query);
-        if(result != null){
+        if (result != null) {
             return result.get("secret").equals(clientSecret);
         }
         return false;
     }
 
     /**
-     * Stores OAuth20 scope.
-     * If the scope already exists, updates it.
+     * Stores OAuth20 scope. If the scope already exists, updates it.
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -266,7 +273,7 @@ public class MongoDBManager implements DBManager{
             DBCollection coll = db.getCollection(SCOPE_COLLECTION_NAME);
             coll.update(query, newObject, true, false);
             stored = true;
-        } catch(IOException e) {
+        } catch (IOException e) {
             log.error("cannot store scope {}", scope.getScope(), e);
         } catch (JSONException e) {
             log.error("cannot store scope {}", scope.getScope(), e);
@@ -283,7 +290,7 @@ public class MongoDBManager implements DBManager{
         List<Scope> list = new ArrayList<Scope>();
         DBCollection coll = db.getCollection(SCOPE_COLLECTION_NAME);
         List<DBObject> result = coll.find().toArray();
-        for(DBObject obj : result) {
+        for (DBObject obj : result) {
             Map<String, Object> mapLoaded = obj.toMap();
             Scope scope = Scope.loadFromMap(mapLoaded);
             list.add(scope);
@@ -304,7 +311,7 @@ public class MongoDBManager implements DBManager{
     @SuppressWarnings("unchecked")
     protected void storeObject(Object object, String collectionName) throws IOException {
         JSONObject json = new JSONObject(object);
-        if(!json.isNull("id")) {
+        if (!json.isNull("id")) {
             constructDbId(json);
         } else {
             json.remove("id");
@@ -343,7 +350,7 @@ public class MongoDBManager implements DBManager{
                 log.debug("found: " + result);
             }
         } finally {
-            if(cursor != null) {
+            if (cursor != null) {
                 cursor.close();
             }
         }

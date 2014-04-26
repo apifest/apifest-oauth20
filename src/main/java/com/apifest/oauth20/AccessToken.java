@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.oauth20;
 
@@ -31,7 +31,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  *
  * @author Rossitsa Borissova
  */
-@JsonPropertyOrder({"access_token","refresh_token","token_type","expires_in"})
+@JsonPropertyOrder({ "access_token", "refresh_token", "token_type", "expires_in" })
 @JsonSerialize(include = Inclusion.NON_NULL)
 public class AccessToken implements Serializable {
 
@@ -73,6 +73,7 @@ public class AccessToken implements Serializable {
 
     /**
      * Creates access token along with its refresh token.
+     *
      * @param tokenType
      * @param expiresIn
      * @param scope
@@ -82,17 +83,17 @@ public class AccessToken implements Serializable {
     }
 
     /**
-     * Creates access token.
-     * Used for generation of client_credentials type tokens with not refreshToken.
+     * Creates access token. Used for generation of client_credentials type tokens with not refreshToken.
+     *
      * @param tokenType
      * @param expiresIn
      * @param scope
      * @param createRefreshToken
      */
     public AccessToken(String tokenType, String expiresIn, String scope, boolean createRefreshToken) {
-        this.token = RandomGenerator.generateCharsDigitsString(ACCESS_TOKEN_LENGTH);
-        if(createRefreshToken) {
-            this.refreshToken = RandomGenerator.generateCharsDigitsString(ACCESS_TOKEN_LENGTH);
+        this.token = RandomGenerator.generateRandomString();
+        if (createRefreshToken) {
+            this.refreshToken = RandomGenerator.generateRandomString();
         }
         this.expiresIn = expiresIn;
         this.type = tokenType;
@@ -194,6 +195,7 @@ public class AccessToken implements Serializable {
         accessToken.created = (Long) map.get("created");
         return accessToken;
     }
+
     public static AccessToken loadFromStringMap(Map<String, String> map) {
         AccessToken accessToken = new AccessToken();
         accessToken.token = map.get("token");
@@ -210,9 +212,10 @@ public class AccessToken implements Serializable {
     }
 
     public boolean tokenExpired() {
-        Long expiresIn = Long.valueOf(getExpiresIn())*1000;//expires_in is in seconds
+        // expires_in is in seconds
+        Long expiresInSec = Long.valueOf(getExpiresIn()) * 1000;
         Long currentTime = System.currentTimeMillis();
-        if(expiresIn + getCreated() < currentTime) {
+        if (expiresInSec + getCreated() < currentTime) {
             return true;
         }
         return false;

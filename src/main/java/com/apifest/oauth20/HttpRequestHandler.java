@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.oauth20;
 
@@ -66,10 +66,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
         final Channel channel = ctx.getChannel();
         Object message = e.getMessage();
-        if(message instanceof HttpRequest) {
+        if (message instanceof HttpRequest) {
             HttpRequest req = (HttpRequest) message;
             String content = new String(req.getContent().array());
-            log.debug("content: {}" , content);
+            log.debug("content: {}", content);
 
             HttpMethod method = req.getMethod();
             String rawUri = req.getUri();
@@ -81,23 +81,23 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             }
 
             HttpResponse response = null;
-            if(OAUTH_REGISTER_CLIENT_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
+            if (OAUTH_REGISTER_CLIENT_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleRegister(req);
-            } else if(AUTH_CODE_GENERATE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
+            } else if (AUTH_CODE_GENERATE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleAuthorize(req);
-            } else if(ACCESS_TOKEN_GENERATE_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
+            } else if (ACCESS_TOKEN_GENERATE_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
                 response = handleToken(req);
-            } else if(ACCESS_TOKEN_VALIDATE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
+            } else if (ACCESS_TOKEN_VALIDATE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleTokenValidate(req);
-            } else if(APPLICATION_INFO_URI.equals(rawUri) && method.equals(HttpMethod.GET)){
+            } else if (APPLICATION_INFO_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleApplicationInfo(req);
-            } else if(ACCESS_TOKEN_REVOKE_URI.equals(rawUri) && method.equals(HttpMethod.POST)){
+            } else if (ACCESS_TOKEN_REVOKE_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
                 response = handleTokenRevoke(req);
-            } else if(OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.POST)){
+            } else if (OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
                 response = handleRegisterScope(req);
-            } else if(OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.GET)){
+            } else if (OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleGetScopes(req);
-            }else {
+            } else {
                 response = Response.createNotFoundResponse();
             }
             ChannelFuture future = channel.write(response);
@@ -116,7 +116,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         String clientId = QueryParameter.getFirstElement(params, "client_id");
         boolean valid = auth.isValidClientId(clientId);
         log.debug("client_id valid:" + valid);
-        if(valid) {
+        if (valid) {
             String appName = auth.getApplicationName(clientId);
             JSONObject json = new JSONObject();
             try {
@@ -139,7 +139,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         // TODO: Check clientId?
         AccessToken token = auth.isValidToken(QueryParameter.getFirstElement(params, "token"));
         log.debug("token valid:" + token);
-        if(token != null) {
+        if (token != null) {
             JSONObject json = new JSONObject(token);
             log.debug(json.toString());
             response = Response.createOkResponse(json.toString());
@@ -153,23 +153,23 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         HttpResponse response = null;
         try {
             AccessToken accessToken = auth.issueAccessToken(req);
-            if(accessToken != null) {
+            if (accessToken != null) {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonString = mapper.writeValueAsString(accessToken);
                 log.debug("access token:" + jsonString);
                 response = Response.createOkResponse(jsonString);
                 accessTokensLog.debug("token {}", jsonString);
             }
-        } catch(OAuthException ex) {
+        } catch (OAuthException ex) {
             response = Response.createOAuthExceptionResponse(ex);
         } catch (JsonGenerationException e1) {
-           log.error("error generating JSON, {}", e1);
+            log.error("error generating JSON, {}", e1);
         } catch (JsonMappingException e1) {
             log.error("error mapping JSON, {}", e1);
         } catch (IOException e1) {
             log.error("IO exception, {}", e1);
         }
-        if(response == null) {
+        if (response == null) {
             response = Response.createBadRequestResponse(Response.CANNOT_ISSUE_TOKEN);
         }
         return response;
@@ -203,16 +203,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             String jsonString = mapper.writeValueAsString(creds);
             log.debug("credentials:" + jsonString);
             response = Response.createOkResponse(jsonString);
-        } catch(OAuthException ex) {
+        } catch (OAuthException ex) {
             response = Response.createOAuthExceptionResponse(ex);
         } catch (JsonGenerationException e1) {
-           log.error("error generating JSON, {}", e1);
+            log.error("error generating JSON, {}", e1);
         } catch (JsonMappingException e1) {
             log.error("error mapping JSON, {}", e1);
         } catch (IOException e1) {
             log.error("IO exception, {}", e1);
         }
-        if(response == null) {
+        if (response == null) {
             response = Response.createBadRequestResponse(Response.CANNOT_REGISTER_APP);
         }
         return response;

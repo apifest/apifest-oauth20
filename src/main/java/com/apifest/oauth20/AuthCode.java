@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.oauth20;
 
@@ -49,7 +49,8 @@ public class AuthCode {
     // Store time as long value
     private Long created;
 
-    public AuthCode(String code, String clientId, String redirectUri, String state, String scope, String type, String userId) {
+    public AuthCode(String code, String clientId, String redirectUri, String state, String scope,
+            String type, String userId) {
         this.code = code;
         this.clientId = clientId;
         this.redirectUri = redirectUri;
@@ -62,7 +63,7 @@ public class AuthCode {
     }
 
     private AuthCode() {
-        //used when loaded from Map/DB
+        // used when loaded from Map/DB
     }
 
     public String getCode() {
@@ -139,6 +140,7 @@ public class AuthCode {
 
     /**
      * Generates authorization code.
+     *
      * @return authorization code
      */
     public static String generate() {
@@ -147,7 +149,9 @@ public class AuthCode {
 
     /**
      * Used to create an instance when a record from DB is loaded.
-     * @param map Map that contains the record info
+     *
+     * @param map
+     *            Map that contains the record info
      * @return instance of AuthCode
      */
     public static AuthCode loadFromMap(Map<String, Object> map) {
@@ -180,4 +184,3 @@ public class AuthCode {
         return authCode;
     }
 }
-

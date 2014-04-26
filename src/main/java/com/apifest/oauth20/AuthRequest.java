@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.oauth20;
 
@@ -50,7 +50,7 @@ public class AuthRequest {
     private String userId;
 
     public AuthRequest(HttpRequest request) {
-        if(request.getUri() != null) {
+        if (request.getUri() != null) {
             QueryStringDecoder dec = new QueryStringDecoder(request.getUri());
             Map<String, List<String>> params = dec.getParameters();
             this.clientId = QueryParameter.getFirstElement(params, CLIENT_ID);
@@ -91,10 +91,11 @@ public class AuthRequest {
     }
 
     public void validate() throws OAuthException {
-        if(!RESPONSE_TYPE_CODE.equals(responseType)) {
-            throw new OAuthException(Response.RESPONSE_TYPE_NOT_SUPPORTED, HttpResponseStatus.BAD_REQUEST);
+        if (!RESPONSE_TYPE_CODE.equals(responseType)) {
+            throw new OAuthException(Response.RESPONSE_TYPE_NOT_SUPPORTED,
+                    HttpResponseStatus.BAD_REQUEST);
         }
-        if(!isValidURI(redirectUri)){
+        if (!isValidURI(redirectUri)) {
             throw new OAuthException(Response.INVALID_REDIRECT_URI, HttpResponseStatus.BAD_REQUEST);
         }
     }
@@ -103,8 +104,7 @@ public class AuthRequest {
         try {
             new URL(uri);
             return true;
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             return false;
         }
     }

@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.oauth20;
 
@@ -77,10 +77,12 @@ public class HttpRequestHandlerTest {
     public void when_register_and_OAuth_exception_occurs_return_error() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=TestDemoApp&scope=basic");
+        given(req.getUri()).willReturn(
+                "http://example.com/oauth20/register?app_name=TestDemoApp&scope=basic");
         AuthorizationServer auth = mock(AuthorizationServer.class);
-        willThrow(new OAuthException(Response.APPNAME_OR_SCOPE_IS_NULL, HttpResponseStatus.BAD_REQUEST))
-            .given(auth).issueClientCredentials(req);
+        willThrow(
+                new OAuthException(Response.APPNAME_OR_SCOPE_IS_NULL,
+                        HttpResponseStatus.BAD_REQUEST)).given(auth).issueClientCredentials(req);
         handler.auth = auth;
 
         // WHEN
@@ -104,7 +106,8 @@ public class HttpRequestHandlerTest {
         HttpResponse response = handler.handleRegister(req);
 
         // THEN
-        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), Response.CANNOT_REGISTER_APP);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8),
+                Response.CANNOT_REGISTER_APP);
     }
 
     @Test
@@ -112,7 +115,8 @@ public class HttpRequestHandlerTest {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
         AuthorizationServer auth = mock(AuthorizationServer.class);
-        OAuthException ex = new OAuthException(Response.APPNAME_OR_SCOPE_IS_NULL, HttpResponseStatus.BAD_REQUEST);
+        OAuthException ex = new OAuthException(Response.APPNAME_OR_SCOPE_IS_NULL,
+                HttpResponseStatus.BAD_REQUEST);
         willThrow(ex).given(auth).issueClientCredentials(req);
         handler.auth = auth;
 
@@ -159,7 +163,8 @@ public class HttpRequestHandlerTest {
         HttpRequest req = mock(HttpRequest.class);
         OAuthException.log = mock(Logger.class);
         AuthorizationServer auth = mock(AuthorizationServer.class);
-        willThrow(new OAuthException("something wrong", HttpResponseStatus.BAD_REQUEST)).given(auth).revokeToken(req);
+        willThrow(new OAuthException("something wrong", HttpResponseStatus.BAD_REQUEST))
+                .given(auth).revokeToken(req);
         handler.auth = auth;
 
         // WHEN

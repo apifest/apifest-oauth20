@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.oauth20;
 
@@ -61,13 +61,13 @@ public class TokenRequest {
         String content = request.getContent().toString(CharsetUtil.UTF_8);
         List<NameValuePair> values = URLEncodedUtils.parse(content, Charset.forName("UTF-8"));
         Map<String, String> params = new HashMap<String, String>();
-        for(NameValuePair pair: values) {
+        for (NameValuePair pair : values) {
             params.put(pair.getName(), pair.getValue());
         }
         this.grantType = params.get(GRANT_TYPE);
         this.code = params.get(CODE);
         this.redirectUri = params.get(REDIRECT_URI);
-        //this.clientId = params.get(CLIENT_ID);
+        // this.clientId = params.get(CLIENT_ID);
         this.refreshToken = params.get(REFRESH_TOKEN);
         this.scope = params.get(SCOPE);
         this.username = params.get(USERNAME);
@@ -76,37 +76,46 @@ public class TokenRequest {
 
     public void validate() throws OAuthException {
         checkMandatoryParams();
-        if(!grantType.equals(AUTHORIZATION_CODE) && !grantType.equals(REFRESH_TOKEN) &&
-                !grantType.equals(CLIENT_CREDENTIALS) && !grantType.equals(PASSWORD)) {
-            throw new OAuthException(Response.GRANT_TYPE_NOT_SUPPORTED, HttpResponseStatus.BAD_REQUEST);
+        if (!grantType.equals(AUTHORIZATION_CODE) && !grantType.equals(REFRESH_TOKEN)
+                && !grantType.equals(CLIENT_CREDENTIALS) && !grantType.equals(PASSWORD)) {
+            throw new OAuthException(Response.GRANT_TYPE_NOT_SUPPORTED,
+                    HttpResponseStatus.BAD_REQUEST);
         }
-        if(grantType.equals(AUTHORIZATION_CODE)){
+        if (grantType.equals(AUTHORIZATION_CODE)) {
             if (code == null) {
-                throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CODE), HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CODE),
+                        HttpResponseStatus.BAD_REQUEST);
             }
-            if(redirectUri == null) {
-                throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, REDIRECT_URI), HttpResponseStatus.BAD_REQUEST);
+            if (redirectUri == null) {
+                throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING,
+                        REDIRECT_URI), HttpResponseStatus.BAD_REQUEST);
             }
         }
-        if(grantType.equals(REFRESH_TOKEN) && refreshToken == null) {
-            throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, REFRESH_TOKEN), HttpResponseStatus.BAD_REQUEST);
+        if (grantType.equals(REFRESH_TOKEN) && refreshToken == null) {
+            throw new OAuthException(
+                    String.format(Response.MANDATORY_PARAM_MISSING, REFRESH_TOKEN),
+                    HttpResponseStatus.BAD_REQUEST);
         }
-        if(grantType.equals(PASSWORD)) {
-            if(username == null){
-                throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, USERNAME), HttpResponseStatus.BAD_REQUEST);
+        if (grantType.equals(PASSWORD)) {
+            if (username == null) {
+                throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, USERNAME),
+                        HttpResponseStatus.BAD_REQUEST);
             }
-            if(password == null) {
-                throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, PASSWORD), HttpResponseStatus.BAD_REQUEST);
+            if (password == null) {
+                throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, PASSWORD),
+                        HttpResponseStatus.BAD_REQUEST);
             }
         }
     }
 
     protected void checkMandatoryParams() throws OAuthException {
-        if(clientId == null) {
-            throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CLIENT_ID), HttpResponseStatus.BAD_REQUEST);
+        if (clientId == null) {
+            throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CLIENT_ID),
+                    HttpResponseStatus.BAD_REQUEST);
         }
-        if(grantType == null) {
-            throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, GRANT_TYPE), HttpResponseStatus.BAD_REQUEST);
+        if (grantType == null) {
+            throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, GRANT_TYPE),
+                    HttpResponseStatus.BAD_REQUEST);
         }
     }
 
