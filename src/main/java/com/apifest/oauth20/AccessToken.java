@@ -37,8 +37,6 @@ public class AccessToken implements Serializable {
 
     private static final long serialVersionUID = 7155736126283397493L;
 
-    private static final int ACCESS_TOKEN_LENGTH = 64;
-
     @JsonProperty("access_token")
     private String token = "";
 

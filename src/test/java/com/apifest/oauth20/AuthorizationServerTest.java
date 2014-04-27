@@ -460,10 +460,10 @@ public class AuthorizationServerTest {
         given(authServer.db.findClientCredentials(clientId)).willReturn(creds);
 
         // WHEN
-        String result = authServer.getApplicationName(clientId);
+        ApplicationInfo result = authServer.getApplicationInfo(clientId);
 
         // THEN
-        assertEquals(result, appName);
+        assertEquals(result.getName(), appName);
     }
 
     @Test
@@ -472,7 +472,7 @@ public class AuthorizationServerTest {
         String clientId = "not_registered_client_id";
 
         // WHEN
-        String result = authServer.getApplicationName(clientId);
+        ApplicationInfo result = authServer.getApplicationInfo(clientId);
 
         // THEN
         assertNull(result);

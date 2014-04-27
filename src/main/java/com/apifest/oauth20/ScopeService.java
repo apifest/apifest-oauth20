@@ -18,6 +18,7 @@ package com.apifest.oauth20;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -135,12 +136,15 @@ public class ScopeService {
 
     public boolean scopeAllowed(String scope, String allowedScopes) {
         String [] allScopes = allowedScopes.split(COMMA);
-        for(String s : allScopes) {
-            if(s.equals(scope)) {
-                return true;
+        List<String> allowedList = Arrays.asList(allScopes);
+        String [] scopes = scope.split(COMMA);
+        int allowedCount = 0;
+        for(String s : scopes) {
+            if (allowedList.contains(s)) {
+                allowedCount++;
             }
         }
-        return false;
+        return (allowedCount == scopes.length);
     }
 
     protected HttpResponse getScopes(String clientId) {

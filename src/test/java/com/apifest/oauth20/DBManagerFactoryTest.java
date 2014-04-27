@@ -28,8 +28,7 @@ public class DBManagerFactoryTest {
     @Test
     public void when_no_oauth20_database_set_return_mongodb() throws Exception {
         // GIVEN
-        String path = getClass().getClassLoader().getResource("apifest-oauth-test.properties")
-                .getPath();
+        String path = getClass().getClassLoader().getResource("apifest-oauth-test.properties").getPath();
         System.setProperty("properties.file", path);
         OAuthServer.loadConfig();
 

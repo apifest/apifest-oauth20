@@ -196,4 +196,17 @@ public class ScopeServiceTest {
         // THEN
         assertFalse(allowed);
     }
+
+    @Test
+    public void when_scope_contains_two_scopes_check_all() throws Exception {
+        // GIVEN
+        String scope = "basic,extended";
+        String scopeList = "basic,extended";
+
+        // WHEN
+        boolean allowed = service.scopeAllowed(scope, scopeList);
+
+        // THEN
+        assertTrue(allowed);
+    }
 }

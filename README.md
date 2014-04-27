@@ -119,4 +119,5 @@ When the server starts, you will see:
 * **/oauth20/token** - issues access tokens
 * **/oauth20/token/validate** - validates access tokens
 * **/oauth20/token/revoke** - revokes access tokens
+* **/oauth20/scopes** - returns scope info - name, description and expires_in (GET method), creates scope (POST method)
 

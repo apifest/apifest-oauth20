@@ -117,15 +117,19 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         boolean valid = auth.isValidClientId(clientId);
         log.debug("client_id valid:" + valid);
         if (valid) {
-            String appName = auth.getApplicationName(clientId);
-            JSONObject json = new JSONObject();
+            ApplicationInfo appInfo = auth.getApplicationInfo(clientId);
+            ObjectMapper mapper = new ObjectMapper();
             try {
-                json.put("application_name", appName);
-            } catch (JSONException e) {
-                log.error("Cannot extract application name", e);
+                String json = mapper.writeValueAsString(appInfo);
+                log.debug(json);
+                response = Response.createOkResponse(json);
+            } catch (JsonGenerationException e) {
+                log.error("error get application info", e);
+            } catch (JsonMappingException e) {
+                log.error("error get application info", e);
+            } catch (IOException e) {
+                log.error("error get application info", e);
             }
-            log.debug(json.toString());
-            response = Response.createOkResponse(json.toString());
         } else {
             response = Response.createBadRequestResponse(Response.INVALID_CLIENT_ID);
         }
@@ -163,11 +167,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         } catch (OAuthException ex) {
             response = Response.createOAuthExceptionResponse(ex);
         } catch (JsonGenerationException e1) {
-            log.error("error generating JSON, {}", e1);
+            log.error("error handle token", e1);
         } catch (JsonMappingException e1) {
-            log.error("error mapping JSON, {}", e1);
+            log.error("error handle token", e1);
         } catch (IOException e1) {
-            log.error("IO exception, {}", e1);
+            log.error("error handle token", e1);
         }
         if (response == null) {
             response = Response.createBadRequestResponse(Response.CANNOT_ISSUE_TOKEN);
@@ -190,7 +194,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         } catch (OAuthException ex) {
             response = Response.createOAuthExceptionResponse(ex);
         } catch (JSONException e) {
-            log.debug("problen JSON parsing", e);
+            log.debug("error handle authorize", e);
         }
         return response;
     }
@@ -206,11 +210,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         } catch (OAuthException ex) {
             response = Response.createOAuthExceptionResponse(ex);
         } catch (JsonGenerationException e1) {
-            log.error("error generating JSON, {}", e1);
+            log.error("error handle register", e1);
         } catch (JsonMappingException e1) {
-            log.error("error mapping JSON, {}", e1);
+            log.error("error handle register", e1);
         } catch (IOException e1) {
-            log.error("IO exception, {}", e1);
+            log.error("error handle register", e1);
         }
         if (response == null) {
             response = Response.createBadRequestResponse(Response.CANNOT_REGISTER_APP);

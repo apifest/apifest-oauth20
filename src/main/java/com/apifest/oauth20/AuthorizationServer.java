@@ -18,6 +18,7 @@ package com.apifest.oauth20;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -250,13 +251,17 @@ public class AuthorizationServer {
         return null;
     }
 
-    public String getApplicationName(String clientId) {
-        String appName = null;
+    public ApplicationInfo getApplicationInfo(String clientId) {
+        ApplicationInfo appInfo = null;
         ClientCredentials creds = db.findClientCredentials(clientId);
         if (creds != null) {
-            appName = creds.getName();
+            appInfo = new ApplicationInfo();
+            appInfo.setName(creds.getName());
+            appInfo.setDescription(creds.getDescr());
+            appInfo.setScope(creds.getScope());
+            appInfo.setRegistered(new Date(creds.getCreated()));
         }
-        return appName;
+        return appInfo;
     }
 
     protected String generateCode() {
