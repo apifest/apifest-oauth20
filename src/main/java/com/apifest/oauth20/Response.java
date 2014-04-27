@@ -60,6 +60,7 @@ public final class Response {
         if(message != null) {
             ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
             response.setContent(buf);
+            response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         }
         response.headers().set(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
         response.headers().set(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
@@ -71,6 +72,7 @@ public final class Response {
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(NOT_FOUND_CONTENT.getBytes());
         response.setContent(buf);
+        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         response.headers().set(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
         response.headers().set(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
         return response;
@@ -81,6 +83,7 @@ public final class Response {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(jsonString.getBytes());
         response.setContent(buf);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
+        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         response.headers().set(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
         response.headers().set(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
         return response;
@@ -91,6 +94,7 @@ public final class Response {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(ex.getMessage().getBytes());
         response.setContent(buf);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
+        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         response.headers().set(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
         response.headers().set(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
         return response;
@@ -100,6 +104,7 @@ public final class Response {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(Response.INVALID_ACCESS_TOKEN.getBytes());
         response.setContent(buf);
+        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         response.headers().set(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
         response.headers().set(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
         return response;
