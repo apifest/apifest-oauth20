@@ -147,6 +147,46 @@ public class ScopeService {
         return (allowedCount == scopes.length);
     }
 
+    /**
+     * Returns value for expires_in by given scope and token type.
+     *
+     * @param scope scope/s for which expires in will be returned
+     * @param tokenGrantType client_credentials or password type
+     * @return minimum value of given scope/s expires_in
+     */
+    public int getExpiresIn(String tokenGrantType, String scope) {
+        int expiresIn = Integer.MAX_VALUE;
+        List<Scope> scopes = loadScopes(scope);
+        boolean ccGrantType = TokenRequest.CLIENT_CREDENTIALS.equals(tokenGrantType);
+        if (ccGrantType) {
+            for (Scope s : scopes) {
+                if (s.getCcExpiresIn() < expiresIn) {
+                    expiresIn = s.getCcExpiresIn();
+                }
+            }
+        } else {
+            for (Scope s : scopes) {
+                if (s.getPassExpiresIn() < expiresIn) {
+                    expiresIn = s.getPassExpiresIn();
+                }
+            }
+        }
+        if (scopes.size() == 0 || expiresIn == Integer.MAX_VALUE) {
+            expiresIn = (ccGrantType) ? OAuthServer.DEFAULT_CC_EXPIRES_IN : OAuthServer.DEFAULT_PASSWORD_EXPIRES_IN;
+        }
+        return expiresIn;
+    }
+
+    protected List<Scope> loadScopes(String scope) {
+        String [] scopes = scope.split(COMMA);
+        List<Scope> loadedScopes = new ArrayList<Scope>();
+        DBManager db = DBManagerFactory.getInstance();
+        for (String name : scopes) {
+            loadedScopes.add(db.findScope(name));
+        }
+        return loadedScopes;
+    }
+
     protected HttpResponse getScopes(String clientId) {
         ClientCredentials credentials = DBManagerFactory.getInstance().findClientCredentials(clientId);
         String jsonString;

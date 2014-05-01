@@ -38,8 +38,6 @@ Here is a template of apifest-oauth.properties file:
 ```
 oauth20.port=
 oauth20.host=
-expires_in.client_credentials=
-expires_in.password=
 db_host=
 user.authenticate.endpoint=
 user_id.name=
@@ -80,14 +78,6 @@ If Redis is used, define Redis sentinels list(as comma-separated list) in the fo
 You can define the name of Redis master in the following property in apifest-oauth.properties file:
 
 ***redis.master***
-
-* **Setup expires in times**
-
-Defines different access tokens types expires_in (in seconds) in the following properties:
-
-***expires_in.client_credentials*** - for client_credentials access tokens
-
-***expires_in.password*** - for password access tokens
 
 * **Setup authenticate endpoint in your API**
 

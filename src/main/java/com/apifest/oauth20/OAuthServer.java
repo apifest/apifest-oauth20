@@ -54,10 +54,10 @@ public final class OAuthServer {
     private static String redisMaster;
 
     //expires_in in sec for grant type password
-    private static int expiresInPassword = 900;
+    public static final int DEFAULT_PASSWORD_EXPIRES_IN = 900;
 
     //expires_in in sec for grant type client_credentials
-    private static int expiresInClientCredentials = 1800;
+    public static final int DEFAULT_CC_EXPIRES_IN = 1800;
 
     private static Logger log = LoggerFactory.getLogger(OAuthServer.class);
 
@@ -153,31 +153,9 @@ public final class OAuthServer {
             if(dbHost == null || dbHost.length() == 0) {
                 dbHost = "localhost";
             }
-            setExpiresInValues(props);
             setHostAndPort((String) props.get("oauth20.host"), (String) props.get("oauth20.port"));
         } catch (IOException e) {
             log.error("Cannot load properties file", e);
-        }
-    }
-
-    private static void setExpiresInValues(Properties props) {
-        String expiresInCC = props.getProperty("expires_in.client_credentials");
-        String expiresInPass = props.getProperty("expires_in.password");
-        try {
-            if(expiresInCC != null) {
-                expiresInClientCredentials = Integer.parseInt(expiresInCC);
-            }
-        } catch(NumberFormatException e){
-            log.warn("expires_in {} for token type client credentials cannot be parsed to int, set default value {}",
-                    expiresInCC, expiresInClientCredentials);
-        }
-        try {
-            if(expiresInPass != null) {
-                expiresInPassword = Integer.parseInt(expiresInPass);
-            }
-        } catch(NumberFormatException e) {
-            log.warn("expires_in {} for token type password cannot be parsed to int, set default value {}",
-                    expiresInPass, expiresInPassword);
         }
     }
 
@@ -214,14 +192,6 @@ public final class OAuthServer {
 
     public static String getUserIdJsonName (){
         return userIdJsonName;
-    }
-
-    public static int getExpiresInPassword() {
-        return expiresInPassword;
-    }
-
-    public static int getExpiresInClientCredentials() {
-        return expiresInClientCredentials;
     }
 
     public static String getDbHost() {

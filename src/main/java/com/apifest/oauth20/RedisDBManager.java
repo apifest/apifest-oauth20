@@ -198,7 +198,8 @@ public class RedisDBManager implements DBManager {
         Map<String, String> scopeMap = new HashMap<String, String>();
         scopeMap.put("id", scope.getScope());
         scopeMap.put(Scope.DESCRIPTION_FIELD, scope.getDescription());
-        scopeMap.put(Scope.EXPIRES_IN_FIELD, String.valueOf(scope.getExpiresIn()));
+        scopeMap.put(Scope.CC_EXPIRES_IN_FIELD, String.valueOf(scope.getCcExpiresIn()));
+        scopeMap.put(Scope.PASS_EXPIRES_IN_FIELD, String.valueOf(scope.getPassExpiresIn()));
         Jedis jedis = pool.getResource();
         jedis.hmset("sc:" + scope.getScope(), scopeMap);
         return true;

@@ -26,12 +26,13 @@ import org.codehaus.jackson.annotate.JsonPropertyOrder;
  *
  * @author Rossitsa Borissova
  */
-@JsonPropertyOrder({ "name", "description", "expires_in" })
+@JsonPropertyOrder({ "name", "description", "cc_expires_in", "pass_expires_in"})
 public class Scope {
 
     static final String SCOPE_FIELD = "scope";
     static final String DESCRIPTION_FIELD = "description";
-    static final String EXPIRES_IN_FIELD = "expiresIn";
+    static final String CC_EXPIRES_IN_FIELD = "ccExpiresIn";
+    static final String PASS_EXPIRES_IN_FIELD = "passExpiresIn";
 
     @JsonProperty("scope")
     private String scope;
@@ -39,8 +40,11 @@ public class Scope {
     @JsonProperty("description")
     private String description;
 
-    @JsonProperty("expires_in")
-    private Integer expiresIn;
+    @JsonProperty("cc_expires_in")
+    private Integer ccExpiresIn;
+
+    @JsonProperty("pass_expires_in")
+    private Integer passExpiresIn;
 
     public String getScope() {
         return scope;
@@ -58,19 +62,28 @@ public class Scope {
         this.description = description;
     }
 
-    public Integer getExpiresIn() {
-        return expiresIn;
+    public Integer getCcExpiresIn() {
+        return ccExpiresIn;
     }
 
-    public void setExpiresIn(int expiresIn) {
-        this.expiresIn = expiresIn;
+    public void setCcExpiresIn(Integer ccExpiresIn) {
+        this.ccExpiresIn = ccExpiresIn;
+    }
+
+    public Integer getPassExpiresIn() {
+        return passExpiresIn;
+    }
+
+    public void setPassExpiresIn(int passExpiresIn) {
+        this.passExpiresIn = passExpiresIn;
     }
 
     public static Scope loadFromMap(Map<String, Object> map) {
         Scope scope = new Scope();
         scope.scope = (String) map.get("_id");
         scope.description = (String) map.get(DESCRIPTION_FIELD);
-        scope.expiresIn = (Integer) map.get(EXPIRES_IN_FIELD);
+        scope.ccExpiresIn = (Integer) map.get(CC_EXPIRES_IN_FIELD);
+        scope.passExpiresIn = (Integer) map.get(PASS_EXPIRES_IN_FIELD);
         return scope;
     }
 
@@ -78,13 +91,16 @@ public class Scope {
         Scope scope = new Scope();
         scope.scope = map.get("id");
         scope.description = map.get(DESCRIPTION_FIELD);
-        scope.expiresIn = Integer.valueOf(map.get(EXPIRES_IN_FIELD));
+        scope.ccExpiresIn = Integer.valueOf(map.get(CC_EXPIRES_IN_FIELD));
+        scope.passExpiresIn = Integer.valueOf(map.get(PASS_EXPIRES_IN_FIELD));
         return scope;
     }
 
     public boolean validate() {
-        boolean scopeValid = (scope == null || scope.length() <= 2);
-        if (scopeValid || description == null || (expiresIn == null || expiresIn <= 0)) {
+        boolean validScope = scope != null && scope.length() >= 2;
+        boolean validCCExpiresIn = ccExpiresIn != null && ccExpiresIn > 0;
+        boolean validPassExpiresIn = passExpiresIn != null && passExpiresIn > 0;
+        if (!validScope || description == null || !validCCExpiresIn || !validPassExpiresIn) {
             return false;
         }
         return true;

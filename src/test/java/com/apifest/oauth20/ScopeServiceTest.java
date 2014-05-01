@@ -17,15 +17,13 @@
 package com.apifest.oauth20;
 
 import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.testng.annotations.BeforeMethod;
@@ -208,5 +206,123 @@ public class ScopeServiceTest {
 
         // THEN
         assertTrue(allowed);
+    }
+
+    @Test
+    public void when_scope_with_CC_expires_in_900_return_900() throws Exception {
+        // GIVEN
+        String scopeName = "basic";
+        Scope scope = new Scope();
+        scope.setScope(scopeName);
+        scope.setCcExpiresIn(900);
+        scope.setPassExpiresIn(300);
+        List<Scope> loadedScope = new ArrayList<Scope>();
+        loadedScope.add(scope);
+        willReturn(loadedScope).given(service).loadScopes(scopeName);
+
+        // WHEN
+        int result = service.getExpiresIn("client_credentials", scopeName);
+
+        // THEN
+        assertEquals(result, 900);
+    }
+
+    @Test
+    public void when_scope_with_PASS_expires_in_300_return_300() throws Exception {
+        // GIVEN
+        String scopeName = "basic";
+        Scope scope = new Scope();
+        scope.setScope(scopeName);
+        scope.setCcExpiresIn(900);
+        scope.setPassExpiresIn(300);
+        List<Scope> loadedScope = new ArrayList<Scope>();
+        loadedScope.add(scope);
+        willReturn(loadedScope).given(service).loadScopes(scopeName);
+
+        // WHEN
+        int result = service.getExpiresIn("password", scopeName);
+
+        // THEN
+        assertEquals(result, 300);
+    }
+
+    @Test
+    public void when_several_scopes_and_pass_return_min_pass_expires_in() throws Exception {
+        // GIVEN
+        String scopeName = "basic,extended";
+        List<Scope> loadedScope = new ArrayList<Scope>();
+
+        Scope scope1 = new Scope();
+        scope1.setScope("basic");
+        scope1.setCcExpiresIn(900);
+        scope1.setPassExpiresIn(300);
+        loadedScope.add(scope1);
+
+        Scope scope2 = new Scope();
+        scope2.setScope("extended");
+        scope2.setCcExpiresIn(600);
+        scope2.setPassExpiresIn(180);
+        loadedScope.add(scope2);
+
+        willReturn(loadedScope).given(service).loadScopes(scopeName);
+
+        // WHEN
+        int result = service.getExpiresIn("password", scopeName);
+
+        // THEN
+        assertEquals(result, 180);
+    }
+
+    @Test
+    public void when_several_scopes_and_CC_return_min_CC_expires_in() throws Exception {
+        // GIVEN
+        String scopeName = "basic,extended";
+        List<Scope> loadedScope = new ArrayList<Scope>();
+
+        Scope scope1 = new Scope();
+        scope1.setScope("basic");
+        scope1.setCcExpiresIn(900);
+        scope1.setPassExpiresIn(300);
+        loadedScope.add(scope1);
+
+        Scope scope2 = new Scope();
+        scope2.setScope("extended");
+        scope2.setCcExpiresIn(600);
+        scope2.setPassExpiresIn(180);
+        loadedScope.add(scope2);
+
+        willReturn(loadedScope).given(service).loadScopes(scopeName);
+
+        // WHEN
+        int result = service.getExpiresIn("client_credentials", scopeName);
+
+        // THEN
+        assertEquals(result, 600);
+    }
+
+    @Test
+    public void when_no_loaded_scopes_and_CC_set_default_CC_expires_in() throws Exception {
+        // GIVEN
+        String scopeName = "not_existing";
+        willReturn(Collections.EMPTY_LIST).given(service).loadScopes(scopeName);
+
+        // WHEN
+        int result = service.getExpiresIn("client_credentials", scopeName);
+
+        // THEN
+        assertEquals(result, OAuthServer.DEFAULT_CC_EXPIRES_IN);
+    }
+
+    @Test
+    public void when_no_loaded_scopes_and_PASS_set_default_PASS_expires_in() throws Exception {
+        // GIVEN
+        String scopeName = "not_existing";
+        willReturn(Collections.EMPTY_LIST).given(service).loadScopes(scopeName);
+
+        // WHEN
+        int result = service.getExpiresIn("password", scopeName);
+
+        // THEN
+        assertEquals(result, OAuthServer.DEFAULT_PASSWORD_EXPIRES_IN);
     }
 }

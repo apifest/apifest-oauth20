@@ -74,8 +74,7 @@ public class AuthorizationServerTest {
     public void when_response_type_not_supported_return_error_unsupported_response_type() {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        willReturn("http://localhost/oauth20/authorize?client_id=1232&response_type=no").given(req)
-                .getUri();
+        willReturn("http://localhost/oauth20/authorize?client_id=1232&response_type=no").given(req).getUri();
         willReturn(true).given(authServer).isValidClientId("1232");
 
         // WHEN
@@ -690,8 +689,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
-        willThrow(new IOException("cannot connect")).given(authServer).authenticateUser("rossi",
-                "test");
+        willThrow(new IOException("cannot connect")).given(authServer).authenticateUser("rossi", "test");
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
 
         // WHEN
@@ -722,7 +720,7 @@ public class AuthorizationServerTest {
         authServer.issueAccessToken(req);
 
         // THEN
-        verify(authServer).getExpiresIn(TokenRequest.PASSWORD);
+        verify(authServer).getExpiresIn(TokenRequest.PASSWORD, "basic");
     }
 
     @Test
@@ -736,14 +734,14 @@ public class AuthorizationServerTest {
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+        willReturn(1800).given(authServer.scopeService).getExpiresIn(TokenRequest.CLIENT_CREDENTIALS, "basic");
 
         // WHEN
         authServer.issueAccessToken(req);
 
         // THEN
-        verify(authServer).getExpiresIn(TokenRequest.CLIENT_CREDENTIALS);
-        assertEquals(authServer.getExpiresIn(TokenRequest.CLIENT_CREDENTIALS), "1800"); // default value for
-                                                                                        // client_credentials token
+        verify(authServer).getExpiresIn(TokenRequest.CLIENT_CREDENTIALS, "basic");
+        assertEquals(authServer.getExpiresIn(TokenRequest.CLIENT_CREDENTIALS, "basic"), "1800");
     }
 
     @Test
@@ -758,20 +756,19 @@ public class AuthorizationServerTest {
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         AccessToken accessToken = mock(AccessToken.class);
-        willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken)
-                .getToken();
-        willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken,
-                clientId);
-        willDoNothing().given(authServer.db)
-                .updateAccessTokenValidStatus(anyString(), anyBoolean());
+        willReturn("basic").given(accessToken).getScope();
+        willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
+        willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken, clientId);
+        willDoNothing().given(authServer.db).updateAccessTokenValidStatus(anyString(), anyBoolean());
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
+        willReturn(900).given(authServer.scopeService).getExpiresIn(TokenRequest.PASSWORD, "basic");
 
         // WHEN
         authServer.issueAccessToken(req);
 
         // THEN
-        verify(authServer).getExpiresIn(TokenRequest.PASSWORD);
-        assertEquals(authServer.getExpiresIn(TokenRequest.PASSWORD), "900"); // default value for password token
+        verify(authServer).getExpiresIn(TokenRequest.PASSWORD, "basic");
+        assertEquals(authServer.getExpiresIn(TokenRequest.PASSWORD, "basic"), "900");
     }
 
     @Test
@@ -909,12 +906,10 @@ public class AuthorizationServerTest {
     public void when_issue_auth_code_check_scope_valid() throws Exception {
         HttpRequest req = mock(HttpRequest.class);
         String clientId = "203598599234220";
-        given(authServer.db.findClientCredentials(clientId)).willReturn(
-                mock(ClientCredentials.class));
-        given(req.getUri())
-                .willReturn(
-                        "http://example.com/oauth20/authorize?redirect_uri=http%3A%2F%2Fexample.com&response_type=code&client_id="
-                                + clientId);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(mock(ClientCredentials.class));
+        given(req.getUri()).willReturn(
+              "http://example.com/oauth20/authorize?redirect_uri=http%3A%2F%2Fexample.com&response_type=code&client_id="
+              + clientId);
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
 
         // WHEN
@@ -1048,13 +1043,10 @@ public class AuthorizationServerTest {
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         AccessToken accessToken = mock(AccessToken.class);
-        willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken)
-                .getToken();
+        willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
         willReturn("basic").given(accessToken).getScope();
-        willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken,
-                clientId);
-        willDoNothing().given(authServer.db)
-                .updateAccessTokenValidStatus(anyString(), anyBoolean());
+        willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken, clientId);
+        willDoNothing().given(authServer.db).updateAccessTokenValidStatus(anyString(), anyBoolean());
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
 
         // WHEN
@@ -1077,14 +1069,11 @@ public class AuthorizationServerTest {
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         AccessToken accessToken = mock(AccessToken.class);
-        willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken)
-                .getToken();
+        willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
         willReturn("basic, extended").given(accessToken).getScope();
         willReturn(true).given(authServer.scopeService).scopeAllowed(anyString(), anyString());
-        willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken,
-                clientId);
-        willDoNothing().given(authServer.db)
-                .updateAccessTokenValidStatus(anyString(), anyBoolean());
+        willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken, clientId);
+        willDoNothing().given(authServer.db).updateAccessTokenValidStatus(anyString(), anyBoolean());
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
 
         // WHEN
@@ -1107,14 +1096,11 @@ public class AuthorizationServerTest {
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         AccessToken accessToken = mock(AccessToken.class);
-        willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken)
-                .getToken();
+        willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
         willReturn("basic, extended").given(accessToken).getScope();
         willReturn(false).given(authServer.scopeService).scopeAllowed(anyString(), anyString());
-        willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken,
-                clientId);
-        willDoNothing().given(authServer.db)
-                .updateAccessTokenValidStatus(anyString(), anyBoolean());
+        willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken, clientId);
+        willDoNothing().given(authServer.db).updateAccessTokenValidStatus(anyString(), anyBoolean());
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
 
         // WHEN

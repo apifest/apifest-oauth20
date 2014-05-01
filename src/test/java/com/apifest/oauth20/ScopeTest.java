@@ -36,7 +36,8 @@ public class ScopeTest {
         Scope scope = new Scope();
         scope.setScope("");
         scope.setDescription("some descr");
-        scope.setExpiresIn(200);
+        scope.setCcExpiresIn(200);
+        scope.setPassExpiresIn(100);
 
         // WHEN
         boolean valid = scope.validate();
@@ -51,7 +52,8 @@ public class ScopeTest {
         Scope scope = new Scope();
         scope.setScope(null);
         scope.setDescription("some descr");
-        scope.setExpiresIn(200);
+        scope.setCcExpiresIn(200);
+        scope.setPassExpiresIn(100);
 
         // WHEN
         boolean valid = scope.validate();
@@ -66,7 +68,8 @@ public class ScopeTest {
         Scope scope = new Scope();
         scope.setScope("basic");
         scope.setDescription(null);
-        scope.setExpiresIn(200);
+        scope.setCcExpiresIn(200);
+        scope.setPassExpiresIn(100);
 
         // WHEN
         boolean valid = scope.validate();
@@ -76,12 +79,29 @@ public class ScopeTest {
     }
 
     @Test
-    public void when_expiresIn_0_return_false() throws Exception {
+    public void when_cc_expiresIn_0_return_false() throws Exception {
         // GIVEN
         Scope scope = new Scope();
         scope.setScope("basic");
         scope.setDescription("some description");
-        scope.setExpiresIn(0);
+        scope.setCcExpiresIn(0);
+        scope.setPassExpiresIn(100);
+
+        // WHEN
+        boolean valid = scope.validate();
+
+        // THEN
+        assertFalse(valid);
+    }
+
+    @Test
+    public void when_pass_expiresIn_0_return_false() throws Exception {
+        // GIVEN
+        Scope scope = new Scope();
+        scope.setScope("basic");
+        scope.setDescription("some description");
+        scope.setCcExpiresIn(100);
+        scope.setPassExpiresIn(0);
 
         // WHEN
         boolean valid = scope.validate();
@@ -96,7 +116,8 @@ public class ScopeTest {
         Scope scope = new Scope();
         scope.setScope("basic");
         scope.setDescription("some description");
-        scope.setExpiresIn(300);
+        scope.setCcExpiresIn(300);
+        scope.setPassExpiresIn(100);
 
         // WHEN
         boolean valid = scope.validate();
@@ -111,7 +132,7 @@ public class ScopeTest {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("_id", "basic");
         map.put(Scope.DESCRIPTION_FIELD, "some descr");
-        map.put(Scope.EXPIRES_IN_FIELD, 300);
+        map.put(Scope.CC_EXPIRES_IN_FIELD, 300);
 
         // WHEN
         Scope scope = Scope.loadFromMap(map);
@@ -119,7 +140,7 @@ public class ScopeTest {
         // THEN
         assertEquals(scope.getScope(), "basic");
         assertEquals(scope.getDescription(), "some descr");
-        assertEquals(scope.getExpiresIn(), Integer.valueOf(300));
+        assertEquals(scope.getCcExpiresIn(), Integer.valueOf(300));
     }
 
     @Test
@@ -128,7 +149,8 @@ public class ScopeTest {
         Map<String, String> map = new HashMap<String, String>();
         map.put("id", "basic");
         map.put(Scope.DESCRIPTION_FIELD, "some descr");
-        map.put(Scope.EXPIRES_IN_FIELD, "300");
+        map.put(Scope.CC_EXPIRES_IN_FIELD, "300");
+        map.put(Scope.PASS_EXPIRES_IN_FIELD, "100");
 
         // WHEN
         Scope scope = Scope.loadFromStringMap(map);
@@ -136,6 +158,6 @@ public class ScopeTest {
         // THEN
         assertEquals(scope.getScope(), "basic");
         assertEquals(scope.getDescription(), "some descr");
-        assertEquals(scope.getExpiresIn(), Integer.valueOf(300));
+        assertEquals(scope.getCcExpiresIn(), Integer.valueOf(300));
     }
 }
