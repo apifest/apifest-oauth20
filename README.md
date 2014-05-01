@@ -38,12 +38,12 @@ Here is a template of apifest-oauth.properties file:
 ```
 oauth20.port=
 oauth20.host=
-db_host=
-user.authenticate.endpoint=
-user_id.name=
 oauth20.database=
+db_host=
 redis.sentinels=
 redis.master=
+user.authenticate.endpoint=
+user_id.name=
 ```
 
 The path to the apifest.properties file should be passed as a system variable:
