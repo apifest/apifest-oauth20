@@ -52,7 +52,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected static final String ACCESS_TOKEN_VALIDATE_URI = "/oauth20/token/validate";
     protected static final String APPLICATION_URI = "/oauth20/application";
     protected static final String ACCESS_TOKEN_REVOKE_URI = "/oauth20/token/revoke";
-    protected static final String OAUTH_CLIENT_SCOPE_URI = "/oauth20/scopes";
+    protected static final String OAUTH_CLIENT_SCOPE_URI = "/oauth20/scope";
 
     protected Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 

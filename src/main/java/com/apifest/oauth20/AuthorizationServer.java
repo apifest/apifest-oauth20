@@ -41,8 +41,6 @@ import org.slf4j.LoggerFactory;
  */
 public class AuthorizationServer {
 
-    private static final String APPNAME_PARAMETER = "app_name";
-    private static final String SCOPE_PARAMETER = "scope";
     static final String BASIC = "Basic ";
     private static final String TOKEN_TYPE_BEARER = "Bearer";
     protected static final String SCOPE_NOK_MESSAGE = "{\"status\":\"scope not valid\"}";

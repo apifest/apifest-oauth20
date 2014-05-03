@@ -43,7 +43,7 @@ public class ScopeService {
 
     static Logger log = LoggerFactory.getLogger(ScopeService.class);
 
-    private static final String MANDATORY_FIELDS_ERROR = "{\"error\":\"scope, description and expires_in are mandatory\"}";
+    private static final String MANDATORY_FIELDS_ERROR = "{\"error\":\"scope, description, cc_expires_in and pass_expires_in are mandatory\"}";
     private static final String SCOPE_STORED_OK_MESSAGE = "{\"status\":\"scope successfully stored\"}";
     private static final String SCOPE_STORED_NOK_MESSAGE = "{\"status\":\"scope not stored\"}";
     private static final String COMMA = ",";
