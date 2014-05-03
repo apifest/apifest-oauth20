@@ -47,13 +47,11 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
-    protected static final String OAUTH_REGISTER_CLIENT_URI = "/oauth20/register";
     protected static final String AUTH_CODE_GENERATE_URI = "/oauth20/authorize";
     protected static final String ACCESS_TOKEN_GENERATE_URI = "/oauth20/token";
     protected static final String ACCESS_TOKEN_VALIDATE_URI = "/oauth20/token/validate";
-    protected static final String APPLICATION_INFO_URI = "/oauth20/application";
+    protected static final String APPLICATION_URI = "/oauth20/application";
     protected static final String ACCESS_TOKEN_REVOKE_URI = "/oauth20/token/revoke";
-
     protected static final String OAUTH_CLIENT_SCOPE_URI = "/oauth20/scopes";
 
     protected Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
@@ -81,7 +79,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             }
 
             HttpResponse response = null;
-            if (OAUTH_REGISTER_CLIENT_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
+            if (APPLICATION_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
                 response = handleRegister(req);
             } else if (AUTH_CODE_GENERATE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleAuthorize(req);
@@ -89,7 +87,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 response = handleToken(req);
             } else if (ACCESS_TOKEN_VALIDATE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleTokenValidate(req);
-            } else if (APPLICATION_INFO_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
+            } else if (APPLICATION_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleApplicationInfo(req);
             } else if (ACCESS_TOKEN_REVOKE_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
                 response = handleTokenRevoke(req);

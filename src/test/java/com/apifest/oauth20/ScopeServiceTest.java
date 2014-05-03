@@ -90,7 +90,7 @@ public class ScopeServiceTest {
         HttpRequest req = mock(HttpRequest.class);
         willReturn("http://localhost:8080/oauth20/scope?client_id=" + clientId).given(req).getUri();
         String scope = "basic";
-        ClientCredentials creds = new ClientCredentials("appName", scope);
+        ClientCredentials creds = new ClientCredentials("appName", scope, "descr", "http://example.com");
         willReturn(creds).given(DBManagerFactory.dbManager).findClientCredentials(clientId);
 
         // WHEN
@@ -109,7 +109,7 @@ public class ScopeServiceTest {
         HttpRequest req = mock(HttpRequest.class);
         willReturn("http://localhost:8080/oauth20/scope?client_id=" + clientId).given(req).getUri();
         String scope = "basic,extended";
-        ClientCredentials creds = new ClientCredentials("appName", scope);
+        ClientCredentials creds = new ClientCredentials("appName", scope, "descr", "http://example.com");
         willReturn(creds).given(DBManagerFactory.dbManager).findClientCredentials(clientId);
 
         // WHEN

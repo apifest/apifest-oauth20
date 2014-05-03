@@ -17,23 +17,32 @@
 package com.apifest.oauth20;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Contains info about client application.
  *
  * @author Rossitsa Borissova
  */
-@JsonPropertyOrder({ "name", "description", "scope", "registered" })
+@JsonPropertyOrder({ "name", "description", "scope", "registered", "redirect_uri"})
 @JsonSerialize(include = Inclusion.NON_NULL)
 public class ApplicationInfo implements Serializable {
 
-    private static final long serialVersionUID = -7602871956157070263L;
+    protected static Logger log = LoggerFactory.getLogger(ApplicationInfo.class);
+
+    private static final long serialVersionUID = 6017283924235608024L;
+
+    @JsonProperty("redirect_uri")
+    private String redirectUri;
 
     @JsonProperty("registered")
     private Date registered;
@@ -79,4 +88,26 @@ public class ApplicationInfo implements Serializable {
         this.name = name;
     }
 
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+    }
+
+    public boolean valid() {
+        boolean valid = false;
+        if (name != null && name.length() > 0 && scope != null && scope.length() > 0 &&
+                redirectUri != null && redirectUri.length() > 0) {
+
+            try {
+                new URL(redirectUri);
+                valid = true;
+            } catch (MalformedURLException e) {
+                log.info("not valid URI {}", redirectUri);
+            }
+        }
+        return valid;
+    }
 }

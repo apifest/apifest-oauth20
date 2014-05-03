@@ -360,8 +360,12 @@ public class AuthorizationServerTest {
     public void when_register_store_appName() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        given(req.getUri()).willReturn(
-                "http://example.com/oauth20/register?app_name=TestDemoApp&scope=basic");
+        String content = "{\"name\":\"name\",\"scope\":\"basic\",\"redirect_uri\":\"http://example.com\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("application/json").given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
         willDoNothing().given(authServer.db).storeClientCredentials(any(ClientCredentials.class));
         willReturn(mock(Scope.class)).given(authServer.db).findScope("basic");
 
@@ -376,8 +380,12 @@ public class AuthorizationServerTest {
     public void when_register_with_non_existing_scope_return_error_message() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        given(req.getUri()).willReturn(
-                "http://example.com/oauth20/register?app_name=TestDemoApp&scope=basic");
+        String content = "{\"name\":\"name\",\"scope\":\"basic\",\"redirect_uri\":\"http://example.com\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("application/json").given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
         willDoNothing().given(authServer.db).storeClientCredentials(any(ClientCredentials.class));
         willReturn(null).given(authServer.db).findScope("basic");
 
@@ -398,8 +406,12 @@ public class AuthorizationServerTest {
     public void when_register_with_several_scopes_check_all_scopes() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        given(req.getUri()).willReturn(
-                "http://example.com/oauth20/register?app_name=TestDemoApp&scope=basic,extended");
+        String content = "{\"name\":\"name\",\"scope\":\"basic,extended\",\"redirect_uri\":\"http://example.com\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("application/json").given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
         willDoNothing().given(authServer.db).storeClientCredentials(any(ClientCredentials.class));
         willReturn(mock(Scope.class)).given(authServer.db).findScope("basic");
         willReturn(mock(Scope.class)).given(authServer.db).findScope("extended");
@@ -416,7 +428,12 @@ public class AuthorizationServerTest {
     public void when_no_app_name_passed_return_error() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        given(req.getUri()).willReturn("http://example.com/oauth20/register?scope=basic");
+        String content = "{\"scope\":\"basic\",\"redirect_uri\":\"http://example.com\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("application/json").given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
 
         // WHEN
         String errorMsg = null;
@@ -427,14 +444,19 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, Response.APPNAME_OR_SCOPE_IS_NULL);
+        assertEquals(errorMsg, Response.NAME_OR_SCOPE_OR_URI_IS_NULL);
     }
 
     @Test
     public void when_no_scope_passed_return_error() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=test");
+        String content = "{\"name\":\"name\",\"redirect_uri\":\"http://example.com\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("application/json").given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
 
         // WHEN
         String errorMsg = null;
@@ -445,7 +467,53 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, Response.APPNAME_OR_SCOPE_IS_NULL);
+        assertEquals(errorMsg, Response.NAME_OR_SCOPE_OR_URI_IS_NULL);
+    }
+
+    @Test
+    public void when_no_redirect_uri_passed_return_error() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String content = "{\"name\":\"name\",\"scope\":\"basic\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("application/json").given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            authServer.issueClientCredentials(req);
+        } catch (OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, Response.NAME_OR_SCOPE_OR_URI_IS_NULL);
+    }
+
+    @Test
+    public void when_invalid_redirect_uri_passed_return_error() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String content = "{\"name\":\"name\",\"scope\":\"basic\",\"redirect_uri\":\"htp://example.com\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("application/json").given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            authServer.issueClientCredentials(req);
+        } catch (OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, Response.NAME_OR_SCOPE_OR_URI_IS_NULL);
     }
 
     @Test

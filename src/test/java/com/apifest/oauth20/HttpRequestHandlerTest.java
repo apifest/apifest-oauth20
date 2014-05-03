@@ -60,7 +60,7 @@ public class HttpRequestHandlerTest {
         HttpRequest req = mock(HttpRequest.class);
         given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=TestDemoApp");
         AuthorizationServer auth = mock(AuthorizationServer.class);
-        ClientCredentials creds = new ClientCredentials("TestDemoApp", "basic");
+        ClientCredentials creds = new ClientCredentials("TestDemoApp", "basic", "descr", "http://example.com");
         given(auth.issueClientCredentials(req)).willReturn(creds);
         handler.auth = auth;
 
@@ -81,7 +81,7 @@ public class HttpRequestHandlerTest {
                 "http://example.com/oauth20/register?app_name=TestDemoApp&scope=basic");
         AuthorizationServer auth = mock(AuthorizationServer.class);
         willThrow(
-                new OAuthException(Response.APPNAME_OR_SCOPE_IS_NULL,
+                new OAuthException(Response.NAME_OR_SCOPE_OR_URI_IS_NULL,
                         HttpResponseStatus.BAD_REQUEST)).given(auth).issueClientCredentials(req);
         handler.auth = auth;
 
@@ -90,7 +90,7 @@ public class HttpRequestHandlerTest {
 
         // THEN
         String res = new String(response.getContent().array());
-        assertTrue(res.contains(Response.APPNAME_OR_SCOPE_IS_NULL));
+        assertTrue(res.contains(Response.NAME_OR_SCOPE_OR_URI_IS_NULL));
     }
 
     @Test
@@ -115,7 +115,7 @@ public class HttpRequestHandlerTest {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
         AuthorizationServer auth = mock(AuthorizationServer.class);
-        OAuthException ex = new OAuthException(Response.APPNAME_OR_SCOPE_IS_NULL,
+        OAuthException ex = new OAuthException(Response.NAME_OR_SCOPE_OR_URI_IS_NULL,
                 HttpResponseStatus.BAD_REQUEST);
         willThrow(ex).given(auth).issueClientCredentials(req);
         handler.auth = auth;

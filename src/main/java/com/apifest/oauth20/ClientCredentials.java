@@ -66,10 +66,11 @@ public class ClientCredentials implements Serializable {
     @JsonIgnore
     private int status;
 
-    public ClientCredentials(String appName, String scope) {
+    public ClientCredentials(String appName, String scope, String description, String uri) {
         this.name = appName;
         this.scope = scope;
-
+        this.descr = description;
+        this.uri = uri;
         this.id = generateClientId();
         this.secret = generateClientSecret();
         this.created = (new Date()).getTime();

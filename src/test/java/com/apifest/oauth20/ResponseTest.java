@@ -47,7 +47,7 @@ public class ResponseTest {
     public void when_get_exception_response_get_exception_HTTP_status() throws Exception {
         // GIVEN
         OAuthException ex = mock(OAuthException.class);
-        willReturn(Response.APPNAME_OR_SCOPE_IS_NULL).given(ex).getMessage();
+        willReturn(Response.NAME_OR_SCOPE_OR_URI_IS_NULL).given(ex).getMessage();
         willReturn(HttpResponseStatus.BAD_REQUEST).given(ex).getHttpStatus();
 
         // WHEN

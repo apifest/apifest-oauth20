@@ -104,7 +104,7 @@ When the server starts, you will see:
 
 ##ApiFest OAuth 2.0 Endpoints:
 * **/oauth20/register** - registers client applications
-* **/oauth20/application** - returns client applications info
+* **/oauth20/application** - registers client applications (POST method), returns client applications info (GET method)
 * **/oauth20/authorize** - issues auth codes
 * **/oauth20/token** - issues access tokens
 * **/oauth20/token/validate** - validates access tokens

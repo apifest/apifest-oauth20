@@ -19,14 +19,14 @@ package com.apifest.oauth20;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpHeaders;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.handler.codec.http.QueryStringEncoder;
 import org.jboss.netty.util.CharsetUtil;
 import org.json.JSONException;
@@ -53,26 +53,39 @@ public class AuthorizationServer {
     protected ScopeService scopeService = new ScopeService();
 
     public ClientCredentials issueClientCredentials(HttpRequest req) throws OAuthException {
-        QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
         ClientCredentials creds = null;
-        Map<String, List<String>> queryParams = dec.getParameters();
-        if (queryParams != null && queryParams.get(APPNAME_PARAMETER) != null
-                && queryParams.get(SCOPE_PARAMETER) != null) {
-            String appName = dec.getParameters().get(APPNAME_PARAMETER).get(0);
-            String scope = dec.getParameters().get(SCOPE_PARAMETER).get(0);
-            String[] scopeList = scope.split(",");
-            for (String s : scopeList) {
-                // TODO: add cache for scope
-                if (db.findScope(s) == null) {
-                    throw new OAuthException(Response.SCOPE_NOT_EXIST,
-                            HttpResponseStatus.BAD_REQUEST);
+        String content = req.getContent().toString(CharsetUtil.UTF_8);
+        String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
+
+        if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
+            ObjectMapper mapper = new ObjectMapper();
+            ApplicationInfo appInfo;
+            try {
+                appInfo = mapper.readValue(content, ApplicationInfo.class);
+                if (appInfo.valid()) {
+                  String[] scopeList = appInfo.getScope().split(",");
+                  for (String s : scopeList) {
+                      // TODO: add cache for scope
+                      if (db.findScope(s) == null) {
+                          throw new OAuthException(Response.SCOPE_NOT_EXIST,
+                                  HttpResponseStatus.BAD_REQUEST);
+                      }
+                  }
+                  creds = new ClientCredentials(appInfo.getName(), appInfo.getScope(), appInfo.getDescription(),
+                          appInfo.getRedirectUri());
+                  db.storeClientCredentials(creds);
+                } else {
+                    throw new OAuthException(Response.NAME_OR_SCOPE_OR_URI_IS_NULL, HttpResponseStatus.BAD_REQUEST);
                 }
+            } catch (JsonParseException e) {
+                throw new OAuthException(Response.CANNOT_REGISTER_APP, HttpResponseStatus.BAD_REQUEST);
+            } catch (JsonMappingException e) {
+                throw new OAuthException(Response.CANNOT_REGISTER_APP, HttpResponseStatus.BAD_REQUEST);
+            } catch (IOException e) {
+                throw new OAuthException(Response.CANNOT_REGISTER_APP, HttpResponseStatus.BAD_REQUEST);
             }
-            creds = new ClientCredentials(appName, scope);
-            db.storeClientCredentials(creds);
         } else {
-            throw new OAuthException(Response.APPNAME_OR_SCOPE_IS_NULL,
-                    HttpResponseStatus.BAD_REQUEST);
+            throw new OAuthException(Response.UNSUPPORTED_MEDIA_TYPE, HttpResponseStatus.BAD_REQUEST);
         }
         return creds;
     }
@@ -214,7 +227,7 @@ public class AuthorizationServer {
 
     protected String getBasicAuthorizationClientId(HttpRequest req) {
         // extract Basic Authorization header
-        String authHeader = req.headers().get(HttpHeaders.AUTHORIZATION);
+        String authHeader = req.headers().get(HttpHeaders.Names.AUTHORIZATION);
         String clientId = null;
         if (authHeader != null && authHeader.contains(BASIC)) {
             String value = authHeader.replace(BASIC, "");
@@ -259,6 +272,7 @@ public class AuthorizationServer {
             appInfo.setName(creds.getName());
             appInfo.setDescription(creds.getDescr());
             appInfo.setScope(creds.getScope());
+            appInfo.setRedirectUri(creds.getUri());
             appInfo.setRegistered(new Date(creds.getCreated()));
         }
         return appInfo;
