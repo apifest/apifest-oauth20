@@ -61,7 +61,7 @@ public class AuthorizationServer {
             try {
                 appInfo = mapper.readValue(content, ApplicationInfo.class);
                 if (appInfo.valid()) {
-                  String[] scopeList = appInfo.getScope().split(",");
+                  String[] scopeList = appInfo.getScope().split(" ");
                   for (String s : scopeList) {
                       // TODO: add cache for scope
                       if (db.findScope(s) == null) {

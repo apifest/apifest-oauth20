@@ -108,7 +108,7 @@ public class ScopeServiceTest {
         String clientId = "826064099791766";
         HttpRequest req = mock(HttpRequest.class);
         willReturn("http://localhost:8080/oauth20/scope?client_id=" + clientId).given(req).getUri();
-        String scope = "basic,extended";
+        String scope = "basic extended";
         ClientCredentials creds = new ClientCredentials("appName", scope, "descr", "http://example.com");
         willReturn(creds).given(DBManagerFactory.dbManager).findClientCredentials(clientId);
 
@@ -143,7 +143,7 @@ public class ScopeServiceTest {
         String clientId = "826064099791766";
         MockDBManagerFactory.install();
         ClientCredentials creds = mock(ClientCredentials.class);
-        willReturn("extended,basic").given(creds).getScope();
+        willReturn("extended basic").given(creds).getScope();
         willReturn(creds).given(DBManagerFactory.getInstance()).findClientCredentials(clientId);
 
         // WHEN
@@ -173,7 +173,7 @@ public class ScopeServiceTest {
     public void when_scope_is_contained_return_true() throws Exception {
         // GIVEN
         String scope = "extended";
-        String scopeList = "basic,extended";
+        String scopeList = "basic extended";
 
         // WHEN
         boolean allowed = service.scopeAllowed(scope, scopeList);
@@ -198,8 +198,8 @@ public class ScopeServiceTest {
     @Test
     public void when_scope_contains_two_scopes_check_all() throws Exception {
         // GIVEN
-        String scope = "basic,extended";
-        String scopeList = "basic,extended";
+        String scope = "basic extended";
+        String scopeList = "basic extended";
 
         // WHEN
         boolean allowed = service.scopeAllowed(scope, scopeList);
@@ -249,7 +249,7 @@ public class ScopeServiceTest {
     @Test
     public void when_several_scopes_and_pass_return_min_pass_expires_in() throws Exception {
         // GIVEN
-        String scopeName = "basic,extended";
+        String scopeName = "basic extended";
         List<Scope> loadedScope = new ArrayList<Scope>();
 
         Scope scope1 = new Scope();
@@ -276,7 +276,7 @@ public class ScopeServiceTest {
     @Test
     public void when_several_scopes_and_CC_return_min_CC_expires_in() throws Exception {
         // GIVEN
-        String scopeName = "basic,extended";
+        String scopeName = "basic extended";
         List<Scope> loadedScope = new ArrayList<Scope>();
 
         Scope scope1 = new Scope();

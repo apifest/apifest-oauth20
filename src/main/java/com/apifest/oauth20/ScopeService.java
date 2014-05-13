@@ -46,7 +46,7 @@ public class ScopeService {
     private static final String MANDATORY_FIELDS_ERROR = "{\"error\":\"scope, description, cc_expires_in and pass_expires_in are mandatory\"}";
     private static final String SCOPE_STORED_OK_MESSAGE = "{\"status\":\"scope successfully stored\"}";
     private static final String SCOPE_STORED_NOK_MESSAGE = "{\"status\":\"scope not stored\"}";
-    private static final String COMMA = ",";
+    private static final String SPACE = " ";
 
     public HttpResponse registerScope(HttpRequest req) {
         String content = req.getContent().toString(CharsetUtil.UTF_8);
@@ -135,9 +135,9 @@ public class ScopeService {
     }
 
     public boolean scopeAllowed(String scope, String allowedScopes) {
-        String [] allScopes = allowedScopes.split(COMMA);
+        String [] allScopes = allowedScopes.split(SPACE);
         List<String> allowedList = Arrays.asList(allScopes);
-        String [] scopes = scope.split(COMMA);
+        String [] scopes = scope.split(SPACE);
         int allowedCount = 0;
         for(String s : scopes) {
             if (allowedList.contains(s)) {
@@ -178,7 +178,7 @@ public class ScopeService {
     }
 
     protected List<Scope> loadScopes(String scope) {
-        String [] scopes = scope.split(COMMA);
+        String [] scopes = scope.split(SPACE);
         List<Scope> loadedScopes = new ArrayList<Scope>();
         DBManager db = DBManagerFactory.getInstance();
         for (String name : scopes) {
@@ -193,7 +193,7 @@ public class ScopeService {
         if(credentials != null) {
             //scopes are separated by comma
             String scopes = credentials.getScope();
-            String [] s = scopes.split(COMMA);
+            String [] s = scopes.split(SPACE);
             List<Scope> result = new ArrayList<Scope>();
             for(String name : s) {
                 Scope scope = DBManagerFactory.getInstance().findScope(name);

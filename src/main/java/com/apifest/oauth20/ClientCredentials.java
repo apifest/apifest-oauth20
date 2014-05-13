@@ -42,7 +42,7 @@ public class ClientCredentials implements Serializable {
     @JsonProperty("client_secret")
     private String secret = "";
 
-    // scopes are separated by comma
+    // scopes are separated by space
     @JsonIgnore
     private String scope = "";
 
@@ -69,7 +69,7 @@ public class ClientCredentials implements Serializable {
     public ClientCredentials(String appName, String scope, String description, String uri) {
         this.name = appName;
         this.scope = scope;
-        this.descr = description;
+        this.descr = (description != null)? description : "";
         this.uri = uri;
         this.id = generateClientId();
         this.secret = generateClientSecret();

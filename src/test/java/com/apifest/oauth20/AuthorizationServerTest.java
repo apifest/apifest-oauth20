@@ -406,7 +406,7 @@ public class AuthorizationServerTest {
     public void when_register_with_several_scopes_check_all_scopes() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        String content = "{\"name\":\"name\",\"scope\":\"basic,extended\",\"redirect_uri\":\"http://example.com\"}";
+        String content = "{\"name\":\"name\",\"scope\":\"basic extended\",\"redirect_uri\":\"http://example.com\"}";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         willReturn(buf).given(req).getContent();
         HttpHeaders headers = mock(HttpHeaders.class);
