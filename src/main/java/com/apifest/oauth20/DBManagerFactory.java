@@ -23,6 +23,7 @@ public class DBManagerFactory {
 
     protected static DBManager dbManager;
 
+    // TODO: make H2 DB default
     public static DBManager getInstance() {
         if (dbManager == null) {
             if ("redis".equalsIgnoreCase(OAuthServer.getDatabase())) {
