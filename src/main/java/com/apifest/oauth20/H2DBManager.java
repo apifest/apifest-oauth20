@@ -138,16 +138,6 @@ public class H2DBManager implements DBManager {
         return valid;
     }
 
-    public static void main(String [] args) {
-        H2DBManager h2 = new H2DBManager();
-//        ClientCredentials creds = new ClientCredentials("test_h2_app", "basic", "descr", "http://apifest.com");
-//        log.info("client app wiht id {} and secret {} created", creds.getId(), creds.getSecret());
-//        h2.storeClientCredentials(creds);
-        //boolean valid = h2.validClient("663976285898378", "b96be14045b265f71e7d25885fb734020dd6d68f");
-        ClientCredentials client = h2.findClientCredentials("663976285898378");
-        log.info("valid client {}", client.getScope());
-    }
-
     /* (non-Javadoc)
      * @see com.apifest.oauth20.DBManager#validClient(java.lang.String, java.lang.String)
      */
@@ -261,6 +251,7 @@ public class H2DBManager implements DBManager {
                 map.put("name", rs.getString("name"));
                 map.put("uri", rs.getString("uri"));
                 map.put("descr", rs.getString("description"));
+                // TODO: set default type value
                 //map.put("type", rs.getObject(("type"));
                 map.put("type", "0");
                 map.put("status", rs.getString("status"));
