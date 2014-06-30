@@ -41,10 +41,15 @@ public class H2DBManager implements DBManager {
     protected static Logger log = LoggerFactory.getLogger(H2DBManager.class);
 
     // TODO: check column length
-    private static final String CREATE_SCOPE_TABLE = "create table scopes (id int primary key, name varchar(255))";
+    private static final String CREATE_SCOPES_TABLE = "create table scopes (id varchar(255) primary key, " +
+        "description varchar(512), cc_expires_in int, pass_expires_in int)";
+    private static final String SCOPES_TABLE = "scopes";
+    private static final String INSERT_SCOPE_SQL = "insert into scopes(id, description, cc_expires_in, pass_expires_in) " +
+        "values(?,?,?,?)";
+    private static final String SELECT_SCOPE_BY_ID_SQL = "select * from scopes where id=?";
 
     // TODO: add type column
-    private static final String CREATE_CLIENT_TABLE_SQL = "create table clients (id varchar(255) primary key," +
+    private static final String CREATE_CLIENTS_TABLE_SQL = "create table clients (id varchar(255) primary key," +
         "secret varchar(255), name varchar(255), description varchar(255), uri varchar(1024), scope varchar(255)," +
         "status int, created time)";
     private static final String CLIENTS_TABLE = "clients";
@@ -54,11 +59,11 @@ public class H2DBManager implements DBManager {
     private static final String VALID_CLIENT_SQL = "select id from clients where id=? and secret=?";
     private static final String SELECT_CLIENT_BY_ID_SQL = "select * from clients where id=?";
 
-    private static final String CREATE_ACCESS_TOKEN_TABLE_SQL = "create table access_tokens (token varchar(255) primary key," +
+    private static final String CREATE_ACCESS_TOKENS_TABLE_SQL = "create table access_tokens (token varchar(255) primary key," +
         "refresh_token varchar(255), expires_in int, type varchar(64), scope varchar(255), valid boolean," +
         "client_id varchar(255), user_id varchar(255), created time)";
 
-    private static final String ACCESS_TOKEN_TABLE = "access_tokens";
+    private static final String ACCESS_TOKENS_TABLE = "access_tokens";
 
     private static final String INSERT_ACCESS_TOKEN_SQL = "insert into access_tokens(token, refresh_token, " +
         "expires_in, type, scope, valid, client_id, user_id, created) values(?,?,?,?,?,?,?,?,?)";
@@ -95,23 +100,28 @@ public class H2DBManager implements DBManager {
         return exist;
     }
 
-    private void executeSQL(String sql, List<Object> params) {
+    private boolean executeSQL(String sql, List<Object> params) {
         Connection conn = null;
         PreparedStatement st = null;
+        boolean ok = false;
         try {
             conn = ds.getConnection();
             st = conn.prepareStatement(sql);
-            int i = 0;
-            for(Object obj : params) {
-                st.setObject(++i, obj);
+            if (params != null) {
+                int i = 0;
+                for(Object obj : params) {
+                    st.setObject(++i, obj);
+                }
             }
             st.execute();
             conn.commit();
+            ok = true;
         } catch (SQLException e) {
             log.error("cannot execute SQL", e);
         } finally {
             closeDBResources(st, null, conn);
         }
+        return ok;
     }
 
     private boolean recordExists(String sql, List<Object> params) {
@@ -122,9 +132,11 @@ public class H2DBManager implements DBManager {
         try {
             conn = ds.getConnection();
             st = conn.prepareStatement(sql);
-            int i = 0;
-            for(Object obj : params) {
-                st.setObject(++i, obj);
+            if (params != null) {
+                int i = 0;
+                for(Object obj : params) {
+                    st.setObject(++i, obj);
+                }
             }
             rs = st.executeQuery();
             if (rs.next()) {
@@ -155,7 +167,7 @@ public class H2DBManager implements DBManager {
     @Override
     @SuppressWarnings("unchecked")
     public void storeClientCredentials(ClientCredentials clientCreds) {
-        ensureTableExists(CLIENTS_TABLE, CREATE_CLIENT_TABLE_SQL);
+        ensureTableExists(CLIENTS_TABLE, CREATE_CLIENTS_TABLE_SQL);
         List<Object> params = new ArrayList<Object>(Arrays.asList(clientCreds.getId(), clientCreds.getSecret(),
                 clientCreds.getName(), clientCreds.getDescr(), clientCreds.getUri(), clientCreds.getScope(),
                 clientCreds.getStatus(), new Date(clientCreds.getCreated())));
@@ -186,7 +198,7 @@ public class H2DBManager implements DBManager {
     @Override
     @SuppressWarnings("unchecked")
     public void storeAccessToken(AccessToken accessToken) {
-        ensureTableExists(ACCESS_TOKEN_TABLE, CREATE_ACCESS_TOKEN_TABLE_SQL);
+        ensureTableExists(ACCESS_TOKENS_TABLE, CREATE_ACCESS_TOKENS_TABLE_SQL);
         List<Object> params = new ArrayList<Object>(Arrays.asList(accessToken.getToken(), accessToken.getRefreshToken(),
                 accessToken.getExpiresIn(), accessToken.getType(), accessToken.getScope(), accessToken.isValid(),
                 accessToken.getClientId(), accessToken.getUserId() , new Date(accessToken.getCreated())));
@@ -271,9 +283,12 @@ public class H2DBManager implements DBManager {
      * @see com.apifest.oauth20.DBManager#storeScope(com.apifest.oauth20.Scope)
      */
     @Override
+    @SuppressWarnings("unchecked")
     public boolean storeScope(Scope scope) {
-        // TODO Auto-generated method stub
-        return false;
+        ensureTableExists(SCOPES_TABLE, CREATE_SCOPES_TABLE);
+        List<Object> params = new ArrayList<Object>(Arrays.asList(scope.getScope(), scope.getDescription(),
+                scope.getCcExpiresIn(), scope.getPassExpiresIn()));
+        return executeSQL(INSERT_SCOPE_SQL, params);
     }
 
     /* (non-Javadoc)
@@ -290,8 +305,28 @@ public class H2DBManager implements DBManager {
      */
     @Override
     public Scope findScope(String scopeName) {
-        // TODO Auto-generated method stub
-        return null;
+        Connection conn = null;
+        PreparedStatement st = null;
+        ResultSet rs = null;
+        Scope scope = null;
+        try {
+            conn = ds.getConnection();
+            st = conn.prepareStatement(SELECT_SCOPE_BY_ID_SQL);
+            st.setString(1, scopeName);
+            rs = st.executeQuery();
+            if (rs.next()) {
+                scope = new Scope();
+                scope.setScope(scopeName);
+                scope.setDescription(rs.getString("description"));
+                scope.setCcExpiresIn(rs.getInt("cc_expires_in"));
+                scope.setPassExpiresIn(rs.getInt("pass_expires_in"));
+            }
+        } catch (SQLException e) {
+            log.error("cannot execute SQL", e);
+        } finally {
+            closeDBResources(st, rs, conn);
+        }
+        return scope;
     }
 
     protected void closeDBResources(Statement st, ResultSet rs, Connection conn) {
