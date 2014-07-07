@@ -62,8 +62,8 @@ public class AuthCode {
         this.created = (new Date()).getTime();
     }
 
-    private AuthCode() {
-        // used when loaded from Map/DB
+    public AuthCode() {
+
     }
 
     public String getCode() {
@@ -134,8 +134,16 @@ public class AuthCode {
         return created;
     }
 
+    public void setCreated(Long created) {
+        this.created = created;
+    }
+
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     /**

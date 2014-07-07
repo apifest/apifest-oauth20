@@ -19,6 +19,8 @@
  */
 package com.apifest.oauth20;
 
+import com.apifest.oauth20.persistence.hazelcast.HazelcastDBManager;
+
 public class DBManagerFactory {
 
     protected static DBManager dbManager;
@@ -33,8 +35,15 @@ public class DBManagerFactory {
             if ("mongodb".equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new MongoDBManager();
             }
+            if ("hazelcast".equalsIgnoreCase(OAuthServer.getDatabase())) {
+                dbManager = new HazelcastDBManager();
+            }
         }
         return dbManager;
     }
 
+    public static void init() {
+        // that will instantiate a connection to the storage
+        getInstance();
+    }
 }

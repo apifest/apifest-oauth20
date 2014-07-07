@@ -6,3 +6,4 @@ redis.sentinels=
 redis.master=
 user.authenticate.endpoint=
 user_id.name=
+apifest-oauth20.nodes=

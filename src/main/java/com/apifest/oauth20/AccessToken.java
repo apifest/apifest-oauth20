@@ -100,7 +100,7 @@ public class AccessToken implements Serializable {
         this.created = (new Date()).getTime();
     }
 
-    private AccessToken() {
+    public AccessToken() {
     }
 
     public String getToken() {
@@ -177,6 +177,10 @@ public class AccessToken implements Serializable {
 
     public Long getCreated() {
         return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 
     public static AccessToken loadFromMap(Map<String, Object> map) {

@@ -52,6 +52,7 @@ public final class OAuthServer {
     private static String database;
     private static String redisSentinels;
     private static String redisMaster;
+    private static String apifestOAuth20Nodes;
 
     //expires_in in sec for grant type password
     public static final int DEFAULT_PASSWORD_EXPIRES_IN = 900;
@@ -90,6 +91,7 @@ public final class OAuthServer {
         bootstrap.setOption("child.soLinger", -1);
 
         bootstrap.bind(new InetSocketAddress(host, portInt));
+        DBManagerFactory.init();
         log.info("ApiFest OAuth 2.0 Server started at " + host + ":" + portInt);
     }
 
@@ -154,6 +156,7 @@ public final class OAuthServer {
                 dbHost = "localhost";
             }
             setHostAndPort((String) props.get("oauth20.host"), (String) props.get("oauth20.port"));
+            apifestOAuth20Nodes = props.getProperty("apifest-oauth20.nodes");
         } catch (IOException e) {
             log.error("Cannot load properties file", e);
         }
@@ -186,6 +189,10 @@ public final class OAuthServer {
         }
     }
 
+    public static String getHost() {
+        return host;
+    }
+
     public static String getUserAuthEndpoint() {
         return userAuthEndpoint;
     }
@@ -208,5 +215,9 @@ public final class OAuthServer {
 
     public static String getRedisMaster() {
         return redisMaster;
+    }
+
+    public static String getApifestOAuth20Nodes() {
+        return apifestOAuth20Nodes;
     }
 }

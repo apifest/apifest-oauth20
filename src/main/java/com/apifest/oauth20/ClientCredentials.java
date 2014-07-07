@@ -76,8 +76,8 @@ public class ClientCredentials implements Serializable {
         this.created = (new Date()).getTime();
     }
 
-    private ClientCredentials() {
-        // used to load the class from Map
+    public ClientCredentials() {
+
     }
 
     public String getId() {
@@ -138,6 +138,10 @@ public class ClientCredentials implements Serializable {
 
     public Long getCreated() {
         return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 
     public String getScope() {
