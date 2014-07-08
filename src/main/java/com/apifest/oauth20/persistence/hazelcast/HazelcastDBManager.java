@@ -19,7 +19,10 @@ package com.apifest.oauth20.persistence.hazelcast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +36,16 @@ import com.apifest.oauth20.Scope;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.ExecutorConfig;
 import com.hazelcast.config.GroupConfig;
+import com.hazelcast.config.InMemoryFormat;
 import com.hazelcast.config.InterfacesConfig;
 import com.hazelcast.config.JoinConfig;
+import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.MaxSizeConfig;
 import com.hazelcast.config.MulticastConfig;
 import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.TcpIpConfig;
+import com.hazelcast.config.MapConfig.EvictionPolicy;
+import com.hazelcast.config.MaxSizeConfig.MaxSizePolicy;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -68,9 +76,33 @@ public class HazelcastDBManager implements DBManager {
         Config config = createConfiguration();
         GroupConfig groupConfig = new GroupConfig("apifest-oauth20", "apifest-oauth20-pass");
         config.setGroupConfig(groupConfig);
+        config.setMapConfigs(createMapConfigs());
         hazelcastClient = Hazelcast.newHazelcastInstance(config);
         hazelcastClient.getMap(APIFEST_AUTH_CODE).addIndex("codeURI", false);
         hazelcastClient.getMap(APIFEST_ACCESS_TOKEN).addIndex("refreshTokenByClient", false);
+    }
+
+    private static Map<String, MapConfig> createMapConfigs() {
+        Map<String, MapConfig> configs = new HashMap<String, MapConfig>();
+        MapConfig accTokenConfig = createMapConfig(APIFEST_ACCESS_TOKEN);
+        MapConfig scopeConfig = createMapConfig(APIFEST_SCOPE);
+        MapConfig clientConfig = createMapConfig(APIFEST_CLIENT);
+        MapConfig authCodeConfig = createMapConfig(APIFEST_AUTH_CODE);
+        configs.put(accTokenConfig.getName(), accTokenConfig);
+        configs.put(scopeConfig.getName(), scopeConfig);
+        configs.put(clientConfig.getName(), clientConfig);
+        configs.put(authCodeConfig.getName(), authCodeConfig);
+        return configs;
+    }
+
+    private static MapConfig createMapConfig(String mapName) {
+        MapConfig mapConfig = new MapConfig(mapName);
+        mapConfig.setInMemoryFormat(InMemoryFormat.OBJECT);
+        mapConfig.setEvictionPolicy(EvictionPolicy.NONE);
+        mapConfig.setMaxSizeConfig(new MaxSizeConfig(0, MaxSizePolicy.PER_NODE));
+        mapConfig.setEvictionPercentage(0);
+        mapConfig.setMergePolicy("com.hazelcast.map.merge.PutIfAbsentMapMergePolicy");
+        return mapConfig;
     }
 
     private static Config createConfiguration() {
@@ -137,6 +169,7 @@ public class HazelcastDBManager implements DBManager {
                 PersistenceTransformations.toPersistentClientCredentials(clientCreds));
     }
 
+    // TODO: Set expiration time for auth code
     @Override
     public void storeAuthCode(AuthCode authCode) {
         getAuthCodeContainer().put(authCode.getCode(), PersistenceTransformations.toPersistentAuthCode(authCode));
@@ -151,7 +184,8 @@ public class HazelcastDBManager implements DBManager {
 
     @Override
     public void storeAccessToken(AccessToken accessToken) {
-        getAccessTokenContainer().put(accessToken.getToken(), PersistenceTransformations.toPersistentAccessToken(accessToken));
+        getAccessTokenContainer().put(accessToken.getToken(), PersistenceTransformations.toPersistentAccessToken(accessToken),
+                Integer.valueOf(accessToken.getExpiresIn()), TimeUnit.SECONDS);
     }
 
     @Override

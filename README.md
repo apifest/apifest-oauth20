@@ -44,6 +44,7 @@ redis.sentinels=
 redis.master=
 user.authenticate.endpoint=
 user_id.name=
+apifest-oauth20.nodes=
 ```
 
 The path to the apifest.properties file should be set as a system variable:
@@ -92,7 +93,11 @@ The name of the JSON field containing that information is defined in the followi
 
 ***user_id.name***
 
-  
+In order to run ApiFest OAuth20 distributed storage, you need to setup all ApiFest OAuth20 nodes (as comma-separated list of IPs).
+
+***apifest-oauth20.nodes***
+
+
 **2. Start ApiFest OAuth 2.0 Server**
 
 You can start the ApiFest OAuth 2.0 Server with the following command:

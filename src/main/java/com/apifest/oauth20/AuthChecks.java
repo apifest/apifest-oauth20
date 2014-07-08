@@ -31,7 +31,7 @@ public class AuthChecks {
 
     private static final String BASIC = "Basic ";
 
-    protected static Logger log = LoggerFactory.getLogger(AuthorizationServer.class);
+    protected static Logger log = LoggerFactory.getLogger(AuthChecks.class);
 
     protected DBManager db = DBManagerFactory.getInstance();
 
