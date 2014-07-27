@@ -171,6 +171,7 @@ public class AuthorizationServer {
                 AccessToken newAccessToken = new AccessToken(TOKEN_TYPE_BEARER,
                         getExpiresIn(TokenRequest.PASSWORD, validScope), validScope);
                 newAccessToken.setUserId(accessToken.getUserId());
+                newAccessToken.setDetails(accessToken.getDetails());
                 newAccessToken.setClientId(accessToken.getClientId());
                 db.storeAccessToken(newAccessToken);
                 return newAccessToken;
@@ -203,6 +204,7 @@ public class AuthorizationServer {
                         tokenRequest.getPassword());
                 if (userDetails != null && userDetails.getUserId() != null) {
                     accessToken.setUserId(userDetails.getUserId());
+                    accessToken.setDetails(userDetails.getDetails());
                     accessToken.setClientId(tokenRequest.getClientId());
                     db.storeAccessToken(accessToken);
                 } else {

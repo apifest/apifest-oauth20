@@ -68,6 +68,9 @@ public class UserAuthentication {
                 JSONObject jsonResponse = new JSONObject(res);
                 String userId = jsonResponse.getString(OAuthServer.getUserIdJsonName());
                 log.debug("user_id: " + userId);
+                // Create details in order to store them along with access token
+                // List<NameValue> details = new ArrayList<NameValue>();
+                // details.add(new NameValue("key1", "value1"));
                 userDetails = new UserDetails(userId, null);
             }
         } catch (JSONException e) {

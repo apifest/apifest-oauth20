@@ -123,6 +123,7 @@ public class RedisDBManager implements DBManager {
         accessTokenMap.put("codeId", accessToken.getCodeId());
         accessTokenMap.put("userId", accessToken.getUserId());
         accessTokenMap.put("created", String.valueOf(accessToken.getCreated()));
+        accessTokenMap.put("details", JSONUtils.convertListToJSON(accessToken.getDetails()));
         Jedis jedis = pool.getResource();
         jedis.hmset("at:" + accessToken.getToken(), accessTokenMap);
         jedis.expire("at:" + accessToken.getToken(), Integer.valueOf(accessToken.getExpiresIn()));

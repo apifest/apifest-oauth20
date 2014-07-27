@@ -19,6 +19,7 @@ package com.apifest.oauth20.persistence.hazelcast;
 import com.apifest.oauth20.AccessToken;
 import com.apifest.oauth20.AuthCode;
 import com.apifest.oauth20.ClientCredentials;
+import com.apifest.oauth20.JSONUtils;
 import com.apifest.oauth20.Scope;
 
 /**
@@ -126,6 +127,7 @@ public class PersistenceTransformations {
         persistentAccessToken.setType(accessToken.getType());
         persistentAccessToken.setUserId(accessToken.getUserId());
         persistentAccessToken.setValid(accessToken.isValid());
+        persistentAccessToken.setDetails(JSONUtils.convertListToJSON(accessToken.getDetails()));
         return persistentAccessToken;
     }
 
@@ -143,6 +145,7 @@ public class PersistenceTransformations {
             accessToken.setType(persistentAccessToken.getType());
             accessToken.setUserId(persistentAccessToken.getUserId());
             accessToken.setValid(persistentAccessToken.isValid());
+            accessToken.setDetails(JSONUtils.convertStringToList(persistentAccessToken.getDetails()));
         }
         return accessToken;
     }

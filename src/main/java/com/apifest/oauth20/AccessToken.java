@@ -18,6 +18,7 @@ package com.apifest.oauth20;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -35,7 +36,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 @JsonSerialize(include = Inclusion.NON_NULL)
 public class AccessToken implements Serializable {
 
-    private static final long serialVersionUID = 7155736126283397493L;
+    private static final long serialVersionUID = 4322523635887085378L;
 
     @JsonProperty("access_token")
     private String token = "";
@@ -65,6 +66,9 @@ public class AccessToken implements Serializable {
 
     @JsonIgnore
     private String userId = "";
+
+    @JsonIgnore
+    private List<NameValue> details = null;
 
     @JsonIgnore
     private Long created;
@@ -175,6 +179,14 @@ public class AccessToken implements Serializable {
         this.userId = userId;
     }
 
+    public List<NameValue> getDetails() {
+        return details;
+    }
+
+    public void setDetails(List<NameValue> details) {
+        this.details = details;
+    }
+
     public Long getCreated() {
         return created;
     }
@@ -195,6 +207,7 @@ public class AccessToken implements Serializable {
         accessToken.codeId = (String) map.get("codeId");
         accessToken.userId = (String) map.get("userId");
         accessToken.created = (Long) map.get("created");
+        accessToken.details = JSONUtils.convertStringToList((String) map.get("details"));
         return accessToken;
     }
 
@@ -210,6 +223,7 @@ public class AccessToken implements Serializable {
         accessToken.codeId = map.get("codeId");
         accessToken.userId = map.get("userId");
         accessToken.created = Long.parseLong(map.get("created"));
+        accessToken.details = JSONUtils.convertStringToList(map.get("details"));
         return accessToken;
     }
 

@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -73,6 +74,7 @@ public class MongoDBManager implements DBManager {
      *
      * @param clientCreds
      */
+    @Override
     public void storeClientCredentials(ClientCredentials clientCreds) {
         try {
             storeObject(clientCreds, CLIENTS_COLLECTION_NAME);
@@ -106,6 +108,7 @@ public class MongoDBManager implements DBManager {
      *
      * @param authCode that will be stored in the DB
      */
+    @Override
     public void storeAuthCode(AuthCode authCode) {
         try {
             storeObject(authCode, AUTH_CODE_COLLECTION_NAME);
@@ -145,6 +148,7 @@ public class MongoDBManager implements DBManager {
      *
      * @param authCode that will be stored in the DB
      */
+    @Override
     public void storeAccessToken(AccessToken accessToken) {
         try {
             storeObject(accessToken, ACCESS_TOKEN_COLLECTION_NAME);
@@ -176,6 +180,11 @@ public class MongoDBManager implements DBManager {
         }
         if (list.size() > 0) {
             Map<String, Object> mapLoaded = list.get(0).toMap();
+            // convert details list to String
+            if (mapLoaded.get("details") instanceof BasicDBList) {
+                BasicDBList details = (BasicDBList) mapLoaded.get("details");
+                mapLoaded.put("details", details.toString());
+            }
             return AccessToken.loadFromMap(mapLoaded);
         } else {
             log.debug("No access token found");
@@ -201,6 +210,11 @@ public class MongoDBManager implements DBManager {
         List<DBObject> list = coll.find(dbObject).toArray();
         if (list != null && list.size() == 1) {
             Map<String, Object> mapLoaded = list.get(0).toMap();
+            // convert details list to String
+            if (mapLoaded.get("details") instanceof BasicDBList) {
+                BasicDBList details = (BasicDBList) mapLoaded.get("details");
+                mapLoaded.put("details", details.toString());
+            }
             AccessToken loadedAccessToken = AccessToken.loadFromMap(mapLoaded);
             log.debug(loadedAccessToken.getToken());
             return loadedAccessToken;
@@ -222,6 +236,7 @@ public class MongoDBManager implements DBManager {
         }
     }
 
+    @Override
     public void updateAuthCodeValidStatus(String authCode, boolean valid) {
         BasicDBObject dbObject = new BasicDBObject();
         dbObject.put("code", authCode);

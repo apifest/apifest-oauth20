@@ -24,7 +24,8 @@ import java.io.Serializable;
  *
  */
 public class PersistentAccessToken implements Serializable {
-    private static final long serialVersionUID = -4001970496869517550L;
+
+    private static final long serialVersionUID = -1079204531513602561L;
 
     private String token = "";
     private String refreshToken = "";
@@ -36,6 +37,7 @@ public class PersistentAccessToken implements Serializable {
     private String codeId = "";
     private String userId = "";
     private Long created;
+    private String details = "";
 
     public String getToken() {
         return token;
@@ -115,6 +117,14 @@ public class PersistentAccessToken implements Serializable {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
     }
 
     public String getRefreshTokenByClient() {

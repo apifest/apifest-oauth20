@@ -16,29 +16,38 @@
 
 package com.apifest.oauth20;
 
-import java.util.List;
+import org.codehaus.jackson.annotate.JsonPropertyOrder;
 
 /**
- * Represents user details associated with an access token.
+ * Represents key-value object.
  *
  * @author Rossitsa Borissova
  */
-public class UserDetails {
+@JsonPropertyOrder({"name", "value"})
+public class NameValue {
 
-    String userId;
-    List<NameValue> details;
+    String name;
+    String value;
 
-    public UserDetails(String userId, List<NameValue> details) {
-        this.userId = userId;
-        this.details = details;
+    public NameValue() {
+
     }
 
-    public String getUserId() {
-        return userId;
+    public NameValue(String name, String value) {
+        this.name = name;
+        this.value = value;
     }
 
-    public List<NameValue> getDetails() {
-        return details;
+    public String getName() {
+        return name;
     }
-
+    public void setKey(String name) {
+        this.name = name;
+    }
+    public String getValue() {
+        return value;
+    }
+    public void setValue(String value) {
+        this.value = value;
+    }
 }
