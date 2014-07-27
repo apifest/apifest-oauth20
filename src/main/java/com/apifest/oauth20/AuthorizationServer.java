@@ -199,10 +199,10 @@ public class AuthorizationServer {
             accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope),
                     scope);
             try {
-                String userId = authenticateUser(tokenRequest.getUsername(),
+                UserDetails userDetails = authenticateUser(tokenRequest.getUsername(),
                         tokenRequest.getPassword());
-                if (userId != null) {
-                    accessToken.setUserId(userId);
+                if (userDetails != null && userDetails.getUserId() != null) {
+                    accessToken.setUserId(userDetails.getUserId());
                     accessToken.setClientId(tokenRequest.getClientId());
                     db.storeAccessToken(accessToken);
                 } else {
@@ -218,7 +218,7 @@ public class AuthorizationServer {
         return accessToken;
     }
 
-    protected String authenticateUser(String username, String password) throws IOException {
+    protected UserDetails authenticateUser(String username, String password) throws IOException {
         UserAuthentication ua = new UserAuthentication();
         return ua.authenticate(username, password);
     }

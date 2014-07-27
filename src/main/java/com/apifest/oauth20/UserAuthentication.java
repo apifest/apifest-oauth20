@@ -50,8 +50,8 @@ public class UserAuthentication {
      * @return unique id of the user
      * @throws IOException
      */
-    public String authenticate(String username, String password) throws IOException {
-        String userId = null;
+    public UserDetails authenticate(String username, String password) throws IOException {
+        UserDetails userDetails = null;
         HttpPost post = new HttpPost(OAuthServer.getUserAuthEndpoint());
         post.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         HttpClient httpClient = new DefaultHttpClient();
@@ -66,15 +66,16 @@ public class UserAuthentication {
                 String res = readResponse(response);
                 log.debug("json response: " + res);
                 JSONObject jsonResponse = new JSONObject(res);
-                userId = jsonResponse.getString(OAuthServer.getUserIdJsonName());
+                String userId = jsonResponse.getString(OAuthServer.getUserIdJsonName());
                 log.debug("user_id: " + userId);
+                userDetails = new UserDetails(userId, null);
             }
         } catch (JSONException e) {
             log.error("Cannot get user id", e);
         } catch (UnsupportedEncodingException e) {
             log.error("Cannot post to authenticate user", e);
         }
-        return userId;
+        return userDetails;
     }
 
     protected String readResponse(HttpResponse response) throws IOException {

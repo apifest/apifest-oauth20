@@ -714,7 +714,8 @@ public class AuthorizationServerTest {
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
-        willReturn("123456").given(authServer).authenticateUser("rossi", "test");
+        UserDetails userDetails = new UserDetails("123456", null);
+        willReturn(userDetails).given(authServer).authenticateUser("rossi", "test");
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
 
         // WHEN
@@ -781,7 +782,8 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
-        willReturn("3232232122").given(authServer).authenticateUser("rossi", "test");
+        UserDetails userDetails = new UserDetails("3232232122", null);
+        willReturn(userDetails).given(authServer).authenticateUser("rossi", "test");
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
 
         // WHEN
@@ -1066,7 +1068,8 @@ public class AuthorizationServerTest {
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
-        willReturn("23433366").given(authServer).authenticateUser(anyString(), anyString());
+        UserDetails userDetails = new UserDetails("23433366", null);
+        willReturn(userDetails).given(authServer).authenticateUser(anyString(), anyString());
 
         // WHEN
         AccessToken accessToken = authServer.issueAccessToken(req);
