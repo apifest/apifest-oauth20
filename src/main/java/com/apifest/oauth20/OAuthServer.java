@@ -69,6 +69,8 @@ public final class OAuthServer {
         if(!loadConfig()){
             System.exit(1);
         }
+
+        DBManagerFactory.init();
         ChannelFactory factory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
                 Executors.newCachedThreadPool());
 
@@ -91,7 +93,6 @@ public final class OAuthServer {
         bootstrap.setOption("child.soLinger", -1);
 
         bootstrap.bind(new InetSocketAddress(host, portInt));
-        DBManagerFactory.init();
         log.info("ApiFest OAuth 2.0 Server started at " + host + ":" + portInt);
     }
 
@@ -142,10 +143,7 @@ public final class OAuthServer {
             props.load(in);
             userAuthEndpoint = props.getProperty("user.authenticate.endpoint");
             userIdJsonName =  props.getProperty("user_id.name");
-            database = props.getProperty("oauth20.database","mongodb");
-            if(database == null || database.length() == 0) {
-                database = "mongodb";
-            }
+            database = props.getProperty("oauth20.database");
             redisSentinels = props.getProperty("redis.sentinels");
             redisMaster = props.getProperty("redis.master");
             if(userIdJsonName == null) {

@@ -43,6 +43,10 @@ public class AuthorizationServerTest {
 
     @BeforeMethod
     public void setup() {
+        String path = getClass().getClassLoader().getResource("apifest-oauth-test.properties").getPath();
+        System.setProperty("properties.file", path);
+        OAuthServer.loadConfig();
+
         AuthorizationServer.log = mock(Logger.class);
         authServer = spy(new AuthorizationServer());
         authServer.db = mock(DBManager.class);

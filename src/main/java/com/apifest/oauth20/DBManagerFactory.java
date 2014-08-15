@@ -25,7 +25,6 @@ public class DBManagerFactory {
 
     protected static DBManager dbManager;
 
-    // TODO: make H2 DB default
     public static DBManager getInstance() {
         if (dbManager == null) {
             if ("redis".equalsIgnoreCase(OAuthServer.getDatabase())) {
@@ -34,8 +33,7 @@ public class DBManagerFactory {
             }
             if ("mongodb".equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new MongoDBManager();
-            }
-            if ("hazelcast".equalsIgnoreCase(OAuthServer.getDatabase())) {
+            } else {
                 dbManager = new HazelcastDBManager();
             }
         }
