@@ -95,6 +95,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 response = handleRegisterScope(req);
             } else if (OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleGetScopes(req);
+            } else if (APPLICATION_URI.equals(rawUri) && method.equals(HttpMethod.PUT)) {
+                response = handleUpdateClientApp(req);
             } else {
                 response = Response.createNotFoundResponse();
             }
@@ -244,5 +246,17 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
     protected ScopeService getScopeService() {
         return new ScopeService();
+    }
+
+    protected HttpResponse handleUpdateClientApp(HttpRequest req) {
+        HttpResponse response = null;
+        try {
+            if (auth.updateClientApp(req)) {
+                response = Response.createOkResponse("{\"status\":\"client application updated\"}");
+            }
+        } catch (OAuthException ex) {
+            response = Response.createOAuthExceptionResponse(ex);
+        }
+        return response;
     }
 }

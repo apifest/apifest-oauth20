@@ -372,4 +372,30 @@ public class MongoDBManager implements DBManager {
         return result;
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#updateClientAppScope(java.lang.String)
+     */
+    @Override
+    public boolean updateClientAppScope(String clientId, String scope, String description, Integer status) {
+        boolean updated = false;
+        DBCollection coll = db.getCollection(CLIENTS_COLLECTION_NAME);
+        BasicDBObject query = new BasicDBObject(ID_NAME, clientId);
+        List<DBObject> list = coll.find(query).toArray();
+        if (list.size() > 0) {
+            DBObject newObject = list.get(0);
+            if (scope != null && scope.length() > 0) {
+                newObject.put("scope", scope);
+            }
+            if (description != null && description.length() > 0) {
+                newObject.put("descr", description);
+            }
+            if (status != null) {
+                newObject.put("status", status);
+            }
+            coll.findAndModify(query, newObject);
+            updated = true;
+        }
+        return updated;
+    }
+
 }

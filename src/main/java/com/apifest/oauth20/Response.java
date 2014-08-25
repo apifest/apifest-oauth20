@@ -46,6 +46,7 @@ public final class Response {
     public static final String CANNOT_AUTHENTICATE_USER = "{\"error\": \"cannot authenticate user\"}";
     public static final String NOT_FOUND_CONTENT = "{\"error\":\"Not found\"}";
     public static final String UNSUPPORTED_MEDIA_TYPE = "{\"error\":\"unsupported media type\"}";
+    public static final String CANNOT_UPDATE_APP = "{\"error\": \"cannot update client application\"}";
 
     public static final String APPLICATION_JSON = "application/json";
 

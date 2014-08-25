@@ -353,4 +353,13 @@ public class H2DBManager implements DBManager {
         }
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#updateClientAppScope(java.lang.String)
+     */
+    @Override
+    public boolean updateClientAppScope(String clientId, String scope, String description, Integer status) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

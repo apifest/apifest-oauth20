@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Rossitsa Borissova
  */
-@JsonPropertyOrder({ "name", "description", "scope", "registered", "redirect_uri"})
+@JsonPropertyOrder({ "name", "description", "scope", "registered", "redirect_uri", "status"})
 @JsonSerialize(include = Inclusion.NON_NULL)
 public class ApplicationInfo implements Serializable {
 
@@ -55,6 +55,9 @@ public class ApplicationInfo implements Serializable {
 
     @JsonProperty("name")
     private String name;
+
+    @JsonProperty("status")
+    private Integer status;
 
     public String getRegistered() {
         return registered.toString();
@@ -96,6 +99,14 @@ public class ApplicationInfo implements Serializable {
         this.redirectUri = redirectUri;
     }
 
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
     public boolean valid() {
         boolean valid = false;
         if (name != null && name.length() > 0 && scope != null && scope.length() > 0 &&
@@ -107,6 +118,15 @@ public class ApplicationInfo implements Serializable {
             } catch (MalformedURLException e) {
                 log.info("not valid URI {}", redirectUri);
             }
+        }
+        return valid;
+    }
+
+    public boolean validForUpdate() {
+        boolean valid = false;
+        if ((scope != null && scope.length() > 0) || (description != null && description.length() > 0) ||
+                (status != null && (status == 0 || status == 1))) {
+           valid = true;
         }
         return valid;
     }

@@ -240,4 +240,24 @@ public class RedisDBManager implements DBManager {
         return Scope.loadFromStringMap(scopeMap);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#updateClientAppScope(java.lang.String)
+     */
+    @Override
+    public boolean updateClientAppScope(String clientId, String scope, String description, Integer status) {
+        Jedis jedis = pool.getResource();
+        Map<String, String> clientApp = jedis.hgetAll("cc:" + clientId);
+        if (scope != null && scope.length() > 0) {
+            clientApp.put("scope", scope);
+        }
+        if (description != null && description.length() > 0) {
+            clientApp.put("descr", description);
+        }
+        if (status != null) {
+            clientApp.put("status", String.valueOf(status));
+        }
+        jedis.hmset("cc:" + clientId, clientApp);
+        return true;
+    }
+
 }
