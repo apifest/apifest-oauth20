@@ -17,8 +17,9 @@
 package com.apifest.oauth20.api;
 
 /**
+ * Exception thrown when something goes wrong with user authentication.
  *
- *
+ * @author Rossitsa Borissova
  */
 public class UserAuthenticationException extends Exception {
 

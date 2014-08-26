@@ -80,7 +80,7 @@ You can define the name of Redis master in the following property in the apifest
 
 ***redis.master***
 
-* **Setup authenticate endpoint in your API**
+* **Setup user authentication**
 
 As the ApiFest OAuth 2.0 Server should be able to authenticate the user, you can implement your own user authentication as implementing com.apifest.oauth20.IUserAuthentication interface
 The location of the jar that contains the implementation is set by the following property: 
