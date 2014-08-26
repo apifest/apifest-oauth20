@@ -1,0 +1,9 @@
+oauth20.host=
+oauth20.port=
+oauth20.database=
+db_host=
+redis.sentinels=
+redis.master=
+user.authenticate.jar=
+user.authenticate.class=
+apifest-oauth20.nodes=

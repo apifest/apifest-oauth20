@@ -42,8 +42,8 @@ oauth20.database=
 db_host=
 redis.sentinels=
 redis.master=
-user.authenticate.endpoint=
-user_id.name=
+user.authenticate.jar=
+user.authenticate.class=
 apifest-oauth20.nodes=
 ```
 
@@ -82,16 +82,14 @@ You can define the name of Redis master in the following property in the apifest
 
 * **Setup authenticate endpoint in your API**
 
-As the ApiFest OAuth 2.0 Server should be able to use username and password (in case of Resource Owner Password Credentials Grant flow) for authentication, an authenticate endpoint in your 
-API should be defined. For that purpose, use the following property in the apifest-oauth.properties file:
+As the ApiFest OAuth 2.0 Server should be able to authenticate the user, you can implement your own user authentication as implementing com.apifest.oauth20.IUserAuthentication interface
+The location of the jar that contains the implementation is set by the following property: 
 
-***user.authenticate.endpoint***
+***user.authenticate.jar***
 
-Currently, the ApiFest OAuth 2.0 Server expects the response from your API authenticate endpoint in JSON format.
-Also, a user unique identifier should be returned in the response so it can be used by the ApiFest OAuth 2.0 Server (it will be associated with access token with grant_type=password).
-The name of the JSON field containing that information is defined in the following property:
+The custom user authentication class will be loaded by the jar defined in user.authenticate.jar. The implementation class is defined by: 
 
-***user_id.name***
+***user.authenticate.class***
 
 In order to run ApiFest OAuth20 distributed storage, you need to setup all ApiFest OAuth20 nodes (as comma-separated list of IPs).
 
