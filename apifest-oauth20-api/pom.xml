@@ -4,7 +4,7 @@
   <groupId>com.apifest</groupId>
   <artifactId>apifest-oauth20-api</artifactId>
   <version>0.1.1-SNAPSHOT</version>
-  <name>ApiFest-OAuth20</name>
+  <name>ApiFest-OAuth20-API</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
