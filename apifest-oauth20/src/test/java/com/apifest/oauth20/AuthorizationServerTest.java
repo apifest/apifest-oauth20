@@ -1165,4 +1165,102 @@ public class AuthorizationServerTest {
         // THEN
         assertEquals(errorMsg, AuthorizationServer.SCOPE_NOK_MESSAGE);
     }
+
+    @Test
+    public void when_client_id_and_client_secret_passed_issue_client_credentials_with_them() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String clientId = "3242342342342";
+        String clientSecret = "33196d652cb8e5bc2edfc95722ebb452f7fc3ef9";
+        String content = "{\"name\":\"name\",\"redirect_uri\":\"http://example.com\", \"scope\":\"basic\", " +
+                "\"client_id\":\"" + clientId + "\", \"client_secret\":\"" + clientSecret + "\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("application/json").given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+        Scope scope = new Scope();
+        willReturn(scope).given(authServer.db).findScope("basic");
+
+        // WHEN
+        ClientCredentials creds = authServer.issueClientCredentials(req);
+
+        // THEN
+        assertEquals(creds.getId(), clientId);
+        assertEquals(creds.getSecret(), clientSecret);
+    }
+
+    @Test
+    public void when_client_id_only_passed_issue_client_credentials_with_generated_client_id_and_client_secret() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String clientId = "3242342342342";
+        String content = "{\"name\":\"name\",\"redirect_uri\":\"http://example.com\", \"scope\":\"basic\", " +
+                "\"client_id\":\"" + clientId + "\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("application/json").given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+        Scope scope = new Scope();
+        willReturn(scope).given(authServer.db).findScope("basic");
+
+        // WHEN
+        ClientCredentials creds = authServer.issueClientCredentials(req);
+
+        // THEN
+        assertNotEquals(creds.getId(), clientId);
+    }
+
+    @Test
+    public void when_client_secret_only_passed_issue_client_credentials_with_generated_client_id_and_client_secret() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String clientSecret = "33196d652cb8e5bc2edfc95722ebb452f7fc3ef9";
+        String content = "{\"name\":\"name\",\"redirect_uri\":\"http://example.com\", \"scope\":\"basic\", " +
+                "\"client_secret\":\"" + clientSecret + "\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("application/json").given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+        Scope scope = new Scope();
+        willReturn(scope).given(authServer.db).findScope("basic");
+
+        // WHEN
+        ClientCredentials creds = authServer.issueClientCredentials(req);
+
+        // THEN
+        assertNotEquals(creds.getSecret(), clientSecret);
+    }
+
+    @Test
+    public void when_client_id_already_registered_then_throw_exception() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String clientId = "3242342342342";
+        String clientSecret = "33196d652cb8e5bc2edfc95722ebb452f7fc3ef9";
+        String content = "{\"name\":\"name\",\"redirect_uri\":\"http://example.com\", \"scope\":\"basic\", " +
+                "\"client_id\":\"" + clientId + "\", \"client_secret\":\"" + clientSecret + "\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("application/json").given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+        Scope scope = new Scope();
+        willReturn(scope).given(authServer.db).findScope("basic");
+        ClientCredentials registredCreds = new ClientCredentials();
+        willReturn(registredCreds).given(authServer.db).findClientCredentials(clientId);
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            authServer.issueClientCredentials(req);
+        } catch (OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, Response.ALREADY_REGISTERED_APP);
+    }
 }

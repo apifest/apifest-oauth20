@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Rossitsa Borissova
  */
-@JsonPropertyOrder({ "name", "description", "scope", "registered", "redirect_uri", "status"})
+@JsonPropertyOrder({ "name", "description", "client_id", "client_secret", "scope", "registered", "redirect_uri", "status"})
 @JsonSerialize(include = Inclusion.NON_NULL)
 public class ApplicationInfo implements Serializable {
 
@@ -58,6 +58,12 @@ public class ApplicationInfo implements Serializable {
 
     @JsonProperty("status")
     private Integer status;
+
+    @JsonProperty("client_id")
+    private String id = "";
+
+    @JsonProperty("client_secret")
+    private String secret = "";
 
     public String getRegistered() {
         return registered.toString();
@@ -105,6 +111,22 @@ public class ApplicationInfo implements Serializable {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 
     public boolean valid() {

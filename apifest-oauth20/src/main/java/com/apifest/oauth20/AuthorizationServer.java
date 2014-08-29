@@ -72,8 +72,20 @@ public class AuthorizationServer {
                             throw new OAuthException(Response.SCOPE_NOT_EXIST, HttpResponseStatus.BAD_REQUEST);
                         }
                     }
-                    creds = new ClientCredentials(appInfo.getName(), appInfo.getScope(), appInfo.getDescription(),
-                            appInfo.getRedirectUri());
+                    // check client_id, client_secret passed
+                    if ((appInfo.getId() != null && appInfo.getId().length() > 0) &&
+                            (appInfo.getSecret() != null && appInfo.getSecret().length() > 0)) {
+                        // if a client app with this client_id already registered
+                        if (db.findClientCredentials(appInfo.getId()) == null) {
+                            creds = new ClientCredentials(appInfo.getName(), appInfo.getScope(), appInfo.getDescription(),
+                                appInfo.getRedirectUri(), appInfo.getId(), appInfo.getSecret());
+                        } else {
+                            throw new OAuthException(Response.ALREADY_REGISTERED_APP, HttpResponseStatus.BAD_REQUEST);
+                        }
+                    } else {
+                        creds = new ClientCredentials(appInfo.getName(), appInfo.getScope(), appInfo.getDescription(),
+                                appInfo.getRedirectUri());
+                    }
                     db.storeClientCredentials(creds);
                 } else {
                     throw new OAuthException(Response.NAME_OR_SCOPE_OR_URI_IS_NULL, HttpResponseStatus.BAD_REQUEST);

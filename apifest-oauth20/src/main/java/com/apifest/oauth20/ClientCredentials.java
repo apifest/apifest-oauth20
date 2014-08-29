@@ -76,6 +76,16 @@ public class ClientCredentials implements Serializable {
         this.created = (new Date()).getTime();
     }
 
+    public ClientCredentials(String appName, String scope, String description, String uri, String clientId, String clientSecret) {
+        this.name = appName;
+        this.scope = scope;
+        this.descr = (description != null)? description : "";
+        this.uri = uri;
+        this.id = clientId;
+        this.secret = clientSecret;
+        this.created = (new Date()).getTime();
+    }
+
     public ClientCredentials() {
 
     }
