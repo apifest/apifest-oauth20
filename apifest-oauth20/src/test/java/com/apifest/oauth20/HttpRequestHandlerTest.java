@@ -46,6 +46,10 @@ public class HttpRequestHandlerTest {
 
     @BeforeMethod
     public void setup() {
+        String path = getClass().getClassLoader().getResource("apifest-oauth-test.properties").getPath();
+        System.setProperty("properties.file", path);
+        OAuthServer.loadConfig();
+
         handler = spy(new HttpRequestHandler());
         handler.log = mock(Logger.class);
         channel = mock(Channel.class);

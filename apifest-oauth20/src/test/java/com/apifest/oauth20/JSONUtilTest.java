@@ -16,15 +16,12 @@
 
 package com.apifest.oauth20;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.testng.annotations.Test;
-
-import com.apifest.oauth20.api.NameValue;
 
 /**
  * @author Rossitsa Borissova
@@ -34,26 +31,27 @@ public class JSONUtilTest {
     @Test
     public void when_json_string_convert_to_list() throws Exception {
         // GIVEN
-        String json = "[{\"name\":\"key1\",\"value\":\"value1\"},{\"name\":\"key2\",\"value\":\"value2\"}]";
+        String json = "{\"key1\":\"value1\", \"key2\":\"value2\"}";
 
         // WHEN
-        List<NameValue> list = JSONUtils.convertStringToList(json);
+        Map<String, String> map = JSONUtils.convertStringToMap(json);
 
         // THEN
-        assertEquals(list.get(0).getName(), "key1");
+        assertNotNull(map.get("key1"));
     }
 
     @Test
     public void when_list_convert_to_json() throws Exception {
         // GIVEN
-        List<NameValue> details = new ArrayList<NameValue>();
-        details.add(new NameValue("key1", "value1"));
-        details.add(new NameValue("key2", "value2"));
+        Map<String, String> details = new HashMap<String, String>();
+        details.put("key1", "value1");
+        details.put("key2", "value2");
 
         // WHEN
-        String json = JSONUtils.convertListToJSON(details);
+        String json = JSONUtils.convertMapToJSON(details);
 
         // THEN
-        assertTrue(json.toString().contains("[{\"name\":\"key1\",\"value\":\"value1\"},{\"name\":\"key2\",\"value\":\"value2\"}]"));
+        assertTrue(json.toString().contains("\"key1\":\"value1\""));
+        assertTrue(json.toString().contains("\"key2\":\"value2\""));
     }
 }

@@ -16,9 +16,7 @@
 
 package com.apifest.oauth20.api;
 
-import java.util.List;
-
-import com.apifest.oauth20.api.NameValue;
+import java.util.Map;
 
 /**
  * Represents user details associated with an access token.
@@ -28,9 +26,9 @@ import com.apifest.oauth20.api.NameValue;
 public class UserDetails {
 
     String userId;
-    List<NameValue> details;
+    Map<String, String> details;
 
-    public UserDetails(String userId, List<NameValue> details) {
+    public UserDetails(String userId, Map<String, String> details) {
         this.userId = userId;
         this.details = details;
     }
@@ -39,7 +37,7 @@ public class UserDetails {
         return userId;
     }
 
-    public List<NameValue> getDetails() {
+    public Map<String, String> getDetails() {
         return details;
     }
 

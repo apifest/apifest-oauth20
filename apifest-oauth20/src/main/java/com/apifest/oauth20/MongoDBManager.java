@@ -22,12 +22,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.bson.BSONObject;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -180,9 +183,9 @@ public class MongoDBManager implements DBManager {
         }
         if (list.size() > 0) {
             Map<String, Object> mapLoaded = list.get(0).toMap();
-            // convert details list to String
-            if (mapLoaded.get("details") instanceof BasicDBList) {
-                BasicDBList details = (BasicDBList) mapLoaded.get("details");
+            // convert details map to String
+            if (mapLoaded.get("details") instanceof BasicDBObject) {
+                BasicDBObject details = (BasicDBObject) mapLoaded.get("details");
                 mapLoaded.put("details", details.toString());
             }
             return AccessToken.loadFromMap(mapLoaded);
@@ -211,8 +214,8 @@ public class MongoDBManager implements DBManager {
         if (list != null && list.size() == 1) {
             Map<String, Object> mapLoaded = list.get(0).toMap();
             // convert details list to String
-            if (mapLoaded.get("details") instanceof BasicDBList) {
-                BasicDBList details = (BasicDBList) mapLoaded.get("details");
+            if (mapLoaded.get("details") instanceof BasicDBObject) {
+                BasicDBObject details = (BasicDBObject) mapLoaded.get("details");
                 mapLoaded.put("details", details.toString());
             }
             AccessToken loadedAccessToken = AccessToken.loadFromMap(mapLoaded);
@@ -273,26 +276,34 @@ public class MongoDBManager implements DBManager {
     @Override
     @SuppressWarnings("unchecked")
     public boolean storeScope(Scope scope) {
-        String id = scope.getScope();
-        JSONObject json = new JSONObject(scope);
-        json.remove(Scope.SCOPE_FIELD);
         boolean stored = false;
-        try {
-            // use scope name as _id
-            json.put(ID_NAME, id);
-            Map<String, Object> result = new ObjectMapper().readValue(json.toString(), Map.class);
+        String id = scope.getScope();
+        Gson gson = new Gson();
+        String json = gson.toJson(scope);
+        JsonParser parser = new JsonParser();
+        JsonObject jsonObj= parser.parse(json).getAsJsonObject();
+        jsonObj.remove("scope");
+        // use scope name as _id
+        jsonObj.addProperty(ID_NAME, id);
 
-            // if scope already exits, updates is, otherwise creates the scope
+        try {
+            // use ObjectMapper in order to represent expiresIn as integer not as double - 100 instead of 100.00
+            Map<String, Object> result = new ObjectMapper().readValue(jsonObj.toString(), Map.class);
+
+            // if scope already exits, updates it, otherwise creates the scope
             BasicDBObject query = new BasicDBObject(ID_NAME, id);
             BasicDBObject newObject = new BasicDBObject(result);
             DBCollection coll = db.getCollection(SCOPE_COLLECTION_NAME);
             coll.update(query, newObject, true, false);
             stored = true;
+        } catch (JsonParseException e) {
+            log.error("cannot store scope {}", scope.getScope(), e);
+        } catch (JsonMappingException e) {
+            log.error("cannot store scope {}", scope.getScope(), e);
         } catch (IOException e) {
             log.error("cannot store scope {}", scope.getScope(), e);
-        } catch (JSONException e) {
-            log.error("cannot store scope {}", scope.getScope(), e);
         }
+
         return stored;
     }
 
@@ -320,18 +331,18 @@ public class MongoDBManager implements DBManager {
     @SuppressWarnings("unchecked")
     public Scope findScope(String scopeName) {
         BSONObject result = (BSONObject) findObjectById(scopeName, ID_NAME, SCOPE_COLLECTION_NAME);
-        return Scope.loadFromMap(result.toMap());
+        if (result != null) {
+            return Scope.loadFromMap(result.toMap());
+        } else {
+            return null;
+        }
     }
 
     @SuppressWarnings("unchecked")
     protected void storeObject(Object object, String collectionName) throws IOException {
-        JSONObject json = new JSONObject(object);
-        if (!json.isNull("id")) {
-            constructDbId(json);
-        } else {
-            json.remove("id");
-        }
-        Map<String, Object> result = new ObjectMapper().readValue(json.toString(), Map.class);
+        String json = constructDbId(object);
+        // use ObjectMapper in order to represent expiresIn as integer not as double - 100 instead of 100.00
+        Map<String, Object> result = new ObjectMapper().readValue(json, Map.class);
         BasicDBObject dbObject = new BasicDBObject(result);
 
         DBCollection coll = db.getCollection(collectionName);
@@ -339,14 +350,18 @@ public class MongoDBManager implements DBManager {
         log.debug("dbObject:", result);
     }
 
-    protected void constructDbId(JSONObject json) {
-        try {
-            String id = json.getString("id");
-            json.remove("id");
-            json.put(ID_NAME, id);
-        } catch (JSONException e) {
-            log.error("No id set to JSON object {} ", json);
+    // replaces id with _id, if id presents in the object
+    protected String constructDbId(Object object) {
+        Gson gson = new Gson();
+        String json = gson.toJson(object);
+        JsonParser parser = new JsonParser();
+        JsonObject jsonObj= parser.parse(json).getAsJsonObject();
+        if(jsonObj.has("id")) {
+            String id = jsonObj.get("id").getAsString();
+            jsonObj.remove("id");
+            jsonObj.addProperty(ID_NAME, id);
         }
+        return jsonObj.toString();
     }
 
     protected Object findObjectById(String id, String idName, String collectionName) {

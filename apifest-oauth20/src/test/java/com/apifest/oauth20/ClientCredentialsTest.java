@@ -23,7 +23,6 @@ import static org.testng.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 /**
@@ -69,15 +68,4 @@ public class ClientCredentialsTest {
         assertNotNull(creds.getCreated());
     }
 
-    @Test
-    public void when_JSON_presentation_contains_created_value() throws Exception {
-        // GIVEN
-        ClientCredentials creds = new ClientCredentials("Demo", "basic", "descr", "http://example.com");
-
-        // WHEN
-        JSONObject json = new JSONObject(creds);
-
-        // THEN
-        assertNotNull(json.get("created"));
-    }
 }

@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bson.BSONObject;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -143,21 +142,7 @@ public class MongoDBManagerTest {
         dbManager.storeObject(cred, MongoDBManager.CLIENTS_COLLECTION_NAME);
 
         // THEN
-        verify(dbManager).constructDbId(any(JSONObject.class));
-    }
-
-    @Test
-    public void when_json_contains_NO_id_NOT_invoke_constructDbId() throws Exception {
-        // GIVEN
-        AuthCode code = new AuthCode(AuthCode.generate(), "763273054098803", "http://example.com",
-                "xyz", "basic", "code", "1234");
-        given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
-
-        // WHEN
-        dbManager.storeObject(code, MongoDBManager.CLIENTS_COLLECTION_NAME);
-
-        // THEN
-        verify(dbManager, times(0)).constructDbId(any(JSONObject.class));
+        verify(dbManager).constructDbId(any());
     }
 
     @Test
@@ -196,4 +181,43 @@ public class MongoDBManagerTest {
         assertFalse(result);
     }
 
+    @Test
+    public void when_constructDbId_return_whole_object_as_json() throws Exception {
+        // GIVEN
+        ClientCredentials clientCreds = new ClientCredentials();
+        clientCreds.setName("test_client");
+        clientCreds.setDescr("descr");
+
+        // WHEN
+        String json = dbManager.constructDbId(clientCreds);
+
+        // THEN
+        assertTrue(json.contains("descr"));
+    }
+
+    @Test
+    public void when_constructDbId_replace_id_with_undescored_id() throws Exception {
+        // GIVEN
+        ClientCredentials clientCreds = new ClientCredentials();
+        clientCreds.setName("test_client");
+        clientCreds.setDescr("descr");
+
+        // WHEN
+        String json = dbManager.constructDbId(clientCreds);
+
+        // THEN
+        assertTrue(json.contains("_id"));
+    }
+
+    @Test
+    public void when_scope_not_found_return_null() throws Exception {
+        // GIVEN
+        willReturn(null).given(dbManager).findObjectById("basic", MongoDBManager.ID_NAME, MongoDBManager.SCOPE_COLLECTION_NAME);
+
+        // WHEN
+        Scope scope = dbManager.findScope("basic");
+
+        // THEN
+        assertNull(scope);
+    }
 }

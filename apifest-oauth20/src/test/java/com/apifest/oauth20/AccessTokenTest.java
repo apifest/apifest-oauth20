@@ -28,10 +28,8 @@ import java.util.Date;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.json.JSONObject;
 import org.testng.annotations.Test;
 
-import com.mongodb.BasicDBList;
 
 /**
  * @author Rossitsa Borissova

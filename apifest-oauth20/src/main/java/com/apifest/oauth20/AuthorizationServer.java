@@ -29,14 +29,14 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringEncoder;
 import org.jboss.netty.util.CharsetUtil;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.apifest.oauth20.api.IUserAuthentication;
 import com.apifest.oauth20.api.UserAuthenticationException;
 import com.apifest.oauth20.api.UserDetails;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * Main class for authorization.
@@ -196,7 +196,7 @@ public class AuthorizationServer {
 
             accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope);
             try {
-                UserDetails userDetails = authenticateUser(tokenRequest.getUsername(), tokenRequest.getPassword());
+                UserDetails userDetails = authenticateUser(tokenRequest.getUsername(), tokenRequest.getPassword(), req);
                 if (userDetails != null && userDetails.getUserId() != null) {
                     accessToken.setUserId(userDetails.getUserId());
                     accessToken.setDetails(userDetails.getDetails());
@@ -213,13 +213,13 @@ public class AuthorizationServer {
         return accessToken;
     }
 
-    protected UserDetails authenticateUser(String username, String password) throws UserAuthenticationException {
+    protected UserDetails authenticateUser(String username, String password, HttpRequest authRequest) throws UserAuthenticationException {
         UserDetails userDetails = null;
         IUserAuthentication ua;
         if (OAuthServer.getUserAuthenticationClass() != null) {
             try {
                 ua = OAuthServer.getUserAuthenticationClass().newInstance();
-                userDetails = ua.authenticate(username, password);
+                userDetails = ua.authenticate(username, password, authRequest);
             } catch (InstantiationException e) {
                 log.error("cannot instantiate user authentication class", e);
                 throw new UserAuthenticationException(e.getMessage());
@@ -372,13 +372,8 @@ public class AuthorizationServer {
 
     private String getAccessToken(HttpRequest req) {
         String content = req.getContent().toString(CharsetUtil.UTF_8);
-        String token = null;
-        try {
-            JSONObject obj = new JSONObject(content);
-            token = obj.getString("access_token");
-        } catch (JSONException e) {
-            log.error("cannot parse JSON, {}", content);
-        }
-        return token;
+        JsonParser parser = new JsonParser();
+        JsonObject jsonObj= parser.parse(content).getAsJsonObject();
+        return jsonObj.get("access_token").getAsString();
     }
 }

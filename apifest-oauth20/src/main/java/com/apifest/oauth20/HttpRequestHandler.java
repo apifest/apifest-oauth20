@@ -35,10 +35,11 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 /**
  * Handler for requests received on the server.
@@ -144,9 +145,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         AccessToken token = auth.isValidToken(QueryParameter.getFirstElement(params, "token"));
         log.debug("token valid:" + token);
         if (token != null) {
-            JSONObject json = new JSONObject(token);
-            log.debug(json.toString());
-            response = Response.createOkResponse(json.toString());
+            Gson gson = new Gson();
+            String json = gson.toJson(token);
+            log.debug(json);
+            response = Response.createOkResponse(json);
         } else {
             response = Response.createUnauthorizedResponse();
         }
@@ -187,14 +189,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             log.debug("redirectURI: {}", redirectURI);
 
             // return auth_code
-            JSONObject obj = new JSONObject();
-            obj.put("redirect_uri", redirectURI);
+            JsonObject obj = new JsonObject();
+            obj.addProperty("redirect_uri", redirectURI);
             response = Response.createOkResponse(obj.toString());
             accessTokensLog.info("authCode {}", obj.toString());
         } catch (OAuthException ex) {
             response = Response.createOAuthExceptionResponse(ex);
-        } catch (JSONException e) {
-            log.debug("error handle authorize", e);
         }
         return response;
     }

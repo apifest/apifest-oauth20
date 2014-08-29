@@ -18,7 +18,6 @@ package com.apifest.oauth20;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -27,7 +26,6 @@ import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
-import com.apifest.oauth20.api.NameValue;
 
 /**
  * Represents an access token.
@@ -70,7 +68,7 @@ public class AccessToken implements Serializable {
     private String userId = "";
 
     @JsonIgnore
-    private List<NameValue> details = null;
+    private Map<String, String> details = null;
 
     @JsonIgnore
     private Long created;
@@ -181,11 +179,11 @@ public class AccessToken implements Serializable {
         this.userId = userId;
     }
 
-    public List<NameValue> getDetails() {
+    public Map<String, String> getDetails() {
         return details;
     }
 
-    public void setDetails(List<NameValue> details) {
+    public void setDetails(Map<String, String> details) {
         this.details = details;
     }
 
@@ -209,7 +207,7 @@ public class AccessToken implements Serializable {
         accessToken.codeId = (String) map.get("codeId");
         accessToken.userId = (String) map.get("userId");
         accessToken.created = (Long) map.get("created");
-        accessToken.details = JSONUtils.convertStringToList((String) map.get("details"));
+        accessToken.details = JSONUtils.convertStringToMap((String) map.get("details"));
         return accessToken;
     }
 
@@ -225,7 +223,7 @@ public class AccessToken implements Serializable {
         accessToken.codeId = map.get("codeId");
         accessToken.userId = map.get("userId");
         accessToken.created = Long.parseLong(map.get("created"));
-        accessToken.details = JSONUtils.convertStringToList(map.get("details"));
+        accessToken.details = JSONUtils.convertStringToMap(map.get("details"));
         return accessToken;
     }
 

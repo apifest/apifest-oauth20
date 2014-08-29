@@ -16,9 +16,6 @@
 
 package com.apifest.oauth20;
 
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 import org.testng.annotations.Test;

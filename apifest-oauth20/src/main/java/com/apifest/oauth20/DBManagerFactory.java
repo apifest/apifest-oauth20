@@ -30,8 +30,7 @@ public class DBManagerFactory {
             if ("redis".equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new RedisDBManager();
                 ((RedisDBManager) dbManager).setupDBManager();
-            }
-            if ("mongodb".equalsIgnoreCase(OAuthServer.getDatabase())) {
+            } else if ("mongodb".equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new MongoDBManager();
             } else {
                 dbManager = new HazelcastDBManager();
