@@ -16,6 +16,8 @@
 
 package com.apifest.oauth20.persistence.hazelcast;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -122,7 +124,11 @@ public class HazelcastDBManager implements DBManager {
         NetworkConfig networkConfig = new NetworkConfig();
         InterfacesConfig interfaceConfig = new InterfacesConfig();
         // add current host
-        interfaceConfig.addInterface(OAuthServer.getHost());
+        try {
+            interfaceConfig.addInterface(InetAddress.getByName(OAuthServer.getHost()).getHostAddress());
+        } catch (UnknownHostException e) {
+            log.error("cannot create hazelcast config", e);
+        }
         interfaceConfig.setEnabled(true);
 
         networkConfig.setInterfaces(interfaceConfig);
