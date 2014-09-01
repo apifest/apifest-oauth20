@@ -43,6 +43,7 @@ public class TokenRequest {
     protected static final String CODE = "code";
     protected static final String REDIRECT_URI = "redirect_uri";
     protected static final String CLIENT_ID = "client_id";
+    protected static final String CLIENT_SECRET = "client_secret";
     protected static final String SCOPE = "scope";
     protected static final String USERNAME = "username";
 
@@ -50,6 +51,7 @@ public class TokenRequest {
     private String code;
     private String redirectUri;
     private String clientId;
+    private String clientSecret;
     private String refreshToken;
     private String scope;
     private String username;
@@ -67,7 +69,8 @@ public class TokenRequest {
         this.grantType = params.get(GRANT_TYPE);
         this.code = params.get(CODE);
         this.redirectUri = params.get(REDIRECT_URI);
-        // this.clientId = params.get(CLIENT_ID);
+        this.clientId = params.get(CLIENT_ID);
+        this.clientSecret = params.get(CLIENT_SECRET);
         this.refreshToken = params.get(REFRESH_TOKEN);
         this.scope = params.get(SCOPE);
         this.username = params.get(USERNAME);
@@ -161,6 +164,10 @@ public class TokenRequest {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
     }
 
 }

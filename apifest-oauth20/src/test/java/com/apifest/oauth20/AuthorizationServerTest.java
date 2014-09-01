@@ -228,13 +228,13 @@ public class AuthorizationServerTest {
         given(authServer.db.findAuthCode(authCode, redirectUri)).willReturn(mock(AuthCode.class));
 
         HttpRequest req = mock(HttpRequest.class);
-        String content = "client_id=203598599234220&redirect_uri="
-                + redirectUri
+        String content = "redirect_uri=" + redirectUri
                 + "&grant_type=authorization_code&code=eWPoZNvLxVDxuoVBCnGurPXefa#ttxKfryNbLPDvPFsFSkXVhreWW=HvULXWANTnhR=UEtkiaCxsOxgv_nTpq"
                 + "NWQFB-zGkQBHVoqQkjiWkyRuAHZWkFfn#sNeBhJVgOsR=F_vAmJwoOh_ooe#ovaJVCOiZls_DzvkhOnRVrlDRSzZrbZIB_rwGXjpoeXdJlIjZQGhSR#";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
 
         // WHEN
         String errorMsg = null;
@@ -309,11 +309,12 @@ public class AuthorizationServerTest {
                 mock(ClientCredentials.class));
 
         HttpRequest req = mock(HttpRequest.class);
-        String content = "client_id=203598599234220&redirect_uri=example.com"
+        String content = "redirect_uri=example.com"
                 + "&grant_type=authorization_code&code=not_valid_code";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         given(req.getContent()).willReturn(buf);
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
 
         // WHEN
         String errorMsg = null;
@@ -606,6 +607,9 @@ public class AuthorizationServerTest {
     public void when_client_id_null_throw_exception() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
+        String content = "grant_type=password&username=user&password=pass";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
         willReturn(null).given(authServer).getBasicAuthorizationClientId(req);
 
         // WHEN
@@ -671,6 +675,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
         AccessToken accessToken = mock(AccessToken.class);
         willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken)
                 .getToken();
@@ -700,6 +705,7 @@ public class AuthorizationServerTest {
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
         willReturn("basic").given(authServer.scopeService).getValidScope("basic", clientId);
+        willReturn(true).given(authServer).isValidClientId(clientId);
 
         // WHEN
         AccessToken result = authServer.issueAccessToken(req);
@@ -717,6 +723,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
         UserDetails userDetails = new UserDetails("123456", null);
         willReturn(userDetails).given(authServer).authenticateUser("rossi", "test", req);
@@ -740,6 +747,7 @@ public class AuthorizationServerTest {
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willReturn(null).given(authServer).authenticateUser("rossi", "test", req);
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+        willReturn(true).given(authServer).isValidClientId(clientId);
 
         // WHEN
         String errorMsg = null;
@@ -762,6 +770,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
         UserDetails userDetails = new UserDetails("3232232122", null);
         willReturn(userDetails).given(authServer).authenticateUser("rossi", "test", req);
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
@@ -783,6 +792,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
         willReturn(1800).given(authServer.scopeService).getExpiresIn(TokenRequest.CLIENT_CREDENTIALS, "basic");
 
@@ -805,6 +815,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
         AccessToken accessToken = mock(AccessToken.class);
         willReturn("basic").given(accessToken).getScope();
         willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
@@ -1007,6 +1018,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
 
         // WHEN
@@ -1025,6 +1037,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
         willReturn(null).given(authServer.scopeService).getValidScope("ext", clientId);
 
         // WHEN
@@ -1047,6 +1060,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
         UserDetails userDetails = new UserDetails("23433366", null);
         willReturn(userDetails).given(authServer).authenticateUser(anyString(), anyString(), any(HttpRequest.class));
@@ -1068,6 +1082,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
         willReturn(null).given(authServer.scopeService).getValidScope("ext", clientId);
 
         // WHEN
@@ -1093,6 +1108,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
         AccessToken accessToken = mock(AccessToken.class);
         willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
         willReturn("basic").given(accessToken).getScope();
@@ -1119,6 +1135,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
         AccessToken accessToken = mock(AccessToken.class);
         willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
         willReturn("basic, extended").given(accessToken).getScope();
@@ -1146,6 +1163,7 @@ public class AuthorizationServerTest {
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isValidClientId(clientId);
         AccessToken accessToken = mock(AccessToken.class);
         willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
         willReturn("basic, extended").given(accessToken).getScope();
@@ -1262,5 +1280,75 @@ public class AuthorizationServerTest {
 
         // THEN
         assertEquals(errorMsg, Response.ALREADY_REGISTERED_APP);
+    }
+
+    @Test
+    public void when_client_id_and_client_secret_passed_in_request_body_generate_access_token() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String clientId = "203598599234220";
+        String clientSecret = "f754cb0cd78c4c36fa3c1c0325ef72bb4a011373";
+        String content = "grant_type=" + TokenRequest.PASSWORD + "&username=rossi&password=test&client_id=" +
+                clientId + "&client_secret=" + clientSecret;
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        given(req.getContent()).willReturn(buf);
+
+        willReturn(true).given(authServer).isValidClientCredentials(clientId, clientSecret);
+        willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
+        UserDetails userDetails = new UserDetails("123456", null);
+        willReturn(userDetails).given(authServer).authenticateUser("rossi", "test", req);
+        willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+
+        // WHEN
+        AccessToken result = authServer.issueAccessToken(req);
+
+        // THEN
+        verify(authServer).isValidClientCredentials(clientId, clientSecret);
+        assertNotNull(result.getRefreshToken());
+    }
+
+    @Test
+    public void when_client_secret_NOT_passed_and_NO_Basic_Auth_throw_exception() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String clientId = "203598599234220";
+        String content = "grant_type=" + TokenRequest.PASSWORD + "&username=rossi&password=test&client_id=" + clientId;
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        given(req.getContent()).willReturn(buf);
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            authServer.issueAccessToken(req);
+        } catch (OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, Response.INVALID_CLIENT_CREDENTIALS);
+    }
+
+    @Test
+    public void when_client_id_and_client_secret_NOT_valid_throw_exception() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String clientId = "203598599234220";
+        String clientSecret = "f754cb0cd78c4c36fa3c1c0325ef72bb4a011373";
+        String content = "grant_type=" + TokenRequest.PASSWORD + "&username=rossi&password=test&client_id=" +
+                clientId + "&client_secret=" + clientSecret;
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        given(req.getContent()).willReturn(buf);
+        willReturn(false).given(authServer).isValidClientCredentials(clientId, clientSecret);
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            authServer.issueAccessToken(req);
+        } catch (OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, Response.INVALID_CLIENT_CREDENTIALS);
     }
 }

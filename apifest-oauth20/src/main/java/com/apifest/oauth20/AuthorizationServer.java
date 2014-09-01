@@ -19,8 +19,13 @@ package com.apifest.oauth20;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -129,18 +134,23 @@ public class AuthorizationServer {
     }
 
     public AccessToken issueAccessToken(HttpRequest req) throws OAuthException {
-        String clientId = getBasicAuthorizationClientId(req);
-        if (clientId == null) {
-            throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
-        }
         TokenRequest tokenRequest = new TokenRequest(req);
-        tokenRequest.setClientId(clientId);
 
-        /*
-         * if(!isValidClientId(tokenRequest.getClientId())){ throw new OAuthException(ErrorResponse.INVALID_CLIENT_ID,
-         * HttpResponseStatus.BAD_REQUEST); }
-         */
-        tokenRequest.validate();
+        if (tokenRequest.getClientId() == null) {
+            String clientId = getBasicAuthorizationClientId(req);
+            // TODO: check Basic Auth is OK
+            if (clientId == null || !isValidClientId(clientId)) {
+                throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
+            }
+            tokenRequest.setClientId(clientId);
+            tokenRequest.validate();
+        } else {
+            tokenRequest.validate();
+            // check valid client_id and client_secret
+            if (!isValidClientCredentials(tokenRequest.getClientId(), tokenRequest.getClientSecret())) {
+                throw new OAuthException(Response.INVALID_CLIENT_CREDENTIALS, HttpResponseStatus.BAD_REQUEST);
+            }
+        }
 
         AccessToken accessToken = null;
         if (TokenRequest.AUTHORIZATION_CODE.equals(tokenRequest.getGrantType())) {
@@ -307,6 +317,14 @@ public class AuthorizationServer {
 
     protected boolean isValidClientId(String clientId) {
         if (db.findClientCredentials(clientId) != null) {
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean isValidClientCredentials(String clientId, String clientSecret) {
+        ClientCredentials creds = db.findClientCredentials(clientId);
+        if (creds != null && creds.getSecret().equals(clientSecret)) {
             return true;
         }
         return false;
