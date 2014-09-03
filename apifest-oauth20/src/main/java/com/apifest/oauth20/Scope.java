@@ -34,6 +34,8 @@ public class Scope {
     static final String CC_EXPIRES_IN_FIELD = "ccExpiresIn";
     static final String PASS_EXPIRES_IN_FIELD = "passExpiresIn";
 
+    private static final String SPACE = " ";
+
     @JsonProperty("scope")
     private String scope;
 
@@ -96,7 +98,7 @@ public class Scope {
         return scope;
     }
 
-    public boolean validate() {
+    public boolean valid() {
         boolean validScope = scope != null && scope.length() >= 2;
         boolean validCCExpiresIn = ccExpiresIn != null && ccExpiresIn > 0;
         boolean validPassExpiresIn = passExpiresIn != null && passExpiresIn > 0;
@@ -115,5 +117,12 @@ public class Scope {
            valid = true;
         }
         return valid;
+    }
+
+    public static boolean validScopeName(String scopeName) {
+        if (scopeName.contains(SPACE)) {
+            return false;
+        }
+        return true;
     }
 }

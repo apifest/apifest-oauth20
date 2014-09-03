@@ -45,6 +45,7 @@ public class ScopeService {
 
     protected static final String MANDATORY_FIELDS_ERROR = "{\"error\":\"scope, description, cc_expires_in and pass_expires_in are mandatory\"}";
     protected static final String MANDATORY_SCOPE_ERROR = "{\"error\":\"scope is mandatory\"}";
+    protected static final String SCOPE_NAME_SPACE_ERROR = "{\"error\":\"scope name cannot contain space\"}";
     protected static final String SCOPE_STORED_OK_MESSAGE = "{\"status\":\"scope successfully stored\"}";
     protected static final String SCOPE_STORED_NOK_MESSAGE = "{\"status\":\"scope not stored\"}";
     protected static final String SCOPE_UPDATED_OK_MESSAGE = "{\"status\":\"scope successfully updated\"}";
@@ -68,7 +69,11 @@ public class ScopeService {
             ObjectMapper mapper = new ObjectMapper();
             try {
                 Scope scope = mapper.readValue(content, Scope.class);
-                if (scope.validate()) {
+                if (scope.valid()) {
+                    if (!Scope.validScopeName(scope.getScope())) {
+                        log.error("scope name is not valid");
+                        return Response.createBadRequestResponse(SCOPE_NAME_SPACE_ERROR);
+                    }
                     Scope foundScope = DBManagerFactory.getInstance().findScope(scope.getScope());
                     if (foundScope != null) {
                         log.error("scope already exists");

@@ -40,7 +40,7 @@ public class ScopeTest {
         scope.setPassExpiresIn(100);
 
         // WHEN
-        boolean valid = scope.validate();
+        boolean valid = scope.valid();
 
         // THEN
         assertFalse(valid);
@@ -56,7 +56,7 @@ public class ScopeTest {
         scope.setPassExpiresIn(100);
 
         // WHEN
-        boolean valid = scope.validate();
+        boolean valid = scope.valid();
 
         // THEN
         assertFalse(valid);
@@ -72,7 +72,7 @@ public class ScopeTest {
         scope.setPassExpiresIn(100);
 
         // WHEN
-        boolean valid = scope.validate();
+        boolean valid = scope.valid();
 
         // THEN
         assertFalse(valid);
@@ -88,7 +88,7 @@ public class ScopeTest {
         scope.setPassExpiresIn(100);
 
         // WHEN
-        boolean valid = scope.validate();
+        boolean valid = scope.valid();
 
         // THEN
         assertFalse(valid);
@@ -104,7 +104,7 @@ public class ScopeTest {
         scope.setPassExpiresIn(0);
 
         // WHEN
-        boolean valid = scope.validate();
+        boolean valid = scope.valid();
 
         // THEN
         assertFalse(valid);
@@ -120,7 +120,7 @@ public class ScopeTest {
         scope.setPassExpiresIn(100);
 
         // WHEN
-        boolean valid = scope.validate();
+        boolean valid = scope.valid();
 
         // THEN
         assertTrue(valid);

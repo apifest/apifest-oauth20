@@ -638,4 +638,26 @@ public class ScopeServiceTest {
         // THEN
         assertTrue(scope.getPassExpiresIn() == 600);
     }
+
+    @Test
+    public void when_register_scope_with_space_return_error() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String scopeName = "space scope";
+        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn(Response.APPLICATION_JSON).given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        // WHEN
+        HttpResponse response = service.registerScope(req);
+
+        // THEN
+        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
+        assertEquals(resContent, ScopeService.SCOPE_NAME_SPACE_ERROR);
+    }
+
 }
