@@ -105,4 +105,15 @@ public class Scope {
         }
         return true;
     }
+
+    public boolean validForUpdate() {
+        boolean valid = false;
+        boolean validCCExpiresIn = ccExpiresIn != null && ccExpiresIn > 0;
+        boolean validPassExpiresIn = passExpiresIn != null && passExpiresIn > 0;
+        if ((scope != null && scope.length() > 0) &&
+                ((description != null && description.length() > 0) || validCCExpiresIn || validPassExpiresIn)) {
+           valid = true;
+        }
+        return valid;
+    }
 }

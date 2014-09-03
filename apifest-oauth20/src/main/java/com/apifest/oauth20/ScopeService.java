@@ -223,7 +223,7 @@ public class ScopeService {
             ObjectMapper mapper = new ObjectMapper();
             try {
                 Scope scope = mapper.readValue(content, Scope.class);
-                if (scope.validate()) {
+                if (scope.validForUpdate()) {
                     Scope foundScope = DBManagerFactory.getInstance().findScope(scope.getScope());
                     if (foundScope == null) {
                         log.error("scope does not exist");
