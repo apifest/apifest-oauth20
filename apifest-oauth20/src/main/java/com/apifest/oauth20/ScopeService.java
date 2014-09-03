@@ -44,6 +44,7 @@ public class ScopeService {
     static Logger log = LoggerFactory.getLogger(ScopeService.class);
 
     protected static final String MANDATORY_FIELDS_ERROR = "{\"error\":\"scope, description, cc_expires_in and pass_expires_in are mandatory\"}";
+    protected static final String MANDATORY_SCOPE_ERROR = "{\"error\":\"scope is mandatory\"}";
     protected static final String SCOPE_STORED_OK_MESSAGE = "{\"status\":\"scope successfully stored\"}";
     protected static final String SCOPE_STORED_NOK_MESSAGE = "{\"status\":\"scope not stored\"}";
     protected static final String SCOPE_UPDATED_OK_MESSAGE = "{\"status\":\"scope successfully updated\"}";
@@ -228,6 +229,7 @@ public class ScopeService {
                         log.error("scope does not exist");
                         return Response.createBadRequestResponse(SCOPE_NOT_EXIST);
                     } else {
+                        setScopeEmptyValues(scope, foundScope);
                         boolean ok = DBManagerFactory.getInstance().storeScope(scope);
                         if (ok) {
                             responseMsg = SCOPE_UPDATED_OK_MESSAGE;
@@ -237,7 +239,7 @@ public class ScopeService {
                     }
                 } else {
                     log.error("scope is not valid");
-                    return Response.createBadRequestResponse(MANDATORY_FIELDS_ERROR);
+                    return Response.createBadRequestResponse(MANDATORY_SCOPE_ERROR);
                 }
             } catch (JsonParseException e) {
                 log.error("cannot parse scope request", e);
@@ -253,6 +255,19 @@ public class ScopeService {
             return Response.createBadRequestResponse(Response.UNSUPPORTED_MEDIA_TYPE);
         }
         return Response.createOkResponse(responseMsg);
+    }
+
+    protected void setScopeEmptyValues(Scope scope, Scope foundScope) {
+        // if some fields are null, keep the old values
+        if (scope.getDescription() == null || scope.getDescription().length() == 0) {
+            scope.setDescription(foundScope.getDescription());
+        }
+        if (scope.getCcExpiresIn() == null) {
+            scope.setCcExpiresIn(foundScope.getCcExpiresIn());
+        }
+        if (scope.getPassExpiresIn() == null) {
+            scope.setPassExpiresIn(foundScope.getPassExpiresIn());
+        }
     }
 
     protected List<Scope> loadScopes(String scope) {

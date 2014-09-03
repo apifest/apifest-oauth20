@@ -471,8 +471,7 @@ public class ScopeServiceTest {
     public void when_update_invalid_scope_return_error() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        String scopeName = "registered";
-        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"pass_expires_in\":\"900\"}";
+        String content = "{\"description\":\"test scope description\",\"pass_expires_in\":\"900\"}";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
         willReturn(buf).given(req).getContent();
 
@@ -485,7 +484,7 @@ public class ScopeServiceTest {
 
         // THEN
         String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
-        assertEquals(resContent, ScopeService.MANDATORY_FIELDS_ERROR);
+        assertEquals(resContent, ScopeService.MANDATORY_SCOPE_ERROR);
     }
 
     @Test
@@ -553,5 +552,90 @@ public class ScopeServiceTest {
         // THEN
         String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
         assertEquals(resContent, ScopeService.SCOPE_UPDATED_NOK_MESSAGE);
+    }
+
+    @Test
+    public void when_scope_with_no_description_set_it_from_the_stored_scope() throws Exception {
+        // GIVEN
+        Scope scope = new Scope();
+        scope.setScope("scope");
+        scope.setCcExpiresIn(1800);
+        scope.setPassExpiresIn(900);
+
+        Scope storedScope = new Scope();
+        storedScope.setScope("scope");
+        storedScope.setDescription("descr");
+        storedScope.setCcExpiresIn(1800);
+        storedScope.setPassExpiresIn(900);
+
+        // WHEN
+        service.setScopeEmptyValues(scope, storedScope);
+
+        // THEN
+        assertEquals(scope.getDescription(), "descr");
+    }
+
+    @Test
+    public void when_scope_with_no_ccExpireseIn_set_it_from_the_stored_scope() throws Exception {
+        // GIVEN
+        Scope scope = new Scope();
+        scope.setScope("scope");
+        scope.setDescription("descr");
+        scope.setPassExpiresIn(900);
+
+        Scope storedScope = new Scope();
+        storedScope.setScope("scope");
+        storedScope.setDescription("descr");
+        storedScope.setCcExpiresIn(1800);
+        storedScope.setPassExpiresIn(900);
+
+        // WHEN
+        service.setScopeEmptyValues(scope, storedScope);
+
+        // THEN
+        assertTrue(scope.getCcExpiresIn() == 1800);
+    }
+
+    @Test
+    public void when_scope_with_no_passExpireseIn_set_it_from_the_stored_scope() throws Exception {
+        // GIVEN
+        Scope scope = new Scope();
+        scope.setScope("scope");
+        scope.setDescription("descr");
+        scope.setCcExpiresIn(1800);
+
+        Scope storedScope = new Scope();
+        storedScope.setScope("scope");
+        storedScope.setDescription("descr");
+        storedScope.setCcExpiresIn(1800);
+        storedScope.setPassExpiresIn(900);
+
+        // WHEN
+        service.setScopeEmptyValues(scope, storedScope);
+
+        // THEN
+        assertTrue(scope.getPassExpiresIn() == 900);
+    }
+
+    @Test
+    public void when_scope_with_passExpireseIn_do_not_update_it_from_stored_scope() throws Exception {
+        // GIVEN
+        Scope scope = new Scope();
+        scope.setScope("scope");
+        scope.setDescription("descr");
+        scope.setCcExpiresIn(1800);
+        scope.setPassExpiresIn(600);
+
+        Scope storedScope = new Scope();
+        storedScope.setScope("scope");
+        storedScope.setDescription("descr");
+        storedScope.setCcExpiresIn(1800);
+        storedScope.setPassExpiresIn(900);
+
+        // WHEN
+        service.setScopeEmptyValues(scope, storedScope);
+
+        // THEN
+        assertTrue(scope.getPassExpiresIn() == 600);
     }
 }
