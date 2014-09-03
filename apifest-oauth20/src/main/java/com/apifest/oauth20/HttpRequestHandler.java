@@ -94,6 +94,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 response = handleTokenRevoke(req);
             } else if (OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
                 response = handleRegisterScope(req);
+            } else if (OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.PUT)) {
+                response = handleUpdateScope(req);
             } else if (OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleGetScopes(req);
             } else if (APPLICATION_URI.equals(rawUri) && method.equals(HttpMethod.PUT)) {
@@ -237,6 +239,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected HttpResponse handleRegisterScope(HttpRequest req) {
         ScopeService scopeService = getScopeService();
         return scopeService.registerScope(req);
+    }
+
+    protected HttpResponse handleUpdateScope(HttpRequest req) {
+        ScopeService scopeService = getScopeService();
+        return scopeService.updateScope(req);
     }
 
     protected HttpResponse handleGetScopes(HttpRequest req) {

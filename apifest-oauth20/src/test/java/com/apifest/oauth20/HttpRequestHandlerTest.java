@@ -16,21 +16,34 @@
 
 package com.apifest.oauth20;
 
+import static org.mockito.BDDMockito.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Matchers.*;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.testng.Assert.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
+import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
@@ -208,5 +221,43 @@ public class HttpRequestHandlerTest {
 
         // THEN
         verify(scopeService).getScopes(req);
+    }
+
+    @Test
+    public void when_PUT_scope_invoke_updateScope_method() throws Exception {
+        // GIVEN
+        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
+        Channel channel = mock(Channel.class);
+        willReturn(channel).given(ctx).getChannel();
+        ChannelFuture future = mock(ChannelFuture.class);
+        willReturn(future).given(channel).write(anyObject());
+        willDoNothing().given(future).addListener(ChannelFutureListener.CLOSE);
+
+        MessageEvent event = mock(MessageEvent.class);
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI);
+        willReturn(req).given(event).getMessage();
+        willReturn(mock(HttpResponse.class)).given(handler).handleUpdateScope(req);
+
+        // WHEN
+        handler.messageReceived(ctx, event);
+
+        // THEN
+        verify(handler).handleUpdateScope(req);
+    }
+
+    @Test
+    public void when_handle_updateScope_invoke_scope_service_update() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        ScopeService scopeService = mock(ScopeService.class);
+        willReturn(scopeService).given(handler).getScopeService();
+        HttpResponse res = mock(HttpResponse.class);
+        willReturn(res).given(scopeService).updateScope(req);
+
+        // WHEN
+        handler.handleUpdateScope(req);
+
+        // THEN
+        verify(scopeService).updateScope(req);
     }
 }

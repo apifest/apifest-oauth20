@@ -16,6 +16,7 @@
 
 package com.apifest.oauth20;
 
+import static org.mockito.BDDMockito.*;
 import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -25,7 +26,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.util.CharsetUtil;
+import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -40,6 +47,7 @@ public class ScopeServiceTest {
     public void setup() {
         service = spy(new ScopeService());
         MockDBManagerFactory.install();
+        service.log = mock(Logger.class);
     }
 
     @Test
@@ -324,5 +332,226 @@ public class ScopeServiceTest {
 
         // THEN
         assertEquals(result, OAuthServer.DEFAULT_PASSWORD_EXPIRES_IN);
+    }
+
+    @Test
+    public void when_scope_already_exists_return_already_exists_error() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String scopeName = "registered";
+        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn(Response.APPLICATION_JSON).given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        Scope scope = mock(Scope.class);
+        willReturn(scope).given(DBManagerFactory.dbManager).findScope(scopeName);
+
+        // WHEN
+        HttpResponse response = service.registerScope(req);
+
+        // THEN
+        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
+        assertEquals(resContent, ScopeService.SCOPE_ALREADY_EXISTS);
+    }
+
+    @Test
+    public void when_scope_not_valid_rerutn_error() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String scopeName = "registered";
+        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"pass_expires_in\":\"900\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn(Response.APPLICATION_JSON).given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        // WHEN
+        HttpResponse response = service.registerScope(req);
+
+        // THEN
+        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
+        assertEquals(resContent, ScopeService.MANDATORY_FIELDS_ERROR);
+    }
+
+    @Test
+    public void when_content_type_NOT_application_json_return_unsupported_media_type() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String scopeName = "registered";
+        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"pass_expires_in\":\"900\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+
+        // WHEN
+        HttpResponse response = service.registerScope(req);
+
+        // THEN
+        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
+        assertEquals(resContent, Response.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+    @Test
+    public void when_scope_not_exists_store_it() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String scopeName = "registered";
+        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn(Response.APPLICATION_JSON).given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        willReturn(null).given(DBManagerFactory.dbManager).findScope(scopeName);
+        willReturn(true).given(DBManagerFactory.dbManager).storeScope(any(Scope.class));
+
+        // WHEN
+        HttpResponse response = service.registerScope(req);
+
+        // THEN
+        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
+        assertEquals(resContent, ScopeService.SCOPE_STORED_OK_MESSAGE);
+    }
+
+    @Test
+    public void when_scope_not_successfully_registered_return_error() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String scopeName = "registered";
+        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn(Response.APPLICATION_JSON).given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        willReturn(null).given(DBManagerFactory.dbManager).findScope(scopeName);
+        willReturn(false).given(DBManagerFactory.dbManager).storeScope(any(Scope.class));
+
+        // WHEN
+        HttpResponse response = service.registerScope(req);
+
+        // THEN
+        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
+        assertEquals(resContent, ScopeService.SCOPE_STORED_NOK_MESSAGE);
+    }
+
+    @Test
+    public void when_update_not_existing_scope_return_scope_not_exist_error() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String scopeName = "registered";
+        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn(Response.APPLICATION_JSON).given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        willReturn(null).given(DBManagerFactory.dbManager).findScope(scopeName);
+
+        // WHEN
+        HttpResponse response = service.updateScope(req);
+
+        // THEN
+        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
+        assertEquals(resContent, ScopeService.SCOPE_NOT_EXIST);
+    }
+
+    @Test
+    public void when_update_invalid_scope_return_error() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String scopeName = "registered";
+        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"pass_expires_in\":\"900\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn(Response.APPLICATION_JSON).given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        // WHEN
+        HttpResponse response = service.updateScope(req);
+
+        // THEN
+        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
+        assertEquals(resContent, ScopeService.MANDATORY_FIELDS_ERROR);
+    }
+
+    @Test
+    public void when_update_scope_and_NOT_application_json_header_return_unsupported_media_error() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String scopeName = "registered";
+        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+
+        // WHEN
+        HttpResponse response = service.updateScope(req);
+
+        // THEN
+        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
+        assertEquals(resContent, Response.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+    @Test
+    public void when_update_successfully_scope_return_updated_ok_message() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String scopeName = "registered";
+        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn(Response.APPLICATION_JSON).given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        Scope scope = mock(Scope.class);
+        willReturn(scope).given(DBManagerFactory.dbManager).findScope(scopeName);
+        willReturn(true).given(DBManagerFactory.dbManager).storeScope(any(Scope.class));
+
+        // WHEN
+        HttpResponse response = service.updateScope(req);
+
+        // THEN
+        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
+        assertEquals(resContent, ScopeService.SCOPE_UPDATED_OK_MESSAGE);
+    }
+
+    @Test
+    public void when_update_not_successfully_scope_return_updated_not_ok_message() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String scopeName = "registered";
+        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        willReturn(buf).given(req).getContent();
+
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn(Response.APPLICATION_JSON).given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        Scope scope = mock(Scope.class);
+        willReturn(scope).given(DBManagerFactory.dbManager).findScope(scopeName);
+        willReturn(false).given(DBManagerFactory.dbManager).storeScope(any(Scope.class));
+
+        // WHEN
+        HttpResponse response = service.updateScope(req);
+
+        // THEN
+        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
+        assertEquals(resContent, ScopeService.SCOPE_UPDATED_NOK_MESSAGE);
     }
 }

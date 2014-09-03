@@ -43,27 +43,43 @@ public class ScopeService {
 
     static Logger log = LoggerFactory.getLogger(ScopeService.class);
 
-    private static final String MANDATORY_FIELDS_ERROR = "{\"error\":\"scope, description, cc_expires_in and pass_expires_in are mandatory\"}";
-    private static final String SCOPE_STORED_OK_MESSAGE = "{\"status\":\"scope successfully stored\"}";
-    private static final String SCOPE_STORED_NOK_MESSAGE = "{\"status\":\"scope not stored\"}";
+    protected static final String MANDATORY_FIELDS_ERROR = "{\"error\":\"scope, description, cc_expires_in and pass_expires_in are mandatory\"}";
+    protected static final String SCOPE_STORED_OK_MESSAGE = "{\"status\":\"scope successfully stored\"}";
+    protected static final String SCOPE_STORED_NOK_MESSAGE = "{\"status\":\"scope not stored\"}";
+    protected static final String SCOPE_UPDATED_OK_MESSAGE = "{\"status\":\"scope successfully updated\"}";
+    protected static final String SCOPE_UPDATED_NOK_MESSAGE = "{\"status\":\"scope not updated\"}";
+    protected static final String SCOPE_NOT_EXIST = "{\"status\":\"scope does not exist\"}";
+    protected static final String SCOPE_ALREADY_EXISTS = "{\"status\":\"scope already exists\"}";
     private static final String SPACE = " ";
 
+    /**
+     * Register an oauth scope. If the scope already exists, returns an error.
+     *
+     * @param req http request
+     * @return http response
+     */
     public HttpResponse registerScope(HttpRequest req) {
         String content = req.getContent().toString(CharsetUtil.UTF_8);
-        String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
+        String contentType = (req.headers() != null) ? req.headers().get(HttpHeaders.Names.CONTENT_TYPE) : null;
         String responseMsg = "";
         // check Content-Type
-        if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
+        if (contentType != null && (contentType != null && contentType.contains(Response.APPLICATION_JSON))) {
             ObjectMapper mapper = new ObjectMapper();
             try {
                 Scope scope = mapper.readValue(content, Scope.class);
                 if (scope.validate()) {
-                    // store in the DB, if already exists such a scope, overwrites it
-                    boolean ok = DBManagerFactory.getInstance().storeScope(scope);
-                    if (ok) {
-                        responseMsg = SCOPE_STORED_OK_MESSAGE;
+                    Scope foundScope = DBManagerFactory.getInstance().findScope(scope.getScope());
+                    if (foundScope != null) {
+                        log.error("scope already exists");
+                        return Response.createBadRequestResponse(SCOPE_ALREADY_EXISTS);
                     } else {
-                        responseMsg = SCOPE_STORED_NOK_MESSAGE;
+                        // store in the DB, if already exists such a scope, overwrites it
+                        boolean ok = DBManagerFactory.getInstance().storeScope(scope);
+                        if (ok) {
+                            responseMsg = SCOPE_STORED_OK_MESSAGE;
+                        } else {
+                            responseMsg = SCOPE_STORED_NOK_MESSAGE;
+                        }
                     }
                 } else {
                     log.error("scope is not valid");
@@ -116,6 +132,13 @@ public class ScopeService {
         return Response.createOkResponse(jsonString);
     }
 
+    /**
+     * Checks whether a scope is valid for a given client id.
+     *
+     * @param scope oauth scope
+     * @param clientId client id
+     * @return the scope if it is valid, otherwise returns null
+     */
     public String getValidScope(String scope, String clientId) {
         String validScope = null;
         ClientCredentials creds = DBManagerFactory.getInstance().findClientCredentials(clientId);
@@ -134,6 +157,13 @@ public class ScopeService {
         return validScope;
     }
 
+    /**
+     * Checks whether a scope is contained in allowed scopes.
+     *
+     * @param scope scope to be checked
+     * @param allowedScopes all allowed scopes
+     * @return <code>true<code> if the scope is allowed, otherwise <code>false</code>>
+     */
     public boolean scopeAllowed(String scope, String allowedScopes) {
         String [] allScopes = allowedScopes.split(SPACE);
         List<String> allowedList = Arrays.asList(allScopes);
@@ -175,6 +205,54 @@ public class ScopeService {
             expiresIn = (ccGrantType) ? OAuthServer.DEFAULT_CC_EXPIRES_IN : OAuthServer.DEFAULT_PASSWORD_EXPIRES_IN;
         }
         return expiresIn;
+    }
+
+    /**
+     * Updates a scope. If the scope does not exists, returns an error.
+     *
+     * @param req http request
+     * @return http response
+     */
+    public HttpResponse updateScope(HttpRequest req) {
+        String content = req.getContent().toString(CharsetUtil.UTF_8);
+        String contentType = (req.headers() != null) ? req.headers().get(HttpHeaders.Names.CONTENT_TYPE) : null;
+        String responseMsg = "";
+        // check Content-Type
+        if (contentType != null && (contentType != null && contentType.contains(Response.APPLICATION_JSON))) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                Scope scope = mapper.readValue(content, Scope.class);
+                if (scope.validate()) {
+                    Scope foundScope = DBManagerFactory.getInstance().findScope(scope.getScope());
+                    if (foundScope == null) {
+                        log.error("scope does not exist");
+                        return Response.createBadRequestResponse(SCOPE_NOT_EXIST);
+                    } else {
+                        boolean ok = DBManagerFactory.getInstance().storeScope(scope);
+                        if (ok) {
+                            responseMsg = SCOPE_UPDATED_OK_MESSAGE;
+                        } else {
+                            responseMsg = SCOPE_UPDATED_NOK_MESSAGE;
+                        }
+                    }
+                } else {
+                    log.error("scope is not valid");
+                    return Response.createBadRequestResponse(MANDATORY_FIELDS_ERROR);
+                }
+            } catch (JsonParseException e) {
+                log.error("cannot parse scope request", e);
+                return Response.createBadRequestResponse(null);
+            } catch (JsonMappingException e) {
+                log.error("cannot map scope request", e);
+                return Response.createBadRequestResponse(null);
+            } catch (IOException e) {
+                log.error("cannot handle scope request", e);
+                return Response.createBadRequestResponse(null);
+            }
+        } else {
+            return Response.createBadRequestResponse(Response.UNSUPPORTED_MEDIA_TYPE);
+        }
+        return Response.createOkResponse(responseMsg);
     }
 
     protected List<Scope> loadScopes(String scope) {
