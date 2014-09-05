@@ -16,8 +16,10 @@
 
 package com.apifest.oauth20;
 
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertTrue;
 
+import org.slf4j.Logger;
 import org.testng.annotations.Test;
 
 /**
@@ -28,6 +30,7 @@ public class DBManagerFactoryTest {
     @Test
     public void when_no_oauth20_database_set_return_mongodb() throws Exception {
         // GIVEN
+        OAuthServer.log = mock(Logger.class);
         String path = getClass().getClassLoader().getResource("apifest-oauth-test.properties").getPath();
         System.setProperty("properties.file", path);
         OAuthServer.loadConfig();

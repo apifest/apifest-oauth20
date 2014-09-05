@@ -18,7 +18,6 @@ package com.apifest.oauth20;
 
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Matchers.*;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
@@ -49,6 +48,7 @@ public class HttpRequestHandlerTest {
 
     @BeforeMethod
     public void setup() {
+        OAuthServer.log = mock(Logger.class);
         String path = getClass().getClassLoader().getResource("apifest-oauth-test.properties").getPath();
         System.setProperty("properties.file", path);
         OAuthServer.loadConfig();

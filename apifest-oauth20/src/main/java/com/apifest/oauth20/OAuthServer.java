@@ -40,6 +40,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.oauth20.api.ICustomGrantTypeHandler;
 import com.apifest.oauth20.api.IUserAuthentication;
 
 /**
@@ -49,9 +50,12 @@ import com.apifest.oauth20.api.IUserAuthentication;
  */
 public final class OAuthServer {
 
-    private static String userAuthJar;
+    private static String customJar;
     private static String userAuthClass;
     private static Class<IUserAuthentication> userAuthenticationClass;
+    private static String customGrantType;
+    private static String customGrantTypeClass;
+    private static Class<ICustomGrantTypeHandler> customGrantTypeHandler;
     private static String host;
     private static int portInt;
     private static String dbHost;
@@ -66,7 +70,7 @@ public final class OAuthServer {
     // expires_in in sec for grant type client_credentials
     public static final int DEFAULT_CC_EXPIRES_IN = 1800;
 
-    private static Logger log = LoggerFactory.getLogger(OAuthServer.class);
+    static Logger log = LoggerFactory.getLogger(OAuthServer.class);
 
     private OAuthServer() {
     }
@@ -135,7 +139,7 @@ public final class OAuthServer {
                 }
             }
         }
-        if (userAuthJar == null) {
+        if (customJar == null) {
             log.warn("Set value for user_authenticate_jar in properties file, otherwise user authentication will always pass successfully");
         } else {
             if (userAuthClass != null && userAuthClass.length() > 0) {
@@ -143,6 +147,19 @@ public final class OAuthServer {
                     userAuthenticationClass = loadCustomUserAuthentication(userAuthClass);
                 } catch (ClassNotFoundException e) {
                     log.error("cannot load user.authenticate.class, check property value", e);
+                }
+            }
+            if (customGrantType != null && customGrantType.length() > 0) {
+                if (customGrantTypeClass == null || customGrantTypeClass.length() == 0) {
+                    loaded = false;
+                    log.error("no custom.grant_type.class set for custom.grant_type={}", customGrantType);
+                } else {
+                    try {
+                        customGrantTypeHandler= loadCustomGrantTypeClass(customGrantTypeClass);
+                    } catch (ClassNotFoundException e) {
+                        log.error("cannot load custom.grant_type.class, check property value", e);
+                    }
+
                 }
             }
         }
@@ -159,13 +176,36 @@ public final class OAuthServer {
                 if (IUserAuthentication.class.isAssignableFrom(clazz)) {
                     result = (Class<IUserAuthentication>) clazz;
                 } else {
-                    log.error("user.authentication.class {} does not implement UserAuthentication interface, default authentication will be used", clazz);
+                    log.error("user.authentication.class {} does not implement IUserAuthentication interface, default authentication will be used", clazz);
                 }
             } else {
-                log.error("cannot load user authentication jar, default authentication will be used");
+                log.error("cannot load custom jar, default authentication will be used");
             }
         } catch (MalformedURLException e) {
-            log.error("cannot load user authentication jar, default authentication will be used");
+            log.error("cannot load custom jar, default authentication will be used");
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Class<ICustomGrantTypeHandler> loadCustomGrantTypeClass(String className) throws ClassNotFoundException {
+        Class<ICustomGrantTypeHandler> result = null;
+        try {
+            URLClassLoader jarClassLoader = createJarClassLoader();
+            if (jarClassLoader != null) {
+                Class<?> clazz = jarClassLoader.loadClass(className);
+                if (ICustomGrantTypeHandler.class.isAssignableFrom(clazz)) {
+                    result = (Class<ICustomGrantTypeHandler>) clazz;
+                } else {
+                    log.error("custom.grant_type.class {} does not implement ICustomGrantTypeHandler interface", clazz);
+                }
+            } else {
+                log.error("cannot load custom jar");
+            }
+        } catch (MalformedURLException e) {
+            log.error("cannot load custom jar");
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
         }
@@ -174,8 +214,8 @@ public final class OAuthServer {
 
     private static URLClassLoader createJarClassLoader() throws MalformedURLException {
         URLClassLoader jarClassLoader = null;
-        if (userAuthJar != null) {
-            File file = new File(userAuthJar);
+        if (customJar != null) {
+            File file = new File(customJar);
             if (file.exists()) {
                 URL jarfile = file.toURI().toURL();
                 jarClassLoader = URLClassLoader.newInstance(new URL[] { jarfile }, OAuthServer.class.getClassLoader());
@@ -190,8 +230,10 @@ public final class OAuthServer {
         Properties props = new Properties();
         try {
             props.load(in);
-            userAuthJar = props.getProperty("user.authenticate.jar");
+            customJar = props.getProperty("custom.classes.jar");
             userAuthClass = props.getProperty("user.authenticate.class");
+            customGrantType = props.getProperty("custom.grant_type");
+            customGrantTypeClass = props.getProperty("custom.grant_type.class");
             database = props.getProperty("oauth20.database");
             redisSentinels = props.getProperty("redis.sentinels");
             redisMaster = props.getProperty("redis.master");
@@ -259,5 +301,13 @@ public final class OAuthServer {
 
     public static Class<IUserAuthentication> getUserAuthenticationClass() {
         return userAuthenticationClass;
+    }
+
+    public static String getCustomGrantType() {
+        return customGrantType;
+    }
+
+    public static Class<ICustomGrantTypeHandler> getCustomGrantTypeHandler() {
+        return customGrantTypeHandler;
     }
 }

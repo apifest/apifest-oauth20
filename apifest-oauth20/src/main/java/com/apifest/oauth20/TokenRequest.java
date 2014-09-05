@@ -80,7 +80,8 @@ public class TokenRequest {
     public void validate() throws OAuthException {
         checkMandatoryParams();
         if (!grantType.equals(AUTHORIZATION_CODE) && !grantType.equals(REFRESH_TOKEN)
-                && !grantType.equals(CLIENT_CREDENTIALS) && !grantType.equals(PASSWORD)) {
+                && !grantType.equals(CLIENT_CREDENTIALS) && !grantType.equals(PASSWORD)
+                && !grantType.equals(OAuthServer.getCustomGrantType())) {
             throw new OAuthException(Response.GRANT_TYPE_NOT_SUPPORTED,
                     HttpResponseStatus.BAD_REQUEST);
         }
@@ -112,11 +113,11 @@ public class TokenRequest {
     }
 
     protected void checkMandatoryParams() throws OAuthException {
-        if (clientId == null) {
+        if (clientId == null || clientId.length() == 0) {
             throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CLIENT_ID),
                     HttpResponseStatus.BAD_REQUEST);
         }
-        if (grantType == null) {
+        if (grantType == null || grantType.length() == 0) {
             throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, GRANT_TYPE),
                     HttpResponseStatus.BAD_REQUEST);
         }

@@ -43,6 +43,7 @@ public class AuthorizationServerTest {
 
     @BeforeMethod
     public void setup() {
+        OAuthServer.log = mock(Logger.class);
         String path = getClass().getClassLoader().getResource("apifest-oauth-test.properties").getPath();
         System.setProperty("properties.file", path);
         OAuthServer.loadConfig();
@@ -52,6 +53,7 @@ public class AuthorizationServerTest {
         authServer.db = mock(DBManager.class);
         authServer.scopeService = mock(ScopeService.class);
         OAuthException.log = mock(Logger.class);
+        ApplicationInfo.log = mock(Logger.class);
     }
 
     @Test
@@ -1351,4 +1353,77 @@ public class AuthorizationServerTest {
         // THEN
         assertEquals(errorMsg, Response.INVALID_CLIENT_CREDENTIALS);
     }
+
+    @Test
+    public void when_grant_type_custom_invoke_custom_handler() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String clientId = "203598599234220";
+        String clientSecret = "f754cb0cd78c4c36fa3c1c0325ef72bb4a011373";
+        String content = "grant_type=" + OAuthServer.getCustomGrantType() + "&username=rossi&password=test&client_id=" +
+                clientId + "&client_secret=" + clientSecret;
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        given(req.getContent()).willReturn(buf);
+        willReturn(true).given(authServer).isValidClientCredentials(clientId, clientSecret);
+        willReturn(null).given(authServer).callCustomGrantTypeHandler(req);
+        willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+
+        // WHEN
+        authServer.issueAccessToken(req);
+
+        // THEN
+        verify(authServer).callCustomGrantTypeHandler(req);
+    }
+
+    @Test
+    public void when_grant_type_custom_and_scope_not_valid_throw_exception() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String clientId = "203598599234220";
+        String clientSecret = "f754cb0cd78c4c36fa3c1c0325ef72bb4a011373";
+        String content = "grant_type=" + OAuthServer.getCustomGrantType() + "&username=rossi&password=test&client_id=" +
+                clientId + "&client_secret=" + clientSecret;
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        given(req.getContent()).willReturn(buf);
+        willReturn(true).given(authServer).isValidClientCredentials(clientId, clientSecret);
+        willReturn(null).given(authServer).callCustomGrantTypeHandler(req);
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            authServer.issueAccessToken(req);
+        } catch (OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, AuthorizationServer.SCOPE_NOK_MESSAGE);
+    }
+
+    @Test
+    public void when_grant_type_custom_issue_token_with_user_details() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String clientId = "203598599234220";
+        String clientSecret = "f754cb0cd78c4c36fa3c1c0325ef72bb4a011373";
+        String content = "grant_type=" + OAuthServer.getCustomGrantType() + "&username=rossi&password=test&client_id=" +
+                clientId + "&client_secret=" + clientSecret;
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        given(req.getContent()).willReturn(buf);
+        willReturn(true).given(authServer).isValidClientCredentials(clientId, clientSecret);
+        UserDetails userDetails = mock(UserDetails.class);
+        willReturn("12345").given(userDetails).getUserId();
+        willReturn(null).given(userDetails).getDetails();
+        willReturn(userDetails).given(authServer).callCustomGrantTypeHandler(req);
+        willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+
+        // WHEN
+        authServer.issueAccessToken(req);
+
+        // THEN
+        verify(userDetails, times(2)).getUserId();
+        verify(userDetails).getDetails();
+    }
+
 }
+

@@ -42,9 +42,11 @@ oauth20.database=
 db_host=
 redis.sentinels=
 redis.master=
-user.authenticate.jar=
-user.authenticate.class=
 apifest-oauth20.nodes=
+custom.classes.jar=
+user.authenticate.class=
+custom.grant_type=
+custom.grant_type.class=
 ```
 
 The path to the apifest.properties file should be set as a system variable:
@@ -80,21 +82,31 @@ You can define the name of Redis master in the following property in the apifest
 
 ***redis.master***
 
+In order to run ApiFest OAuth20 distributed storage, you need to setup all ApiFest OAuth20 nodes (as comma-separated list of IPs).
+
+***apifest-oauth20.nodes***
+
 * **Setup user authentication**
 
 As the ApiFest OAuth 2.0 Server should be able to authenticate the user, you can implement your own user authentication as implementing com.apifest.oauth20.IUserAuthentication interface
-The location of the jar that contains the implementation is set by the following property: 
+In addition, ApiFest supports a custom grant_type and can implement your own handler for it.
+The location of the jar that contains the implementation of these custom classes is set by the following property: 
 
-***user.authenticate.jar***
+***custom.classes.jar***
 
 The custom user authentication class will be loaded by the jar defined in user.authenticate.jar. The implementation class is defined by: 
 
 ***user.authenticate.class***
 
-In order to run ApiFest OAuth20 distributed storage, you need to setup all ApiFest OAuth20 nodes (as comma-separated list of IPs).
+* **Setup custom grant_type**
 
-***apifest-oauth20.nodes***
+If for some reason, you need to support additional custom grant_type, you can set it using the following property:
 
+***custom.grant_type***
+
+The custom grant_type class implementation should be contained in the custom.classes.jar and it should be set by:
+
+***custom.grant_type.class***
 
 **2. Start ApiFest OAuth 2.0 Server**
 

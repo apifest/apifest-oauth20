@@ -16,9 +16,10 @@
 
 package com.apifest.oauth20;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -230,5 +231,47 @@ public class TokenRequestTest {
         // THEN
         assertEquals(errorMsg,
                 String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.PASSWORD));
+    }
+
+    @Test
+    public void when_clientId_empty_check_mandatory_params_throws_exception() throws Exception {
+        // GIVEN
+        String content = "grant_type=" + TokenRequest.PASSWORD + "&username=rossi";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        given(req.getContent()).willReturn(buf);
+        TokenRequest tokenReq = new TokenRequest(req);
+        tokenReq.setClientId("");
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            tokenReq.checkMandatoryParams();
+        } catch (OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.CLIENT_ID));
+    }
+
+    @Test
+    public void when_grantType_empty_check_mandatory_params_throws_exception() throws Exception {
+        // GIVEN
+        String content = "grant_type=" + "" +"&username=rossi";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        given(req.getContent()).willReturn(buf);
+        TokenRequest tokenReq = new TokenRequest(req);
+        tokenReq.setClientId("203598599234220");
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            tokenReq.checkMandatoryParams();
+        } catch (OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.GRANT_TYPE));
     }
 }

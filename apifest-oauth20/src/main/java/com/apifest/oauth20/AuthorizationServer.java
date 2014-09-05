@@ -37,8 +37,9 @@ import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.oauth20.api.ICustomGrantTypeHandler;
 import com.apifest.oauth20.api.IUserAuthentication;
-import com.apifest.oauth20.api.UserAuthenticationException;
+import com.apifest.oauth20.api.AuthenticationException;
 import com.apifest.oauth20.api.UserDetails;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -216,10 +217,10 @@ public class AuthorizationServer {
                 throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
             }
 
-            accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope);
             try {
                 UserDetails userDetails = authenticateUser(tokenRequest.getUsername(), tokenRequest.getPassword(), req);
                 if (userDetails != null && userDetails.getUserId() != null) {
+                    accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope);
                     accessToken.setUserId(userDetails.getUserId());
                     accessToken.setDetails(userDetails.getDetails());
                     accessToken.setClientId(tokenRequest.getClientId());
@@ -227,15 +228,33 @@ public class AuthorizationServer {
                 } else {
                     throw new OAuthException(Response.INVALID_USERNAME_PASSWORD, HttpResponseStatus.UNAUTHORIZED);
                 }
-            } catch (UserAuthenticationException e) {
+            } catch (AuthenticationException e) {
                 log.error("Cannot authenticate user", e);
                 throw new OAuthException(Response.CANNOT_AUTHENTICATE_USER, HttpResponseStatus.UNAUTHORIZED); // NOSONAR
+            }
+        } else if (tokenRequest.getGrantType().equals(OAuthServer.getCustomGrantType())) {
+            String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());
+            if (scope == null) {
+                throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
+            }
+            try {
+                accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope);
+                accessToken.setClientId(tokenRequest.getClientId());
+                UserDetails userDetails = callCustomGrantTypeHandler(req);
+                if (userDetails != null && userDetails.getUserId() != null) {
+                    accessToken.setUserId(userDetails.getUserId());
+                    accessToken.setDetails(userDetails.getDetails());
+                }
+                db.storeAccessToken(accessToken);
+            } catch (AuthenticationException e) {
+                log.error("Cannot authenticate user", e);
+                throw new OAuthException(Response.CANNOT_AUTHENTICATE_USER, HttpResponseStatus.UNAUTHORIZED);
             }
         }
         return accessToken;
     }
 
-    protected UserDetails authenticateUser(String username, String password, HttpRequest authRequest) throws UserAuthenticationException {
+    protected UserDetails authenticateUser(String username, String password, HttpRequest authRequest) throws AuthenticationException {
         UserDetails userDetails = null;
         IUserAuthentication ua;
         if (OAuthServer.getUserAuthenticationClass() != null) {
@@ -244,14 +263,32 @@ public class AuthorizationServer {
                 userDetails = ua.authenticate(username, password, authRequest);
             } catch (InstantiationException e) {
                 log.error("cannot instantiate user authentication class", e);
-                throw new UserAuthenticationException(e.getMessage());
+                throw new AuthenticationException(e.getMessage());
             } catch (IllegalAccessException e) {
                 log.error("cannot instantiate user authentication class", e);
-                throw new UserAuthenticationException(e.getMessage());
+                throw new AuthenticationException(e.getMessage());
             }
         } else {
             // if no specific UserAuthentication used, always returns customerId - 12345
             userDetails = new UserDetails("12345", null);
+        }
+        return userDetails;
+    }
+
+    protected UserDetails callCustomGrantTypeHandler(HttpRequest authRequest) throws AuthenticationException {
+        UserDetails userDetails = null;
+        ICustomGrantTypeHandler customHandler;
+        if (OAuthServer.getCustomGrantTypeHandler() != null) {
+            try {
+                customHandler = OAuthServer.getCustomGrantTypeHandler().newInstance();
+                userDetails = customHandler.execute(authRequest);
+            } catch (InstantiationException e) {
+                log.error("cannot instantiate custom grant_type class", e);
+                throw new AuthenticationException(e.getMessage());
+            } catch (IllegalAccessException e) {
+                log.error("cannot instantiate custom grant_type class", e);
+                throw new AuthenticationException(e.getMessage());
+            }
         }
         return userDetails;
     }

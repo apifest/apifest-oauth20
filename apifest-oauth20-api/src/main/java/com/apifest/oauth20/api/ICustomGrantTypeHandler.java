@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, ApiFest project
+ * Copyright 2014, ApiFest project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,19 @@
 
 package com.apifest.oauth20.api;
 
+import org.jboss.netty.handler.codec.http.HttpRequest;
+
 /**
- * Exception thrown when something goes wrong with user authentication.
+ * Interface for custom grant_type handler.
  *
- * @author Rossitsa Borissova
  */
-public class UserAuthenticationException extends Exception {
+public interface ICustomGrantTypeHandler {
 
-    private static final long serialVersionUID = -5776710386861918365L;
+    /**
+     * Executes what is required for that grant_type and returns user details.
+     * @param request issue token request
+     * @return user details that will be associated with the access token
+     */
+    UserDetails execute(final HttpRequest request) throws AuthenticationException;
 
-    private String message;
-
-    public UserAuthenticationException(String message) {
-        this.message = message;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
-    }
 }

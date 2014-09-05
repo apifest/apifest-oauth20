@@ -16,26 +16,23 @@
 
 package com.apifest.oauth20.api;
 
-import org.jboss.netty.handler.codec.http.HttpRequest;
-
-import com.apifest.oauth20.api.UserDetails;
-
-
-
 /**
- * Interface for user authentication.
+ * Exception thrown when something goes wrong with authentication.
  *
+ * @author Rossitsa Borissova
  */
-public interface IUserAuthentication {
+public class AuthenticationException extends Exception {
 
-    /**
-     * Authenticates the user using username, password and what info required from the auth request.
-     * @param username username
-     * @param password password
-     * @param authRequest the authorization request
-     * @return details about the authenticated user
-     * @throws AuthenticationException
-     */
-    UserDetails authenticate(String username, String password, HttpRequest authRequest) throws AuthenticationException;
+    private static final long serialVersionUID = -5776710386861918365L;
 
+    private String message;
+
+    public AuthenticationException(String message) {
+        this.message = message;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
 }
