@@ -16,20 +16,15 @@
 
 package com.apifest.oauth20.api;
 
-import org.jboss.netty.handler.codec.http.HttpRequest;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * Interface for custom grant_type handler.
+ * Annotation for classes that will be invoked before an access token is issued.
  *
  * @author Rossitsa Borissova
  */
-public interface ICustomGrantTypeHandler {
-
-    /**
-     * Executes what is required for that grant_type and returns user details.
-     * @param request issue token request
-     * @return user details that will be associated with the access token
-     */
-    UserDetails execute(final HttpRequest request) throws AuthenticationException;
+@Retention(RetentionPolicy.RUNTIME)
+public @interface PreIssueTokenAnnotation {
 
 }

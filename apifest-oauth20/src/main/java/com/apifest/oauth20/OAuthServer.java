@@ -25,8 +25,13 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelFactory;
@@ -42,6 +47,9 @@ import org.slf4j.LoggerFactory;
 
 import com.apifest.oauth20.api.ICustomGrantTypeHandler;
 import com.apifest.oauth20.api.IUserAuthentication;
+import com.apifest.oauth20.api.LifecycleHandler;
+import com.apifest.oauth20.api.PostIssueTokenAnnotation;
+import com.apifest.oauth20.api.PreIssueTokenAnnotation;
 
 /**
  * Class responsible for ApiFest OAuth 2.0 Server.
@@ -63,6 +71,10 @@ public final class OAuthServer {
     private static String redisSentinels;
     private static String redisMaster;
     private static String apifestOAuth20Nodes;
+    private static URLClassLoader jarClassLoader;
+
+    private static List<Class<LifecycleHandler>> preIssueTokenHandlers = new ArrayList<Class<LifecycleHandler>>();
+    private static List<Class<LifecycleHandler>> postIssueTokenHandlers = new ArrayList<Class<LifecycleHandler>>();
 
     // expires_in in sec for grant type password
     public static final int DEFAULT_PASSWORD_EXPIRES_IN = 900;
@@ -81,7 +93,8 @@ public final class OAuthServer {
         }
 
         DBManagerFactory.init();
-        ChannelFactory factory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
+        ChannelFactory factory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
+                Executors.newCachedThreadPool());
 
         ServerBootstrap bootstrap = new ServerBootstrap(factory);
         bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
@@ -155,7 +168,7 @@ public final class OAuthServer {
                     log.error("no custom.grant_type.class set for custom.grant_type={}", customGrantType);
                 } else {
                     try {
-                        customGrantTypeHandler= loadCustomGrantTypeClass(customGrantTypeClass);
+                        customGrantTypeHandler = loadCustomGrantTypeClass(customGrantTypeClass);
                     } catch (ClassNotFoundException e) {
                         log.error("cannot load custom.grant_type.class, check property value", e);
                     }
@@ -163,20 +176,25 @@ public final class OAuthServer {
                 }
             }
         }
+
+        loadLifecycleHandlers();
         return loaded;
     }
 
     @SuppressWarnings("unchecked")
-    public static Class<IUserAuthentication> loadCustomUserAuthentication(String className) throws ClassNotFoundException {
+    public static Class<IUserAuthentication> loadCustomUserAuthentication(String className)
+            throws ClassNotFoundException {
         Class<IUserAuthentication> result = null;
         try {
-            URLClassLoader jarClassLoader = createJarClassLoader();
-            if (jarClassLoader != null) {
-                Class<?> clazz = jarClassLoader.loadClass(className);
+            URLClassLoader classLoader = getJarClassLoader();
+            if (classLoader != null) {
+                Class<?> clazz = classLoader.loadClass(className);
                 if (IUserAuthentication.class.isAssignableFrom(clazz)) {
                     result = (Class<IUserAuthentication>) clazz;
                 } else {
-                    log.error("user.authentication.class {} does not implement IUserAuthentication interface, default authentication will be used", clazz);
+                    log.error(
+                            "user.authentication.class {} does not implement IUserAuthentication interface, default authentication will be used",
+                            clazz);
                 }
             } else {
                 log.error("cannot load custom jar, default authentication will be used");
@@ -190,12 +208,13 @@ public final class OAuthServer {
     }
 
     @SuppressWarnings("unchecked")
-    public static Class<ICustomGrantTypeHandler> loadCustomGrantTypeClass(String className) throws ClassNotFoundException {
+    public static Class<ICustomGrantTypeHandler> loadCustomGrantTypeClass(String className)
+            throws ClassNotFoundException {
         Class<ICustomGrantTypeHandler> result = null;
         try {
-            URLClassLoader jarClassLoader = createJarClassLoader();
-            if (jarClassLoader != null) {
-                Class<?> clazz = jarClassLoader.loadClass(className);
+            URLClassLoader classLoader = getJarClassLoader();
+            if (classLoader != null) {
+                Class<?> clazz = classLoader.loadClass(className);
                 if (ICustomGrantTypeHandler.class.isAssignableFrom(clazz)) {
                     result = (Class<ICustomGrantTypeHandler>) clazz;
                 } else {
@@ -212,15 +231,65 @@ public final class OAuthServer {
         return result;
     }
 
-    private static URLClassLoader createJarClassLoader() throws MalformedURLException {
-        URLClassLoader jarClassLoader = null;
-        if (customJar != null) {
-            File file = new File(customJar);
-            if (file.exists()) {
-                URL jarfile = file.toURI().toURL();
-                jarClassLoader = URLClassLoader.newInstance(new URL[] { jarfile }, OAuthServer.class.getClassLoader());
-            } else {
-                throw new IllegalArgumentException("check property user.authentication.jar, jar does not exist, default authentication will be used");
+    @SuppressWarnings("unchecked")
+    public static void loadLifecycleHandlers() {
+        try {
+            URLClassLoader classLoader = getJarClassLoader();
+            if (classLoader != null) {
+                JarFile jarFile = new JarFile(customJar);
+                Enumeration<JarEntry> entries = jarFile.entries();
+                while (entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+                    if (entry.isDirectory() || !entry.getName().endsWith(".class")) {
+                        continue;
+                    }
+                    // remove .class
+                    String className = entry.getName().substring(0, entry.getName().length() - 6);
+                    className = className.replace('/', '.');
+                    try {
+                        // REVISIT: check for better solution
+                        if (className.startsWith("org.jboss.netty") || className.startsWith("org.apache.log4j")
+                                || className.startsWith("org.apache.commons")) {
+                            continue;
+                        }
+                        Class<?> clazz = classLoader.loadClass(className);
+                        if (clazz.isAnnotationPresent(PreIssueTokenAnnotation.class)
+                                && LifecycleHandler.class.isAssignableFrom(clazz)) {
+                            preIssueTokenHandlers.add((Class<LifecycleHandler>) clazz);
+                            log.info("preIssueTokenHandler added {}", className);
+                        }
+                        if (clazz.isAnnotationPresent(PostIssueTokenAnnotation.class)
+                                && LifecycleHandler.class.isAssignableFrom(clazz)) {
+                            postIssueTokenHandlers.add((Class<LifecycleHandler>) clazz);
+                            log.info("postIssueTokenHandler added {}", className);
+                        }
+
+                    } catch (ClassNotFoundException e1) {
+                        // continue
+                    }
+                }
+            }
+        } catch (MalformedURLException e) {
+            log.error("cannot load lifecycle handlers", e);
+        } catch (IOException e) {
+            log.error("cannot load lifecycle handlers", e);
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private static URLClassLoader getJarClassLoader() throws MalformedURLException {
+        if (jarClassLoader == null) {
+            if (customJar != null) {
+                File file = new File(customJar);
+                if (file.exists()) {
+                    URL jarfile = file.toURI().toURL();
+                    jarClassLoader = URLClassLoader.newInstance(new URL[] { jarfile },
+                            OAuthServer.class.getClassLoader());
+                } else {
+                    throw new IllegalArgumentException(
+                            "check property custom.classes.jar, jar does not exist, default authentication will be used");
+                }
             }
         }
         return jarClassLoader;
@@ -310,4 +379,13 @@ public final class OAuthServer {
     public static Class<ICustomGrantTypeHandler> getCustomGrantTypeHandler() {
         return customGrantTypeHandler;
     }
+
+    public static List<Class<LifecycleHandler>> getPreIssueTokenHandlers() {
+        return preIssueTokenHandlers;
+    }
+
+    public static List<Class<LifecycleHandler>> getPostIssueTokenHandlers() {
+        return postIssueTokenHandlers;
+    }
+
 }

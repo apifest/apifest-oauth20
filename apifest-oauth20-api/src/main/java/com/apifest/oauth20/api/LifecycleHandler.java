@@ -17,19 +17,14 @@
 package com.apifest.oauth20.api;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
 
 /**
- * Interface for custom grant_type handler.
+ * Handles request on token lifecycle.
  *
  * @author Rossitsa Borissova
  */
-public interface ICustomGrantTypeHandler {
+public interface LifecycleHandler {
 
-    /**
-     * Executes what is required for that grant_type and returns user details.
-     * @param request issue token request
-     * @return user details that will be associated with the access token
-     */
-    UserDetails execute(final HttpRequest request) throws AuthenticationException;
-
+    public void handle(HttpRequest request, HttpResponse response);
 }

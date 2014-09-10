@@ -38,6 +38,7 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.oauth20.api.LifecycleHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -157,10 +158,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return response;
     }
 
-    protected HttpResponse handleToken(HttpRequest req) {
+    protected HttpResponse handleToken(HttpRequest request) {
+        executePreIssueTokenCallbacks(request, null);
+
         HttpResponse response = null;
         try {
-            AccessToken accessToken = auth.issueAccessToken(req);
+            AccessToken accessToken = auth.issueAccessToken(request);
             if (accessToken != null) {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonString = mapper.writeValueAsString(accessToken);
@@ -180,7 +183,30 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         if (response == null) {
             response = Response.createBadRequestResponse(Response.CANNOT_ISSUE_TOKEN);
         }
+
+        executePostIssueTokenCallbacks(request, response);
         return response;
+    }
+
+    protected void executePreIssueTokenCallbacks(HttpRequest request, HttpResponse response) {
+        invokeHandlers(request, response, OAuthServer.getPreIssueTokenHandlers());
+    }
+
+    protected void executePostIssueTokenCallbacks(HttpRequest request, HttpResponse response) {
+        invokeHandlers(request, response, OAuthServer.getPostIssueTokenHandlers());
+    }
+
+    protected void invokeHandlers(HttpRequest request, HttpResponse response, List<Class<LifecycleHandler>> handlers) {
+        for (int i = 0; i < handlers.size(); i++) {
+            try {
+                LifecycleHandler handler = handlers.get(i).newInstance();
+                handler.handle(request, response);
+            } catch (InstantiationException e) {
+                log.error("cannot instantiate handler", e);
+            } catch (IllegalAccessException e) {
+                log.error("cannot invoke handler", e);
+            }
+        }
     }
 
     private HttpResponse handleAuthorize(HttpRequest req) {

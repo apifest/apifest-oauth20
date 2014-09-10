@@ -21,10 +21,10 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import com.apifest.oauth20.api.UserDetails;
 
 
-
 /**
  * Interface for user authentication.
  *
+ * @author Rossitsa Borissova
  */
 public interface IUserAuthentication {
 
