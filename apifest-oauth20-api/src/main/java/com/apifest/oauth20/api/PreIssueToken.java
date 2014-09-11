@@ -25,6 +25,6 @@ import java.lang.annotation.RetentionPolicy;
  * @author Rossitsa Borissova
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PreIssueTokenAnnotation {
+public @interface PreIssueToken {
 
 }

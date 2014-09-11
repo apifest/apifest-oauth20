@@ -48,8 +48,8 @@ import org.slf4j.LoggerFactory;
 import com.apifest.oauth20.api.ICustomGrantTypeHandler;
 import com.apifest.oauth20.api.IUserAuthentication;
 import com.apifest.oauth20.api.LifecycleHandler;
-import com.apifest.oauth20.api.PostIssueTokenAnnotation;
-import com.apifest.oauth20.api.PreIssueTokenAnnotation;
+import com.apifest.oauth20.api.PostIssueToken;
+import com.apifest.oauth20.api.PreIssueToken;
 
 /**
  * Class responsible for ApiFest OAuth 2.0 Server.
@@ -253,12 +253,12 @@ public final class OAuthServer {
                             continue;
                         }
                         Class<?> clazz = classLoader.loadClass(className);
-                        if (clazz.isAnnotationPresent(PreIssueTokenAnnotation.class)
+                        if (clazz.isAnnotationPresent(PreIssueToken.class)
                                 && LifecycleHandler.class.isAssignableFrom(clazz)) {
                             preIssueTokenHandlers.add((Class<LifecycleHandler>) clazz);
                             log.info("preIssueTokenHandler added {}", className);
                         }
-                        if (clazz.isAnnotationPresent(PostIssueTokenAnnotation.class)
+                        if (clazz.isAnnotationPresent(PostIssueToken.class)
                                 && LifecycleHandler.class.isAssignableFrom(clazz)) {
                             postIssueTokenHandlers.add((Class<LifecycleHandler>) clazz);
                             log.info("postIssueTokenHandler added {}", className);
