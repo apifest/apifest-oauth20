@@ -68,8 +68,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         Object message = e.getMessage();
         if (message instanceof HttpRequest) {
             HttpRequest req = (HttpRequest) message;
-            String content = new String(req.getContent().array());
-            log.debug("content: {}", content);
+
+            if (log.isDebugEnabled()) {
+                String content = new String(req.getContent().array());
+                log.debug("content: {}", content);
+            }
 
             HttpMethod method = req.getMethod();
             String rawUri = req.getUri();
