@@ -256,12 +256,12 @@ public final class OAuthServer {
                         if (clazz.isAnnotationPresent(PreIssueToken.class)
                                 && LifecycleHandler.class.isAssignableFrom(clazz)) {
                             preIssueTokenHandlers.add((Class<LifecycleHandler>) clazz);
-                            log.info("preIssueTokenHandler added {}", className);
+                            log.debug("preIssueTokenHandler added {}", className);
                         }
                         if (clazz.isAnnotationPresent(PostIssueToken.class)
                                 && LifecycleHandler.class.isAssignableFrom(clazz)) {
                             postIssueTokenHandlers.add((Class<LifecycleHandler>) clazz);
-                            log.info("postIssueTokenHandler added {}", className);
+                            log.debug("postIssueTokenHandler added {}", className);
                         }
 
                     } catch (ClassNotFoundException e1) {

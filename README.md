@@ -112,7 +112,7 @@ The custom grant_type class implementation should be contained in the custom.cla
 
 You can start the ApiFest OAuth 2.0 Server with the following command:
 
-```java -Dproperties.file=[apifest_properties_file_path] -jar apifest-oauth20-0.1.0-jar-with-dependencies.jar```
+```java -Dproperties.file=[apifest_properties_file_path] -Dlog4j.configuration=file:///[log4j_xml_file_path] -jar apifest-oauth20-0.1.0-jar-with-dependencies.jar```
 
 When the server starts, you will see:
 ```ApiFest OAuth 2.0 Server started at [host]:[port]```
