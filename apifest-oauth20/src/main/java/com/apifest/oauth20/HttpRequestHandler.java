@@ -192,11 +192,19 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     }
 
     protected void executePreIssueTokenCallbacks(HttpRequest request, HttpResponse response) {
-        invokeHandlers(request, response, OAuthServer.getPreIssueTokenHandlers());
+        invokeHandlers(request, response, LifecycleEventHandlers.getPreIssueTokenHandlers());
     }
 
     protected void executePostIssueTokenCallbacks(HttpRequest request, HttpResponse response) {
-        invokeHandlers(request, response, OAuthServer.getPostIssueTokenHandlers());
+        invokeHandlers(request, response, LifecycleEventHandlers.getPostIssueTokenHandlers());
+    }
+
+    protected void executePreRevokeTokenCallbacks(HttpRequest request, HttpResponse response) {
+        invokeHandlers(request, response, LifecycleEventHandlers.getPreRevokeTokenHandlers());
+    }
+
+    protected void executePostRevokeTokenCallbacks(HttpRequest request, HttpResponse response) {
+        invokeHandlers(request, response, LifecycleEventHandlers.getPostRevokeTokenHandlers());
     }
 
     protected void invokeHandlers(HttpRequest request, HttpResponse response, List<Class<LifecycleHandler>> handlers) {
@@ -254,15 +262,17 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     }
 
     protected HttpResponse handleTokenRevoke(HttpRequest req) {
+        executePreRevokeTokenCallbacks(req, null);
         boolean revoked = false;
         try {
             revoked = auth.revokeToken(req);
         } catch (OAuthException e) {
             log.error("cannot revoke token", e);
-            Response.createBadRequestResponse();
         }
         String json = "{\"revoked\":\"" + revoked + "\"}";
-        return Response.createOkResponse(json);
+        HttpResponse response = Response.createOkResponse(json);
+        executePostRevokeTokenCallbacks(req, response);
+        return response;
     }
 
     protected HttpResponse handleRegisterScope(HttpRequest req) {

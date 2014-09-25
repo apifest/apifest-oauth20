@@ -322,7 +322,7 @@ public class AuthorizationServer {
 
     public AccessToken isValidToken(String token) {
         AccessToken accessToken = db.findAccessToken(token);
-        if (accessToken != null) {
+        if (accessToken != null && accessToken.isValid()) {
             if (accessToken.tokenExpired()) {
                 db.updateAccessTokenValidStatus(accessToken.getToken(), false);
                 return null;

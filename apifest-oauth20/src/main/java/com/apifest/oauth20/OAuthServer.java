@@ -25,13 +25,8 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelFactory;
@@ -47,9 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import com.apifest.oauth20.api.ICustomGrantTypeHandler;
 import com.apifest.oauth20.api.IUserAuthentication;
-import com.apifest.oauth20.api.LifecycleHandler;
-import com.apifest.oauth20.api.PostIssueToken;
-import com.apifest.oauth20.api.PreIssueToken;
 
 /**
  * Class responsible for ApiFest OAuth 2.0 Server.
@@ -72,9 +64,6 @@ public final class OAuthServer {
     private static String redisMaster;
     private static String apifestOAuth20Nodes;
     private static URLClassLoader jarClassLoader;
-
-    private static List<Class<LifecycleHandler>> preIssueTokenHandlers = new ArrayList<Class<LifecycleHandler>>();
-    private static List<Class<LifecycleHandler>> postIssueTokenHandlers = new ArrayList<Class<LifecycleHandler>>();
 
     // expires_in in sec for grant type password
     public static final int DEFAULT_PASSWORD_EXPIRES_IN = 900;
@@ -175,9 +164,14 @@ public final class OAuthServer {
 
                 }
             }
+
+            try {
+                LifecycleEventHandlers.loadLifecycleHandlers(getJarClassLoader(), customJar);
+            } catch (MalformedURLException e) {
+                log.warn("cannot load custom jar");
+            }
         }
 
-        loadLifecycleHandlers();
         return loaded;
     }
 
@@ -229,53 +223,6 @@ public final class OAuthServer {
             log.error(e.getMessage());
         }
         return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static void loadLifecycleHandlers() {
-        try {
-            URLClassLoader classLoader = getJarClassLoader();
-            if (classLoader != null) {
-                JarFile jarFile = new JarFile(customJar);
-                Enumeration<JarEntry> entries = jarFile.entries();
-                while (entries.hasMoreElements()) {
-                    JarEntry entry = entries.nextElement();
-                    if (entry.isDirectory() || !entry.getName().endsWith(".class")) {
-                        continue;
-                    }
-                    // remove .class
-                    String className = entry.getName().substring(0, entry.getName().length() - 6);
-                    className = className.replace('/', '.');
-                    try {
-                        // REVISIT: check for better solution
-                        if (className.startsWith("org.jboss.netty") || className.startsWith("org.apache.log4j")
-                                || className.startsWith("org.apache.commons")) {
-                            continue;
-                        }
-                        Class<?> clazz = classLoader.loadClass(className);
-                        if (clazz.isAnnotationPresent(PreIssueToken.class)
-                                && LifecycleHandler.class.isAssignableFrom(clazz)) {
-                            preIssueTokenHandlers.add((Class<LifecycleHandler>) clazz);
-                            log.debug("preIssueTokenHandler added {}", className);
-                        }
-                        if (clazz.isAnnotationPresent(PostIssueToken.class)
-                                && LifecycleHandler.class.isAssignableFrom(clazz)) {
-                            postIssueTokenHandlers.add((Class<LifecycleHandler>) clazz);
-                            log.debug("postIssueTokenHandler added {}", className);
-                        }
-
-                    } catch (ClassNotFoundException e1) {
-                        // continue
-                    }
-                }
-            }
-        } catch (MalformedURLException e) {
-            log.error("cannot load lifecycle handlers", e);
-        } catch (IOException e) {
-            log.error("cannot load lifecycle handlers", e);
-        } catch (IllegalArgumentException e) {
-            log.error(e.getMessage());
-        }
     }
 
     private static URLClassLoader getJarClassLoader() throws MalformedURLException {
@@ -378,14 +325,6 @@ public final class OAuthServer {
 
     public static Class<ICustomGrantTypeHandler> getCustomGrantTypeHandler() {
         return customGrantTypeHandler;
-    }
-
-    public static List<Class<LifecycleHandler>> getPreIssueTokenHandlers() {
-        return preIssueTokenHandlers;
-    }
-
-    public static List<Class<LifecycleHandler>> getPostIssueTokenHandlers() {
-        return postIssueTokenHandlers;
     }
 
 }

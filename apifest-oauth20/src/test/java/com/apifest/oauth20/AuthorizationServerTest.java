@@ -128,6 +128,7 @@ public class AuthorizationServerTest {
         String token = "a9855207b560ac824dfb84f4d235243afdccfacaa3a32c66baeeec06eb0afa9c";
         AccessToken accessToken = mock(AccessToken.class);
         given(accessToken.getToken()).willReturn(token);
+        given(accessToken.isValid()).willReturn(true);
         given(authServer.db.findAccessToken(accessToken.getToken())).willReturn(accessToken);
 
         // WHEN
@@ -135,6 +136,22 @@ public class AuthorizationServerTest {
 
         // THEN
         assertEquals(result, accessToken);
+    }
+
+    @Test
+    public void when_invalid_token_found_return_null() throws Exception {
+        // GIVEN
+        String token = "a9855207b560ac824dfb84f4d235243afdccfacaa3a32c66baeeec06eb0afa9c";
+        AccessToken accessToken = mock(AccessToken.class);
+        willReturn(false).given(accessToken).isValid();
+        given(accessToken.getToken()).willReturn(token);
+        given(authServer.db.findAccessToken(accessToken.getToken())).willReturn(accessToken);
+
+        // WHEN
+        AccessToken result = authServer.isValidToken(token);
+
+        // THEN
+        assertNull(result);
     }
 
     @Test
@@ -840,6 +857,7 @@ public class AuthorizationServerTest {
         String token = "a9855207b560ac824dfb84f4d235243afdccfacaa3a32c66baeeec06eb0afa9c";
         AccessToken accessToken = mock(AccessToken.class);
         given(accessToken.getToken()).willReturn(token);
+        given(accessToken.isValid()).willReturn(true);
         given(authServer.db.findAccessToken(accessToken.getToken())).willReturn(accessToken);
         given(accessToken.tokenExpired()).willReturn(true);
 
