@@ -33,7 +33,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  * @author Rossitsa Borissova
  */
 @JsonPropertyOrder({ "access_token", "refresh_token", "token_type", "expires_in" })
-@JsonSerialize(include = Inclusion.NON_NULL)
+@JsonSerialize(include = Inclusion.NON_EMPTY)
 public class AccessToken implements Serializable {
 
     private static final long serialVersionUID = 4322523635887085378L;
