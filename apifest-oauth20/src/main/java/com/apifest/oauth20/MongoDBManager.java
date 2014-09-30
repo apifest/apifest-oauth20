@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -411,6 +410,23 @@ public class MongoDBManager implements DBManager {
             updated = true;
         }
         return updated;
+    }
+
+    /*
+     * @see com.apifest.oauth20.DBManager#getAllApplications()
+     */
+    @Override
+    public List<ClientCredentials> getAllApplications() {
+        List<ClientCredentials> list = new ArrayList<ClientCredentials>();
+        DBCollection coll = db.getCollection(CLIENTS_COLLECTION_NAME);
+        List<DBObject> result = coll.find().toArray();
+        for (DBObject obj : result) {
+            BSONObject bson = obj;
+            Map<String, Object> mapLoaded = bson.toMap();
+            ClientCredentials loadedCreds = ClientCredentials.loadFromMap(mapLoaded);
+            list.add(loadedCreds);
+        }
+        return list;
     }
 
 }

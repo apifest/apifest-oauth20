@@ -260,4 +260,24 @@ public class RedisDBManager implements DBManager {
         return true;
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#getAllApplications()
+     */
+    @Override
+    public List<ClientCredentials> getAllApplications() {
+        List<ClientCredentials> list = new ArrayList<ClientCredentials>();
+        Jedis jedis = pool.getResource();
+        Set<String> allApps = jedis.keys("cc*");
+        for (String app : allApps) {
+            Map<String, String> appMap = jedis.hgetAll(app);
+            if (appMap.isEmpty()) {
+                continue;
+            } else {
+                ClientCredentials creds = ClientCredentials.loadFromStringMap(appMap);
+                list.add(creds);
+            }
+        }
+        pool.returnResource(jedis);
+        return list;
+    }
 }

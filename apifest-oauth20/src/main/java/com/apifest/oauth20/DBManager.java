@@ -49,4 +49,6 @@ public interface DBManager {
     Scope findScope(String scopeName);
 
     boolean updateClientAppScope(String clientId, String scope, String description, Integer status);
+
+    List<ClientCredentials> getAllApplications();
 }

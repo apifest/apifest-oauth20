@@ -21,7 +21,6 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
-
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -217,12 +216,7 @@ public class HttpRequestHandlerTest {
     @Test
     public void when_PUT_scope_invoke_updateScope_method() throws Exception {
         // GIVEN
-        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
-        Channel channel = mock(Channel.class);
-        willReturn(channel).given(ctx).getChannel();
-        ChannelFuture future = mock(ChannelFuture.class);
-        willReturn(future).given(channel).write(anyObject());
-        willDoNothing().given(future).addListener(ChannelFutureListener.CLOSE);
+        ChannelHandlerContext ctx = mockChannelHandlerContext();
 
         MessageEvent event = mock(MessageEvent.class);
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI);
@@ -251,4 +245,118 @@ public class HttpRequestHandlerTest {
         // THEN
         verify(scopeService).updateScope(req);
     }
+
+    @Test
+    public void when_POST_scope_invoke_handleRegisterScope_method() throws Exception {
+        // GIVEN
+        ChannelHandlerContext ctx = mockChannelHandlerContext();
+
+        MessageEvent event = mock(MessageEvent.class);
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI);
+        willReturn(req).given(event).getMessage();
+        willReturn(mock(HttpResponse.class)).given(handler).handleRegisterScope(req);
+
+        // WHEN
+        handler.messageReceived(ctx, event);
+
+        // THEN
+        verify(handler).handleRegisterScope(req);
+    }
+
+    @Test
+    public void when_GET_scope_invoke_handleGetScopes_method() throws Exception {
+        // GIVEN
+        ChannelHandlerContext ctx = mockChannelHandlerContext();
+
+        MessageEvent event = mock(MessageEvent.class);
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI);
+        willReturn(req).given(event).getMessage();
+        willReturn(mock(HttpResponse.class)).given(handler).handleGetScopes(req);
+
+        // WHEN
+        handler.messageReceived(ctx, event);
+
+        // THEN
+        verify(handler).handleGetScopes(req);
+    }
+
+    @Test
+    public void when_GET_application_with_clientId_invoke_handleApplicationInfo() throws Exception {
+        // GIVEN
+        ChannelHandlerContext ctx = mockChannelHandlerContext();
+        MessageEvent event = mock(MessageEvent.class);
+        String uri = HttpRequestHandler.APPLICATION_URI + "?clientId=123";
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
+        willReturn(req).given(event).getMessage();
+        willReturn(mock(HttpResponse.class)).given(handler).handleApplicationInfo(req);
+
+        // WHEN
+        handler.messageReceived(ctx, event);
+
+        // THEN
+        verify(handler).handleApplicationInfo(req);
+        verify(handler, times(0)).handleGetApplications(req);
+    }
+
+    @Test
+    public void when_PUT_applications_invoke_handleUpdateClientApp() throws Exception {
+        // GIVEN
+        ChannelHandlerContext ctx = mockChannelHandlerContext();
+
+        MessageEvent event = mock(MessageEvent.class);
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, HttpRequestHandler.APPLICATION_URI);
+        willReturn(req).given(event).getMessage();
+        willReturn(mock(HttpResponse.class)).given(handler).handleUpdateClientApp(req);
+
+        // WHEN
+        handler.messageReceived(ctx, event);
+
+        // THEN
+        verify(handler).handleUpdateClientApp(req);
+    }
+
+    @Test
+    public void when_POST_applications_invoke_handleRegister() throws Exception {
+        // GIVEN
+        ChannelHandlerContext ctx = mockChannelHandlerContext();
+
+        MessageEvent event = mock(MessageEvent.class);
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, HttpRequestHandler.APPLICATION_URI);
+        willReturn(req).given(event).getMessage();
+        willReturn(mock(HttpResponse.class)).given(handler).handleRegister(req);
+
+        // WHEN
+        handler.messageReceived(ctx, event);
+
+        // THEN
+        verify(handler).handleRegister(req);
+    }
+
+    @Test
+    public void when_GET_applications_invoke_handleGetApplications() throws Exception {
+        // GIVEN
+        ChannelHandlerContext ctx = mockChannelHandlerContext();
+
+        MessageEvent event = mock(MessageEvent.class);
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, HttpRequestHandler.APPLICATION_URI);
+        willReturn(req).given(event).getMessage();
+        willReturn(mock(HttpResponse.class)).given(handler).handleGetApplications(req);
+
+        // WHEN
+        handler.messageReceived(ctx, event);
+
+        // THEN
+        verify(handler).handleGetApplications(req);
+    }
+
+    private ChannelHandlerContext mockChannelHandlerContext() {
+        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
+        Channel channel = mock(Channel.class);
+        willReturn(channel).given(ctx).getChannel();
+        ChannelFuture future = mock(ChannelFuture.class);
+        willReturn(future).given(channel).write(anyObject());
+        willDoNothing().given(future).addListener(ChannelFutureListener.CLOSE);
+        return ctx;
+    }
+
 }

@@ -297,4 +297,18 @@ public class HazelcastDBManager implements DBManager {
         return true;
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#getAllApplications()
+     */
+    @Override
+    public List<ClientCredentials> getAllApplications() {
+        List<ClientCredentials> appsList = new ArrayList<ClientCredentials>();
+        IMap<String, PersistentClientCredentials> clientsContainer = getClientCredentialsContainer();
+        for (String key : clientsContainer.keySet()) {
+            ClientCredentials creds = PersistenceTransformations.toClientCredentials(clientsContainer.get(key));
+            appsList.add(creds);
+        }
+        return appsList;
+    }
+
 }

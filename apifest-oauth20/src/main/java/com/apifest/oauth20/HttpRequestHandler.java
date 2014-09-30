@@ -116,11 +116,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    private HttpResponse handleApplicationInfo(HttpRequest req) {
+    protected HttpResponse handleApplicationInfo(HttpRequest req) {
         HttpResponse response = null;
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
         Map<String, List<String>> params = dec.getParameters();
         String clientId = QueryParameter.getFirstElement(params, "client_id");
+        // if no clientId passed, then list all clients
+        if (clientId == null || clientId.length() == 0) {
+           return handleGetApplications(req);
+        }
         boolean valid = auth.isValidClientId(clientId);
         log.debug("client_id valid:" + valid);
         if (valid) {
@@ -304,5 +308,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             response = Response.createOAuthExceptionResponse(ex);
         }
         return response;
+    }
+
+    protected HttpResponse handleGetApplications(HttpRequest req) {
+        List<ClientCredentials> apps = DBManagerFactory.getInstance().getAllApplications();
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(apps);
+        return Response.createOkResponse(jsonString);
     }
 }
