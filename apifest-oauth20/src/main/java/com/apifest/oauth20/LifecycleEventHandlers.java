@@ -28,7 +28,9 @@ import java.util.jar.JarFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.oauth20.api.ExceptionEventHandler;
 import com.apifest.oauth20.api.LifecycleHandler;
+import com.apifest.oauth20.api.OnException;
 import com.apifest.oauth20.api.PostIssueToken;
 import com.apifest.oauth20.api.PostRevokeToken;
 import com.apifest.oauth20.api.PreIssueToken;
@@ -47,6 +49,7 @@ public class LifecycleEventHandlers {
     private static List<Class<LifecycleHandler>> postIssueTokenHandlers = new ArrayList<Class<LifecycleHandler>>();
     private static List<Class<LifecycleHandler>> preRevokeTokenHandlers = new ArrayList<Class<LifecycleHandler>>();
     private static List<Class<LifecycleHandler>> postRevokeTokenHandlers = new ArrayList<Class<LifecycleHandler>>();
+    private static List<Class<ExceptionEventHandler>> exceptionHandlers = new ArrayList<Class<ExceptionEventHandler>>();
 
     @SuppressWarnings("unchecked")
     public static void loadLifecycleHandlers(URLClassLoader classLoader, String customJar) {
@@ -89,6 +92,11 @@ public class LifecycleEventHandlers {
                             postRevokeTokenHandlers.add((Class<LifecycleHandler>) clazz);
                             log.debug("postRevokeTokenHandler added {}", className);
                         }
+                        if (clazz.isAnnotationPresent(OnException.class)
+                                && ExceptionEventHandler.class.isAssignableFrom(clazz)) {
+                            exceptionHandlers.add((Class<ExceptionEventHandler>) clazz);
+                            log.debug("exceptionHandlers added {}", className);
+                        }
                     } catch (ClassNotFoundException e1) {
                         // continue
                     }
@@ -117,5 +125,9 @@ public class LifecycleEventHandlers {
 
     public static List<Class<LifecycleHandler>> getPostRevokeTokenHandlers() {
         return postRevokeTokenHandlers;
+    }
+
+    public static List<Class<ExceptionEventHandler>> getExceptionHandlers() {
+        return exceptionHandlers;
     }
 }

@@ -38,9 +38,15 @@ public class OAuthException extends Exception {
         super();
         this.message = message;
         this.httpStatus = httpStatus;
-        log.debug("OAuth exception, message {}, httpStatus", message, httpStatus);
     }
 
+    public OAuthException(Throwable e, String message, HttpResponseStatus httpStatus) {
+        super(e);
+        this.message = message;
+        this.httpStatus = httpStatus;
+    }
+
+    @Override
     public String getMessage() {
         return message;
     }

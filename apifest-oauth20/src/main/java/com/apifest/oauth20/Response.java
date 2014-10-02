@@ -113,5 +113,17 @@ public final class Response {
         return response;
     }
 
+    // REVISIT: use this method for all responses creation
+    public static HttpResponse createResponse(HttpResponseStatus status, String message) {
+        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status);
+        if (message != null) {
+            ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
+            response.setContent(buf);
+            response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
+        }
+        response.headers().set(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
+        response.headers().set(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
+        return response;
+    }
 }
 

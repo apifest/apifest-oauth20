@@ -187,8 +187,7 @@ public class HttpRequestHandlerTest {
         HttpRequest req = mock(HttpRequest.class);
         ScopeService scopeService = mock(ScopeService.class);
         willReturn(scopeService).given(handler).getScopeService();
-        HttpResponse res = mock(HttpResponse.class);
-        willReturn(res).given(scopeService).registerScope(req);
+        willReturn("OK").given(scopeService).registerScope(req);
 
         // WHEN
         handler.handleRegisterScope(req);
@@ -203,8 +202,7 @@ public class HttpRequestHandlerTest {
         HttpRequest req = mock(HttpRequest.class);
         ScopeService scopeService = mock(ScopeService.class);
         willReturn(scopeService).given(handler).getScopeService();
-        HttpResponse res = mock(HttpResponse.class);
-        willReturn(res).given(scopeService).getScopes(req);
+        willReturn("basic extended").given(scopeService).getScopes(req);
 
         // WHEN
         handler.handleGetScopes(req);
@@ -236,8 +234,7 @@ public class HttpRequestHandlerTest {
         HttpRequest req = mock(HttpRequest.class);
         ScopeService scopeService = mock(ScopeService.class);
         willReturn(scopeService).given(handler).getScopeService();
-        HttpResponse res = mock(HttpResponse.class);
-        willReturn(res).given(scopeService).updateScope(req);
+        willReturn("OK").given(scopeService).updateScope(req);
 
         // WHEN
         handler.handleUpdateScope(req);

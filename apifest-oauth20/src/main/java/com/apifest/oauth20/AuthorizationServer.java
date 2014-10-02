@@ -19,13 +19,8 @@ package com.apifest.oauth20;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -37,9 +32,9 @@ import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.oauth20.api.AuthenticationException;
 import com.apifest.oauth20.api.ICustomGrantTypeHandler;
 import com.apifest.oauth20.api.IUserAuthentication;
-import com.apifest.oauth20.api.AuthenticationException;
 import com.apifest.oauth20.api.UserDetails;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -97,11 +92,11 @@ public class AuthorizationServer {
                     throw new OAuthException(Response.NAME_OR_SCOPE_OR_URI_IS_NULL, HttpResponseStatus.BAD_REQUEST);
                 }
             } catch (JsonParseException e) {
-                throw new OAuthException(Response.CANNOT_REGISTER_APP, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(e, Response.CANNOT_REGISTER_APP, HttpResponseStatus.BAD_REQUEST);
             } catch (JsonMappingException e) {
-                throw new OAuthException(Response.CANNOT_REGISTER_APP, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(e, Response.CANNOT_REGISTER_APP, HttpResponseStatus.BAD_REQUEST);
             } catch (IOException e) {
-                throw new OAuthException(Response.CANNOT_REGISTER_APP, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(e, Response.CANNOT_REGISTER_APP, HttpResponseStatus.BAD_REQUEST);
             }
         } else {
             throw new OAuthException(Response.UNSUPPORTED_MEDIA_TYPE, HttpResponseStatus.BAD_REQUEST);
@@ -230,7 +225,7 @@ public class AuthorizationServer {
                 }
             } catch (AuthenticationException e) {
                 log.error("Cannot authenticate user", e);
-                throw new OAuthException(Response.CANNOT_AUTHENTICATE_USER, HttpResponseStatus.UNAUTHORIZED); // NOSONAR
+                throw new OAuthException(e, Response.CANNOT_AUTHENTICATE_USER, HttpResponseStatus.UNAUTHORIZED); // NOSONAR
             }
         } else if (tokenRequest.getGrantType().equals(OAuthServer.getCustomGrantType())) {
             String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());
@@ -248,7 +243,7 @@ public class AuthorizationServer {
                 db.storeAccessToken(accessToken);
             } catch (AuthenticationException e) {
                 log.error("Cannot authenticate user", e);
-                throw new OAuthException(Response.CANNOT_AUTHENTICATE_USER, HttpResponseStatus.UNAUTHORIZED);
+                throw new OAuthException(e, Response.CANNOT_AUTHENTICATE_USER, HttpResponseStatus.UNAUTHORIZED);
             }
         }
         return accessToken;
@@ -425,11 +420,11 @@ public class AuthorizationServer {
                     throw new OAuthException(Response.CANNOT_UPDATE_APP, HttpResponseStatus.BAD_REQUEST);
                 }
             } catch (JsonParseException e) {
-                throw new OAuthException(Response.CANNOT_UPDATE_APP, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(e, Response.CANNOT_UPDATE_APP, HttpResponseStatus.BAD_REQUEST);
             } catch (JsonMappingException e) {
-                throw new OAuthException(Response.CANNOT_UPDATE_APP, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(e, Response.CANNOT_UPDATE_APP, HttpResponseStatus.BAD_REQUEST);
             } catch (IOException e) {
-                throw new OAuthException(Response.CANNOT_UPDATE_APP, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(e, Response.CANNOT_UPDATE_APP, HttpResponseStatus.BAD_REQUEST);
             }
         } else {
             throw new OAuthException(Response.UNSUPPORTED_MEDIA_TYPE, HttpResponseStatus.BAD_REQUEST);

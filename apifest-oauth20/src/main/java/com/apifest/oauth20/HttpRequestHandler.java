@@ -38,6 +38,7 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.oauth20.api.ExceptionEventHandler;
 import com.apifest.oauth20.api.LifecycleHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -81,6 +82,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 rawUri = u.getRawPath();
             } catch (URISyntaxException e2) {
                 log.error("URI syntax exception {}", rawUri);
+                invokeExceptionHandler(e2, req);
             }
 
             HttpResponse response = null;
@@ -136,10 +138,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 response = Response.createOkResponse(json);
             } catch (JsonGenerationException e) {
                 log.error("error get application info", e);
+                invokeExceptionHandler(e, req);
             } catch (JsonMappingException e) {
                 log.error("error get application info", e);
+                invokeExceptionHandler(e, req);
             } catch (IOException e) {
                 log.error("error get application info", e);
+                invokeExceptionHandler(e, req);
             }
         } else {
             response = Response.createBadRequestResponse(Response.INVALID_CLIENT_ID);
@@ -180,12 +185,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             }
         } catch (OAuthException ex) {
             response = Response.createOAuthExceptionResponse(ex);
+            invokeExceptionHandler(ex, request);
         } catch (JsonGenerationException e1) {
             log.error("error handle token", e1);
+            invokeExceptionHandler(e1, request);
         } catch (JsonMappingException e1) {
             log.error("error handle token", e1);
+            invokeExceptionHandler(e1, request);
         } catch (IOException e1) {
             log.error("error handle token", e1);
+            invokeExceptionHandler(e1, request);
         }
         if (response == null) {
             response = Response.createBadRequestResponse(Response.CANNOT_ISSUE_TOKEN);
@@ -211,6 +220,22 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         invokeHandlers(request, response, LifecycleEventHandlers.getPostRevokeTokenHandlers());
     }
 
+    protected void invokeExceptionHandler(Exception ex, HttpRequest request) {
+        List<Class<ExceptionEventHandler>> handlers = LifecycleEventHandlers.getExceptionHandlers();
+        for (int i = 0; i < handlers.size(); i++) {
+            try {
+                ExceptionEventHandler handler = handlers.get(i).newInstance();
+                handler.handleException(ex, request);
+            } catch (InstantiationException e) {
+                log.error("cannot instantiate exception handler", e);
+                invokeExceptionHandler(e, request);
+            } catch (IllegalAccessException e) {
+                log.error("cannot invoke exception handler", e);
+                invokeExceptionHandler(ex, request);
+            }
+        }
+    }
+
     protected void invokeHandlers(HttpRequest request, HttpResponse response, List<Class<LifecycleHandler>> handlers) {
         for (int i = 0; i < handlers.size(); i++) {
             try {
@@ -218,8 +243,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 handler.handle(request, response);
             } catch (InstantiationException e) {
                 log.error("cannot instantiate handler", e);
+                invokeExceptionHandler(e, request);
             } catch (IllegalAccessException e) {
                 log.error("cannot invoke handler", e);
+                invokeExceptionHandler(e, request);
             }
         }
     }
@@ -238,6 +265,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             accessTokensLog.info("authCode {}", obj.toString());
         } catch (OAuthException ex) {
             response = Response.createOAuthExceptionResponse(ex);
+            invokeExceptionHandler(ex, req);
         }
         return response;
     }
@@ -252,12 +280,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             response = Response.createOkResponse(jsonString);
         } catch (OAuthException ex) {
             response = Response.createOAuthExceptionResponse(ex);
+            invokeExceptionHandler(ex, req);
         } catch (JsonGenerationException e1) {
             log.error("error handle register", e1);
+            invokeExceptionHandler(e1, req);
         } catch (JsonMappingException e1) {
             log.error("error handle register", e1);
+            invokeExceptionHandler(e1, req);
         } catch (IOException e1) {
             log.error("error handle register", e1);
+            invokeExceptionHandler(e1, req);
         }
         if (response == null) {
             response = Response.createBadRequestResponse(Response.CANNOT_REGISTER_APP);
@@ -272,6 +304,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             revoked = auth.revokeToken(req);
         } catch (OAuthException e) {
             log.error("cannot revoke token", e);
+            invokeExceptionHandler(e, req);
         }
         String json = "{\"revoked\":\"" + revoked + "\"}";
         HttpResponse response = Response.createOkResponse(json);
@@ -281,17 +314,39 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
     protected HttpResponse handleRegisterScope(HttpRequest req) {
         ScopeService scopeService = getScopeService();
-        return scopeService.registerScope(req);
+        HttpResponse response = null;
+        try {
+            String responseMsg = scopeService.registerScope(req);
+            response = Response.createOkResponse(responseMsg);
+        } catch (OAuthException e) {
+            invokeExceptionHandler(e, req);
+            response = Response.createResponse(e.getHttpStatus(), e.getMessage());
+        }
+        return response;
     }
 
     protected HttpResponse handleUpdateScope(HttpRequest req) {
         ScopeService scopeService = getScopeService();
-        return scopeService.updateScope(req);
+        HttpResponse response = null;
+        try {
+            String responseMsg = scopeService.updateScope(req);
+            response = Response.createOkResponse(responseMsg);
+        } catch (OAuthException e) {
+            invokeExceptionHandler(e, req);
+            response = Response.createResponse(e.getHttpStatus(), e.getMessage());
+        }
+        return response;
     }
 
     protected HttpResponse handleGetScopes(HttpRequest req) {
         ScopeService scopeService = getScopeService();
-        return scopeService.getScopes(req);
+        String jsonString = null;
+        try {
+            jsonString = scopeService.getScopes(req);
+        } catch (OAuthException e) {
+            invokeExceptionHandler(e, req);
+        }
+        return Response.createOkResponse(jsonString);
     }
 
     protected ScopeService getScopeService() {
@@ -306,6 +361,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             }
         } catch (OAuthException ex) {
             response = Response.createOAuthExceptionResponse(ex);
+            invokeExceptionHandler(ex, req);
         }
         return response;
     }

@@ -29,7 +29,6 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -333,7 +332,7 @@ public class ScopeServiceTest {
     }
 
     @Test
-    public void when_scope_already_exists_return_already_exists_error() throws Exception {
+    public void when_scope_already_exists_trrows_already_exists_error() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
         String scopeName = "registered";
@@ -349,11 +348,15 @@ public class ScopeServiceTest {
         willReturn(scope).given(DBManagerFactory.dbManager).findScope(scopeName);
 
         // WHEN
-        HttpResponse response = service.registerScope(req);
+        String errorMsg = null;
+        try {
+            service.registerScope(req);
+        } catch(OAuthException e) {
+            errorMsg = e.getMessage();
+        }
 
         // THEN
-        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
-        assertEquals(resContent, ScopeService.SCOPE_ALREADY_EXISTS);
+        assertEquals(errorMsg, ScopeService.SCOPE_ALREADY_EXISTS);
     }
 
     @Test
@@ -370,11 +373,15 @@ public class ScopeServiceTest {
         willReturn(headers).given(req).headers();
 
         // WHEN
-        HttpResponse response = service.registerScope(req);
+        String errorMsg = null;
+        try {
+            service.registerScope(req);
+        } catch(OAuthException e) {
+            errorMsg = e.getMessage();
+        }
 
         // THEN
-        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
-        assertEquals(resContent, ScopeService.MANDATORY_FIELDS_ERROR);
+        assertEquals(errorMsg, ScopeService.MANDATORY_FIELDS_ERROR);
     }
 
     @Test
@@ -387,11 +394,15 @@ public class ScopeServiceTest {
         willReturn(buf).given(req).getContent();
 
         // WHEN
-        HttpResponse response = service.registerScope(req);
+        String errorMsg = null;
+        try {
+            service.registerScope(req);
+        } catch(OAuthException e) {
+            errorMsg = e.getMessage();
+        }
 
         // THEN
-        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
-        assertEquals(resContent, Response.UNSUPPORTED_MEDIA_TYPE);
+        assertEquals(errorMsg, Response.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @Test
@@ -411,11 +422,10 @@ public class ScopeServiceTest {
         willReturn(true).given(DBManagerFactory.dbManager).storeScope(any(Scope.class));
 
         // WHEN
-        HttpResponse response = service.registerScope(req);
+        String storedMsg = service.registerScope(req);
 
         // THEN
-        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
-        assertEquals(resContent, ScopeService.SCOPE_STORED_OK_MESSAGE);
+        assertEquals(storedMsg, ScopeService.SCOPE_STORED_OK_MESSAGE);
     }
 
     @Test
@@ -435,11 +445,10 @@ public class ScopeServiceTest {
         willReturn(false).given(DBManagerFactory.dbManager).storeScope(any(Scope.class));
 
         // WHEN
-        HttpResponse response = service.registerScope(req);
+        String storedMsg = service.registerScope(req);
 
         // THEN
-        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
-        assertEquals(resContent, ScopeService.SCOPE_STORED_NOK_MESSAGE);
+        assertEquals(storedMsg, ScopeService.SCOPE_STORED_NOK_MESSAGE);
     }
 
     @Test
@@ -458,11 +467,15 @@ public class ScopeServiceTest {
         willReturn(null).given(DBManagerFactory.dbManager).findScope(scopeName);
 
         // WHEN
-        HttpResponse response = service.updateScope(req);
+        String errorMsg = null;
+        try {
+            service.updateScope(req);
+        } catch(OAuthException e) {
+            errorMsg = e.getMessage();
+        }
 
         // THEN
-        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
-        assertEquals(resContent, ScopeService.SCOPE_NOT_EXIST);
+        assertEquals(errorMsg, ScopeService.SCOPE_NOT_EXIST);
     }
 
     @Test
@@ -478,11 +491,15 @@ public class ScopeServiceTest {
         willReturn(headers).given(req).headers();
 
         // WHEN
-        HttpResponse response = service.updateScope(req);
+        String errorMsg = null;
+        try {
+            service.updateScope(req);
+        } catch(OAuthException e) {
+            errorMsg = e.getMessage();
+        }
 
         // THEN
-        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
-        assertEquals(resContent, ScopeService.MANDATORY_SCOPE_ERROR);
+        assertEquals(errorMsg, ScopeService.MANDATORY_SCOPE_ERROR);
     }
 
     @Test
@@ -495,11 +512,15 @@ public class ScopeServiceTest {
         willReturn(buf).given(req).getContent();
 
         // WHEN
-        HttpResponse response = service.updateScope(req);
+        String errorMsg = null;
+        try {
+            service.updateScope(req);
+        } catch(OAuthException e) {
+            errorMsg = e.getMessage();
+        }
 
         // THEN
-        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
-        assertEquals(resContent, Response.UNSUPPORTED_MEDIA_TYPE);
+        assertEquals(errorMsg, Response.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @Test
@@ -520,11 +541,10 @@ public class ScopeServiceTest {
         willReturn(true).given(DBManagerFactory.dbManager).storeScope(any(Scope.class));
 
         // WHEN
-        HttpResponse response = service.updateScope(req);
+        String storedMsg = service.updateScope(req);
 
         // THEN
-        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
-        assertEquals(resContent, ScopeService.SCOPE_UPDATED_OK_MESSAGE);
+        assertEquals(storedMsg, ScopeService.SCOPE_UPDATED_OK_MESSAGE);
     }
 
     @Test
@@ -545,11 +565,10 @@ public class ScopeServiceTest {
         willReturn(false).given(DBManagerFactory.dbManager).storeScope(any(Scope.class));
 
         // WHEN
-        HttpResponse response = service.updateScope(req);
+        String  updatedMsg = service.updateScope(req);
 
         // THEN
-        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
-        assertEquals(resContent, ScopeService.SCOPE_UPDATED_NOK_MESSAGE);
+        assertEquals(updatedMsg, ScopeService.SCOPE_UPDATED_NOK_MESSAGE);
     }
 
     @Test
@@ -651,11 +670,15 @@ public class ScopeServiceTest {
         willReturn(headers).given(req).headers();
 
         // WHEN
-        HttpResponse response = service.registerScope(req);
+        String errorMsg = null;
+        try {
+            service.registerScope(req);
+        } catch(OAuthException e) {
+            errorMsg = e.getMessage();
+        }
 
         // THEN
-        String resContent = new String(ChannelBuffers.copiedBuffer(response.getContent()).array());
-        assertEquals(resContent, ScopeService.SCOPE_NAME_SPACE_ERROR);
+        assertEquals(errorMsg, ScopeService.SCOPE_NAME_SPACE_ERROR);
     }
 
 }

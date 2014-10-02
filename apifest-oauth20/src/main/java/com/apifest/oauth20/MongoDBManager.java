@@ -76,6 +76,7 @@ public class MongoDBManager implements DBManager {
      *
      * @param clientCreds
      */
+    // REVISIT: change interface to throw IOException
     @Override
     public void storeClientCredentials(ClientCredentials clientCreds) {
         try {
