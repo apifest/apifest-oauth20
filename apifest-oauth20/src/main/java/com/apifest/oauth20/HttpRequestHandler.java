@@ -69,6 +69,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         Object message = e.getMessage();
         if (message instanceof HttpRequest) {
             HttpRequest req = (HttpRequest) message;
+            invokeRequestEventHandlers(req, null);
 
             if (log.isDebugEnabled()) {
                 String content = new String(req.getContent().array());
@@ -109,6 +110,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             } else {
                 response = Response.createNotFoundResponse();
             }
+            invokeResponseEventHandlers(req, response);
             ChannelFuture future = channel.write(response);
             future.addListener(ChannelFutureListener.CLOSE);
             return;
@@ -171,8 +173,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     }
 
     protected HttpResponse handleToken(HttpRequest request) {
-        executePreIssueTokenCallbacks(request, null);
-
         HttpResponse response = null;
         try {
             AccessToken accessToken = auth.issueAccessToken(request);
@@ -200,24 +200,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             response = Response.createBadRequestResponse(Response.CANNOT_ISSUE_TOKEN);
         }
 
-        executePostIssueTokenCallbacks(request, response);
         return response;
     }
 
-    protected void executePreIssueTokenCallbacks(HttpRequest request, HttpResponse response) {
-        invokeHandlers(request, response, LifecycleEventHandlers.getPreIssueTokenHandlers());
+    protected void invokeRequestEventHandlers(HttpRequest request, HttpResponse response) {
+        invokeHandlers(request, response, LifecycleEventHandlers.getRequestEventHandlers());
     }
 
-    protected void executePostIssueTokenCallbacks(HttpRequest request, HttpResponse response) {
-        invokeHandlers(request, response, LifecycleEventHandlers.getPostIssueTokenHandlers());
-    }
-
-    protected void executePreRevokeTokenCallbacks(HttpRequest request, HttpResponse response) {
-        invokeHandlers(request, response, LifecycleEventHandlers.getPreRevokeTokenHandlers());
-    }
-
-    protected void executePostRevokeTokenCallbacks(HttpRequest request, HttpResponse response) {
-        invokeHandlers(request, response, LifecycleEventHandlers.getPostRevokeTokenHandlers());
+    protected void invokeResponseEventHandlers(HttpRequest request, HttpResponse response) {
+        invokeHandlers(request, response, LifecycleEventHandlers.getResponseEventHandlers());
     }
 
     protected void invokeExceptionHandler(Exception ex, HttpRequest request) {
@@ -298,7 +289,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     }
 
     protected HttpResponse handleTokenRevoke(HttpRequest req) {
-        executePreRevokeTokenCallbacks(req, null);
         boolean revoked = false;
         try {
             revoked = auth.revokeToken(req);
@@ -308,7 +298,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
         String json = "{\"revoked\":\"" + revoked + "\"}";
         HttpResponse response = Response.createOkResponse(json);
-        executePostRevokeTokenCallbacks(req, response);
         return response;
     }
 

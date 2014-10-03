@@ -172,7 +172,6 @@ public class HttpRequestHandlerTest {
         willThrow(new OAuthException("something wrong", HttpResponseStatus.BAD_REQUEST))
                 .given(auth).revokeToken(req);
         handler.auth = auth;
-        willDoNothing().given(handler).executePreRevokeTokenCallbacks(req, null);
 
         // WHEN
         HttpResponse response = handler.handleTokenRevoke(req);

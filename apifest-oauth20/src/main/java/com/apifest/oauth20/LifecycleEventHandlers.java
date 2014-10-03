@@ -31,10 +31,8 @@ import org.slf4j.LoggerFactory;
 import com.apifest.oauth20.api.ExceptionEventHandler;
 import com.apifest.oauth20.api.LifecycleHandler;
 import com.apifest.oauth20.api.OnException;
-import com.apifest.oauth20.api.PostIssueToken;
-import com.apifest.oauth20.api.PostRevokeToken;
-import com.apifest.oauth20.api.PreIssueToken;
-import com.apifest.oauth20.api.PreRevokeToken;
+import com.apifest.oauth20.api.OnResponse;
+import com.apifest.oauth20.api.OnRequest;
 
 /**
  * Loads lifecycle event handlers on OAuth server startup.
@@ -45,10 +43,8 @@ public class LifecycleEventHandlers {
 
     private static Logger log = LoggerFactory.getLogger(LifecycleEventHandlers.class);
 
-    private static List<Class<LifecycleHandler>> preIssueTokenHandlers = new ArrayList<Class<LifecycleHandler>>();
-    private static List<Class<LifecycleHandler>> postIssueTokenHandlers = new ArrayList<Class<LifecycleHandler>>();
-    private static List<Class<LifecycleHandler>> preRevokeTokenHandlers = new ArrayList<Class<LifecycleHandler>>();
-    private static List<Class<LifecycleHandler>> postRevokeTokenHandlers = new ArrayList<Class<LifecycleHandler>>();
+    private static List<Class<LifecycleHandler>> requestEventHandlers = new ArrayList<Class<LifecycleHandler>>();
+    private static List<Class<LifecycleHandler>> responseEventHandlers = new ArrayList<Class<LifecycleHandler>>();
     private static List<Class<ExceptionEventHandler>> exceptionHandlers = new ArrayList<Class<ExceptionEventHandler>>();
 
     @SuppressWarnings("unchecked")
@@ -72,25 +68,15 @@ public class LifecycleEventHandlers {
                             continue;
                         }
                         Class<?> clazz = classLoader.loadClass(className);
-                        if (clazz.isAnnotationPresent(PreIssueToken.class)
+                        if (clazz.isAnnotationPresent(OnRequest.class)
                                 && LifecycleHandler.class.isAssignableFrom(clazz)) {
-                            preIssueTokenHandlers.add((Class<LifecycleHandler>) clazz);
+                            requestEventHandlers.add((Class<LifecycleHandler>) clazz);
                             log.debug("preIssueTokenHandler added {}", className);
                         }
-                        if (clazz.isAnnotationPresent(PostIssueToken.class)
+                        if (clazz.isAnnotationPresent(OnResponse.class)
                                 && LifecycleHandler.class.isAssignableFrom(clazz)) {
-                            postIssueTokenHandlers.add((Class<LifecycleHandler>) clazz);
+                            responseEventHandlers.add((Class<LifecycleHandler>) clazz);
                             log.debug("postIssueTokenHandler added {}", className);
-                        }
-                        if (clazz.isAnnotationPresent(PreRevokeToken.class)
-                                && LifecycleHandler.class.isAssignableFrom(clazz)) {
-                            preRevokeTokenHandlers.add((Class<LifecycleHandler>) clazz);
-                            log.debug("preRevokeTokenHandler added {}", className);
-                        }
-                        if (clazz.isAnnotationPresent(PostRevokeToken.class)
-                                && LifecycleHandler.class.isAssignableFrom(clazz)) {
-                            postRevokeTokenHandlers.add((Class<LifecycleHandler>) clazz);
-                            log.debug("postRevokeTokenHandler added {}", className);
                         }
                         if (clazz.isAnnotationPresent(OnException.class)
                                 && ExceptionEventHandler.class.isAssignableFrom(clazz)) {
@@ -111,20 +97,12 @@ public class LifecycleEventHandlers {
         }
     }
 
-    public static List<Class<LifecycleHandler>> getPreIssueTokenHandlers() {
-        return preIssueTokenHandlers;
+    public static List<Class<LifecycleHandler>> getRequestEventHandlers() {
+        return requestEventHandlers;
     }
 
-    public static List<Class<LifecycleHandler>> getPostIssueTokenHandlers() {
-        return postIssueTokenHandlers;
-    }
-
-    public static List<Class<LifecycleHandler>> getPreRevokeTokenHandlers() {
-        return preRevokeTokenHandlers;
-    }
-
-    public static List<Class<LifecycleHandler>> getPostRevokeTokenHandlers() {
-        return postRevokeTokenHandlers;
+    public static List<Class<LifecycleHandler>> getResponseEventHandlers() {
+        return responseEventHandlers;
     }
 
     public static List<Class<ExceptionEventHandler>> getExceptionHandlers() {

@@ -26,5 +26,10 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
  */
 public interface LifecycleHandler {
 
+    /**
+     * Handles events for incoming requests and outgoind responses.
+     * @param request incoming request
+     * @param response outgoing response
+     */
     public void handle(HttpRequest request, HttpResponse response);
 }

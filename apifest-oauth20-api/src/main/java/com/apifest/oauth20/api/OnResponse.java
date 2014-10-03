@@ -20,11 +20,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Annotation for classes that will be invoked before an access token is issued.
+ * Annotation for classes that will be invoked after an access token is issued.
  *
  * @author Rossitsa Borissova
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PreIssueToken {
+public @interface OnResponse {
 
 }
