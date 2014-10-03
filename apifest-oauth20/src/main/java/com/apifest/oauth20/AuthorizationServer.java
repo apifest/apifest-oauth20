@@ -408,7 +408,6 @@ public class AuthorizationServer {
                     if (appInfo.getScope() != null) {
                         String[] scopeList = appInfo.getScope().split(" ");
                         for (String s : scopeList) {
-                            // TODO: add cache for scope
                             if (db.findScope(s) == null) {
                                 throw new OAuthException(Response.SCOPE_NOT_EXIST, HttpResponseStatus.BAD_REQUEST);
                             }
@@ -416,8 +415,7 @@ public class AuthorizationServer {
                     }
                     db.updateClientAppScope(clientId, appInfo.getScope(), appInfo.getDescription(), appInfo.getStatus());
                 } else {
-                    // TODO: change the error - scope, status or description does not exist
-                    throw new OAuthException(Response.CANNOT_UPDATE_APP, HttpResponseStatus.BAD_REQUEST);
+                    throw new OAuthException(Response.UPDATE_APP_MANDATORY_PARAM_MISSING, HttpResponseStatus.BAD_REQUEST);
                 }
             } catch (JsonParseException e) {
                 throw new OAuthException(e, Response.CANNOT_UPDATE_APP, HttpResponseStatus.BAD_REQUEST);

@@ -48,6 +48,7 @@ public final class Response {
     public static final String NOT_FOUND_CONTENT = "{\"error\":\"Not found\"}";
     public static final String UNSUPPORTED_MEDIA_TYPE = "{\"error\":\"unsupported media type\"}";
     public static final String CANNOT_UPDATE_APP = "{\"error\": \"cannot update client application\"}";
+    public static final String UPDATE_APP_MANDATORY_PARAM_MISSING = "{\"error\": \"scope, description or status is missing or invalid\"}";
     public static final String ALREADY_REGISTERED_APP = "{\"error\": \"already registered client application\"}";
 
     public static final String APPLICATION_JSON = "application/json";

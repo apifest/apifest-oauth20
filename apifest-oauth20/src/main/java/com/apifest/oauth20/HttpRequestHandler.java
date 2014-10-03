@@ -158,7 +158,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         HttpResponse response = null;
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
         Map<String, List<String>> params = dec.getParameters();
-        // TODO: Check clientId?
         AccessToken token = auth.isValidToken(QueryParameter.getFirstElement(params, "token"));
         log.debug("token valid:" + token);
         if (token != null) {
