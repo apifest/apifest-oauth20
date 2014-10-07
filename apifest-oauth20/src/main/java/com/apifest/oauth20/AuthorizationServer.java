@@ -329,7 +329,6 @@ public class AuthorizationServer {
 
     public ApplicationInfo getApplicationInfo(String clientId) {
         ApplicationInfo appInfo = null;
-        // TODO: check clientid param mandatory
         ClientCredentials creds = db.findClientCredentials(clientId);
         if (creds != null) {
             appInfo = new ApplicationInfo();

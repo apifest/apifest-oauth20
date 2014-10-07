@@ -167,12 +167,10 @@ public class MongoDBManager implements DBManager {
      * @return access token object
      */
     @SuppressWarnings("unchecked")
-    // TODO: Check clientId is OK
     @Override
     public AccessToken findAccessToken(String accessToken) {
         BasicDBObject dbObject = new BasicDBObject();
         dbObject.put(ACCESS_TOKEN_ID_NAME, accessToken);
-        // dbObject.put(CLIENTS_ID_NAME, clientId);
         dbObject.put(VALID_NAME, true);
         DBCollection coll = db.getCollection(ACCESS_TOKEN_COLLECTION_NAME);
         List<DBObject> list = coll.find(dbObject).toArray();
