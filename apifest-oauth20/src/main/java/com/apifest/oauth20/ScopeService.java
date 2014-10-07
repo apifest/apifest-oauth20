@@ -45,13 +45,16 @@ public class ScopeService {
 
     protected static final String MANDATORY_FIELDS_ERROR = "{\"error\":\"scope, description, cc_expires_in and pass_expires_in are mandatory\"}";
     protected static final String MANDATORY_SCOPE_ERROR = "{\"error\":\"scope is mandatory\"}";
-    protected static final String SCOPE_NAME_SPACE_ERROR = "{\"error\":\"scope name cannot contain space\"}";
+    protected static final String SCOPE_NAME_INVALID_ERROR = "{\"error\":\"scope name not valid - it may contain aplha-numeric, - and _\"}";
     protected static final String SCOPE_STORED_OK_MESSAGE = "{\"status\":\"scope successfully stored\"}";
     protected static final String SCOPE_STORED_NOK_MESSAGE = "{\"status\":\"scope not stored\"}";
     protected static final String SCOPE_UPDATED_OK_MESSAGE = "{\"status\":\"scope successfully updated\"}";
     protected static final String SCOPE_UPDATED_NOK_MESSAGE = "{\"status\":\"scope not updated\"}";
     protected static final String SCOPE_NOT_EXIST = "{\"status\":\"scope does not exist\"}";
     protected static final String SCOPE_ALREADY_EXISTS = "{\"status\":\"scope already exists\"}";
+    protected static final String SCOPE_DELETED_OK_MESSAGE = "{\"status\":\"scope successfully deleted\"}";
+    protected static final String SCOPE_DELETED_NOK_MESSAGE = "{\"status\":\"scope not deleted\"}";
+    protected static final String SCOPE_USED_BY_APP_MESSAGE = "{\"status\":\"scope cannot be deleted, there are client apps registered with it\"}";
     private static final String SPACE = " ";
 
     /**
@@ -72,7 +75,7 @@ public class ScopeService {
                 if (scope.valid()) {
                     if (!Scope.validScopeName(scope.getScope())) {
                         log.error("scope name is not valid");
-                        throw new OAuthException(SCOPE_NAME_SPACE_ERROR, HttpResponseStatus.BAD_REQUEST);
+                        throw new OAuthException(SCOPE_NAME_INVALID_ERROR, HttpResponseStatus.BAD_REQUEST);
                     }
                     Scope foundScope = DBManagerFactory.getInstance().findScope(scope.getScope());
                     if (foundScope != null) {
@@ -260,6 +263,47 @@ public class ScopeService {
             throw new OAuthException(Response.UNSUPPORTED_MEDIA_TYPE, HttpResponseStatus.BAD_REQUEST);
         }
         return responseMsg;
+    }
+
+    /**
+     * Deletes a scope. If the scope does not exists, returns an error.
+     *
+     * @param req http request
+     * @return String message that will be returned in the response
+     */
+    public String deleteScope(String scopeName) throws OAuthException {
+        String responseMsg = "";
+        Scope foundScope = DBManagerFactory.getInstance().findScope(scopeName);
+        if (foundScope == null) {
+            log.error("scope does not exist");
+            throw new OAuthException(SCOPE_NOT_EXIST, HttpResponseStatus.BAD_REQUEST);
+        } else {
+            // first, check whether there is a client app registered with that scope
+            List<ClientCredentials> registeredApps = getClientAppsByScope(scopeName);
+            if (registeredApps.size() > 0) {
+                responseMsg = SCOPE_USED_BY_APP_MESSAGE;
+            } else {
+                boolean ok = DBManagerFactory.getInstance().deleteScope(scopeName);
+                if (ok) {
+                    responseMsg = SCOPE_DELETED_OK_MESSAGE;
+                } else {
+                    responseMsg = SCOPE_DELETED_NOK_MESSAGE;
+                }
+            }
+        }
+        return responseMsg;
+    }
+
+    protected List<ClientCredentials> getClientAppsByScope(String scopeName) {
+        List<ClientCredentials> scopeApps = new ArrayList<ClientCredentials>();
+        List<ClientCredentials> allApps = DBManagerFactory.getInstance().getAllApplications();
+        for (ClientCredentials app : allApps) {
+            if (app.getScope().contains(scopeName)) {
+                scopeApps.add(app);
+                break;
+            }
+        }
+        return scopeApps;
     }
 
     protected void setScopeEmptyValues(Scope scope, Scope foundScope) {

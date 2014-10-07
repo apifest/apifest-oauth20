@@ -280,4 +280,14 @@ public class RedisDBManager implements DBManager {
         pool.returnResource(jedis);
         return list;
     }
+
+    @Override
+    public boolean deleteScope(String scopeName) {
+        Jedis jedis = pool.getResource();
+        Long deleted = jedis.del("sc:" + scopeName);
+        pool.returnResource(jedis);
+        // 1 if deleted, 0 - nothing deleted
+        return (deleted.intValue() == 1) ? true : false;
+    }
+
 }

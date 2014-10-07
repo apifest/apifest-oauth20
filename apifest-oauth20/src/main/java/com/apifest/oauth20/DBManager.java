@@ -51,4 +51,12 @@ public interface DBManager {
     boolean updateClientAppScope(String clientId, String scope, String description, Integer status);
 
     List<ClientCredentials> getAllApplications();
+
+    /**
+     * Deletes an oauth20 scope.
+     * @param scopeName the name of the scope to be deleted
+     * @return <code>true</code> if the scope is successfully deleted, otherwise <code>false</code>
+     */
+    boolean deleteScope(String scopeName);
+
 }

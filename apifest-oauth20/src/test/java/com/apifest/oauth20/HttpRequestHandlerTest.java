@@ -16,7 +16,10 @@
 
 package com.apifest.oauth20;
 
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
@@ -343,6 +346,125 @@ public class HttpRequestHandlerTest {
 
         // THEN
         verify(handler).handleGetApplications(req);
+    }
+
+    @Test
+    public void when_uri_does_not_match_OAUTH_SCOPE_DELETE_PATTERN_return_not_found() throws Exception {
+        // GIVEN
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, HttpRequestHandler.APPLICATION_URI);
+        req.setUri(HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI + "/non@ValidScope");
+
+        // WHEN
+        HttpResponse response = handler.handleDeleteScope(req);
+
+        // THEN
+        assertEquals(response.getStatus(), HttpResponseStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void when_uri_match_OAUTH_SCOPE_DELETE_PATTERN_delete_scope() throws Exception {
+        // GIVEN
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, HttpRequestHandler.APPLICATION_URI);
+        req.setUri(HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI + "/validScope");
+        //getScopeService
+        ScopeService scopeService = mock(ScopeService.class);
+        willReturn(ScopeService.SCOPE_STORED_OK_MESSAGE).given(scopeService).deleteScope("validScope");
+        willReturn(scopeService).given(handler).getScopeService();
+
+        // WHEN
+        HttpResponse response = handler.handleDeleteScope(req);
+
+        // THEN
+        assertEquals(response.getStatus(), HttpResponseStatus.OK);
+        assertEquals(new String(response.getContent().array()), ScopeService.SCOPE_STORED_OK_MESSAGE);
+    }
+
+    @Test
+    public void when_delete_scope_NOK_return_200_with_NOK_message() throws Exception {
+        // GIVEN
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, HttpRequestHandler.APPLICATION_URI);
+        req.setUri(HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI + "/validScope");
+        //getScopeService
+        ScopeService scopeService = mock(ScopeService.class);
+        willReturn(ScopeService.SCOPE_UPDATED_NOK_MESSAGE).given(scopeService).deleteScope("validScope");
+        willReturn(scopeService).given(handler).getScopeService();
+
+        // WHEN
+        HttpResponse response = handler.handleDeleteScope(req);
+
+        // THEN
+        assertEquals(response.getStatus(), HttpResponseStatus.OK);
+        assertEquals(new String(response.getContent().array()), ScopeService.SCOPE_UPDATED_NOK_MESSAGE);
+    }
+
+    @Test
+    public void when_delete_scope_throws_exception_return_400_http_status() throws Exception {
+        // GIVEN
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, HttpRequestHandler.APPLICATION_URI);
+        req.setUri(HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI + "/validScope");
+        //getScopeService
+        ScopeService scopeService = mock(ScopeService.class);
+        willThrow(new OAuthException(ScopeService.SCOPE_NOT_EXIST, HttpResponseStatus.BAD_REQUEST)).given(scopeService).deleteScope("validScope");
+        willReturn(scopeService).given(handler).getScopeService();
+
+        // WHEN
+        HttpResponse response = handler.handleDeleteScope(req);
+
+        // THEN
+        assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
+        assertEquals(new String(response.getContent().array()), ScopeService.SCOPE_NOT_EXIST);
+    }
+
+    @Test
+    public void when_DELETE_scope_invoke_handleDeleteScope() throws Exception {
+        // GIVEN
+        ChannelHandlerContext ctx = mockChannelHandlerContext();
+
+        MessageEvent event = mock(MessageEvent.class);
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI + "/scope");
+        willReturn(req).given(event).getMessage();
+        willReturn(mock(HttpResponse.class)).given(handler).handleDeleteScope(req);
+
+        // WHEN
+        handler.messageReceived(ctx, event);
+
+        // THEN
+        verify(handler).handleDeleteScope(req);
+    }
+
+    @Test
+    public void when_oauth20_delete_contains_scope_extract_scope_name() throws Exception {
+        // GIVEN
+        String scopeName = "my-super-scope";
+        String uri = "/oauth20/scope/" + scopeName;
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, uri);
+        ScopeService scopeService = mock(ScopeService.class);
+        willReturn("OK").given(scopeService).deleteScope(scopeName);
+        willReturn(scopeService).given(handler).getScopeService();
+
+        // WHEN
+        handler.handleDeleteScope(req);
+
+        // THEN
+        verify(scopeService).deleteScope(scopeName);
+    }
+
+    @Test
+    public void when_oauth20_delete_contains_invalid_scope_return_not_found_response() throws Exception {
+        // GIVEN
+        String scopeName = "my-super-scope invalid";
+        String uri = "/oauth20/scope/" + scopeName;
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, uri);
+        ScopeService scopeService = mock(ScopeService.class);
+        willReturn("OK").given(scopeService).deleteScope(scopeName);
+        willReturn(scopeService).given(handler).getScopeService();
+
+        // WHEN
+        HttpResponse response = handler.handleDeleteScope(req);
+
+        // THEN
+        verify(scopeService, times(0)).deleteScope(scopeName);
+        assertEquals(response.getStatus(), HttpResponseStatus.NOT_FOUND);
     }
 
     private ChannelHandlerContext mockChannelHandlerContext() {

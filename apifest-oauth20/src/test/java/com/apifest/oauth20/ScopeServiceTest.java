@@ -29,6 +29,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -678,7 +679,103 @@ public class ScopeServiceTest {
         }
 
         // THEN
-        assertEquals(errorMsg, ScopeService.SCOPE_NAME_SPACE_ERROR);
+        assertEquals(errorMsg, ScopeService.SCOPE_NAME_INVALID_ERROR);
     }
 
+    @Test
+    public void when_db_delete_scope_return_false_return_delete_NOK_message() throws Exception {
+        // GIVEN
+        String scope = "scope";
+        willReturn(mock(Scope.class)).given(DBManagerFactory.dbManager).findScope(scope);
+        willReturn(false).given(DBManagerFactory.dbManager).deleteScope(scope);
+
+        // WHEN
+        String message = service.deleteScope(scope);
+
+        // THEN
+        assertEquals(message, ScopeService.SCOPE_DELETED_NOK_MESSAGE);
+    }
+
+    @Test
+    public void when_db_delete_scope_return_true_return_delete_OK_message() throws Exception {
+        // GIVEN
+        String scope = "scope";
+        willReturn(mock(Scope.class)).given(DBManagerFactory.dbManager).findScope(scope);
+        willReturn(true).given(DBManagerFactory.dbManager).deleteScope(scope);
+
+        // WHEN
+        String message = service.deleteScope(scope);
+
+        // THEN
+        assertEquals(message, ScopeService.SCOPE_DELETED_OK_MESSAGE);
+    }
+
+    @Test
+    public void when_scope_not_found_throw_exception() throws Exception {
+        // GIVEN
+        String scope = "scope";
+        willReturn(null).given(DBManagerFactory.dbManager).findScope(scope);
+
+        // WHEN
+        OAuthException exception = null;
+        try {
+            service.deleteScope(scope);
+        } catch(OAuthException e) {
+            exception = e;
+        }
+
+        // THEN
+        assertEquals(exception.getHttpStatus(), HttpResponseStatus.BAD_REQUEST);
+        assertEquals(exception.getMessage(), ScopeService.SCOPE_NOT_EXIST);
+    }
+
+    @Test
+    public void when_scope_is_registered_to_client_app_return_error_message() throws Exception {
+        // GIVEN
+        String scope = "scope";
+        willReturn(mock(Scope.class)).given(DBManagerFactory.dbManager).findScope(scope);
+        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
+        apps.add(mock(ClientCredentials.class));
+        willReturn(apps).given(service).getClientAppsByScope(scope);
+
+        // WHEN
+        String message = service.deleteScope(scope);
+
+        // THEN
+        assertEquals(message, ScopeService.SCOPE_USED_BY_APP_MESSAGE);
+    }
+
+    @Test
+    public void when_application_uses_scope_add_it_to_result() throws Exception {
+        // GIVEN
+        String scope = "scope";
+        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
+        ClientCredentials app = mock(ClientCredentials.class);
+        willReturn("someScope" + " " + scope).given(app).getScope();
+        apps.add(app);
+        willReturn(apps).given(DBManagerFactory.dbManager).getAllApplications();
+
+        // WHEN
+        List<ClientCredentials> scopeApps = service.getClientAppsByScope(scope);
+
+        // THEN
+        assertTrue(scopeApps.size() == 1);
+    }
+
+    @Test
+    public void when_no_application_uses_scope_return_empty_list() throws Exception {
+        // GIVEN
+        String scope = "scope";
+        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
+        ClientCredentials app = mock(ClientCredentials.class);
+        willReturn("someScope").given(app).getScope();
+        apps.add(app);
+        willReturn(apps).given(DBManagerFactory.dbManager).getAllApplications();
+
+        // WHEN
+        List<ClientCredentials> scopeApps = service.getClientAppsByScope(scope);
+
+        // THEN
+        assertTrue(scopeApps.size() == 0);
+    }
 }

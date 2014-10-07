@@ -37,6 +37,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.WriteResult;
 
 /**
  * Connects to the database and responsible for CRUD operations.
@@ -426,6 +427,14 @@ public class MongoDBManager implements DBManager {
             list.add(loadedCreds);
         }
         return list;
+    }
+
+    @Override
+    public boolean deleteScope(String scopeName) {
+        DBCollection coll = db.getCollection(SCOPE_COLLECTION_NAME);
+        BasicDBObject query = new BasicDBObject(ID_NAME, scopeName);
+        WriteResult result = coll.remove(query);
+        return (result.getN() == 1) ? true : false;
     }
 
 }

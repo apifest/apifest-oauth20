@@ -311,4 +311,10 @@ public class HazelcastDBManager implements DBManager {
         return appsList;
     }
 
+    @Override
+    public boolean deleteScope(String scopeName) {
+        PersistentScope scope = getScopesContainer().remove(scopeName);
+        return (scope != null) ? true : false;
+    }
+
 }

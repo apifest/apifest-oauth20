@@ -17,6 +17,8 @@
 package com.apifest.oauth20;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
@@ -34,7 +36,7 @@ public class Scope {
     static final String CC_EXPIRES_IN_FIELD = "ccExpiresIn";
     static final String PASS_EXPIRES_IN_FIELD = "passExpiresIn";
 
-    private static final String SPACE = " ";
+    static final Pattern SCOPE_PATTERN = Pattern.compile("^(\\p{Alnum}+-?_?)+$");
 
     @JsonProperty("scope")
     private String scope;
@@ -120,9 +122,10 @@ public class Scope {
     }
 
     public static boolean validScopeName(String scopeName) {
-        if (scopeName.contains(SPACE)) {
-            return false;
+        Matcher m = SCOPE_PATTERN.matcher(scopeName);
+        if (m.find()) {
+            return true;
         }
-        return true;
+        return false;
     }
 }

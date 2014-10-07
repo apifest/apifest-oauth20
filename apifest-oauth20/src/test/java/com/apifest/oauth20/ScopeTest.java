@@ -16,9 +16,9 @@
 
 package com.apifest.oauth20;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -159,5 +159,53 @@ public class ScopeTest {
         assertEquals(scope.getScope(), "basic");
         assertEquals(scope.getDescription(), "some descr");
         assertEquals(scope.getCcExpiresIn(), Integer.valueOf(300));
+    }
+
+    @Test
+    public void when_scope_name_contains_not_alphaNumeric_return_false() throws Exception {
+        boolean valid = Scope.validScopeName("basic@es");
+
+        // THEN
+        assertFalse(valid);
+    }
+
+    @Test
+    public void when_scope_name_contains_space_return_false() throws Exception {
+        boolean valid = Scope.validScopeName("basic my");
+
+        // THEN
+        assertFalse(valid);
+    }
+
+    @Test
+    public void when_scope_name_contains_dash_return_true() throws Exception {
+        boolean valid = Scope.validScopeName("my-basic");
+
+        // THEN
+        assertTrue(valid);
+    }
+
+    @Test
+    public void when_scope_name_contains_several_dashes_return_true() throws Exception {
+        boolean valid = Scope.validScopeName("my-basic-scope");
+
+        // THEN
+        assertTrue(valid);
+    }
+
+    @Test
+    public void when_scope_name_contains_dash_and_undescore_return_true() throws Exception {
+        boolean valid = Scope.validScopeName("my-basic_scope");
+
+        // THEN
+        assertTrue(valid);
+    }
+
+    @Test
+    public void when_scope_name_contains_several_undescores_return_true() throws Exception {
+        boolean valid = Scope.validScopeName("my_basic_scope");
+
+        // THEN
+        assertTrue(valid);
     }
 }

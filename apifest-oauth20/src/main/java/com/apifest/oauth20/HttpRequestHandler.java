@@ -21,6 +21,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -56,6 +58,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected static final String APPLICATION_URI = "/oauth20/application";
     protected static final String ACCESS_TOKEN_REVOKE_URI = "/oauth20/token/revoke";
     protected static final String OAUTH_CLIENT_SCOPE_URI = "/oauth20/scope";
+
+    protected static final Pattern OAUTH_CLIENT_SCOPE_DELETE_PATTERN = Pattern.compile("/oauth20/scope/((\\p{Alnum}+-?_?)+$)");
 
     protected Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 
@@ -107,6 +111,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 response = handleGetScopes(req);
             } else if (APPLICATION_URI.equals(rawUri) && method.equals(HttpMethod.PUT)) {
                 response = handleUpdateClientApp(req);
+            } else if (rawUri.startsWith(OAUTH_CLIENT_SCOPE_URI) && method.equals(HttpMethod.DELETE)) {
+                response = handleDeleteScope(req);
             } else {
                 response = Response.createNotFoundResponse();
             }
@@ -335,6 +341,25 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             invokeExceptionHandler(e, req);
         }
         return Response.createOkResponse(jsonString);
+    }
+
+    protected HttpResponse handleDeleteScope(HttpRequest req) {
+        HttpResponse response = null;
+        Matcher m = OAUTH_CLIENT_SCOPE_DELETE_PATTERN.matcher(req.getUri());
+        if (m.find()) {
+            String scopeName = m.group(1);
+            ScopeService scopeService = getScopeService();
+            try {
+                String responseMsg = scopeService.deleteScope(scopeName);
+                response = Response.createOkResponse(responseMsg);
+            } catch (OAuthException e) {
+                invokeExceptionHandler(e, req);
+                response = Response.createResponse(e.getHttpStatus(), e.getMessage());
+            }
+        } else {
+            response = Response.createNotFoundResponse();
+        }
+        return response;
     }
 
     protected ScopeService getScopeService() {
