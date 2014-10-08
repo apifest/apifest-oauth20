@@ -30,6 +30,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -338,7 +339,7 @@ public class ScopeServiceTest {
         HttpRequest req = mock(HttpRequest.class);
         String scopeName = "registered";
         String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
 
         HttpHeaders headers = mock(HttpHeaders.class);
@@ -366,7 +367,7 @@ public class ScopeServiceTest {
         HttpRequest req = mock(HttpRequest.class);
         String scopeName = "registered";
         String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"pass_expires_in\":\"900\"}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
 
         HttpHeaders headers = mock(HttpHeaders.class);
@@ -391,7 +392,7 @@ public class ScopeServiceTest {
         HttpRequest req = mock(HttpRequest.class);
         String scopeName = "registered";
         String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"pass_expires_in\":\"900\"}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
 
         // WHEN
@@ -412,7 +413,7 @@ public class ScopeServiceTest {
         HttpRequest req = mock(HttpRequest.class);
         String scopeName = "registered";
         String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
 
         HttpHeaders headers = mock(HttpHeaders.class);
@@ -435,7 +436,7 @@ public class ScopeServiceTest {
         HttpRequest req = mock(HttpRequest.class);
         String scopeName = "registered";
         String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
 
         HttpHeaders headers = mock(HttpHeaders.class);
@@ -458,7 +459,7 @@ public class ScopeServiceTest {
         HttpRequest req = mock(HttpRequest.class);
         String scopeName = "registered";
         String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
 
         HttpHeaders headers = mock(HttpHeaders.class);
@@ -484,7 +485,7 @@ public class ScopeServiceTest {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
         String content = "{\"description\":\"test scope description\",\"pass_expires_in\":\"900\"}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
 
         HttpHeaders headers = mock(HttpHeaders.class);
@@ -509,7 +510,7 @@ public class ScopeServiceTest {
         HttpRequest req = mock(HttpRequest.class);
         String scopeName = "registered";
         String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
 
         // WHEN
@@ -530,7 +531,7 @@ public class ScopeServiceTest {
         HttpRequest req = mock(HttpRequest.class);
         String scopeName = "registered";
         String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
 
         HttpHeaders headers = mock(HttpHeaders.class);
@@ -554,7 +555,7 @@ public class ScopeServiceTest {
         HttpRequest req = mock(HttpRequest.class);
         String scopeName = "registered";
         String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
 
         HttpHeaders headers = mock(HttpHeaders.class);
@@ -663,7 +664,7 @@ public class ScopeServiceTest {
         HttpRequest req = mock(HttpRequest.class);
         String scopeName = "space scope";
         String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
 
         HttpHeaders headers = mock(HttpHeaders.class);

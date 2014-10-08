@@ -160,6 +160,9 @@ public class HazelcastDBManager implements DBManager {
         return nodes;
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#validClient(java.lang.String, java.lang.String)
+     */
     @Override
     public boolean validClient(String clientId, String clientSecret) {
         ClientCredentials clientCredentials = findClientCredentials(clientId);
@@ -169,18 +172,27 @@ public class HazelcastDBManager implements DBManager {
         return false;
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#storeClientCredentials(com.apifest.oauth20.ClientCredentials)
+     */
     @Override
     public void storeClientCredentials(ClientCredentials clientCreds) {
         getClientCredentialsContainer().put(clientCreds.getId(),
                 PersistenceTransformations.toPersistentClientCredentials(clientCreds));
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#storeAuthCode(com.apifest.oauth20.AuthCode)
+     */
     // TODO: Set expiration time for auth code
     @Override
     public void storeAuthCode(AuthCode authCode) {
         getAuthCodeContainer().put(authCode.getCode(), PersistenceTransformations.toPersistentAuthCode(authCode));
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#updateAuthCodeValidStatus(java.lang.String, boolean)
+     */
     @Override
     public void updateAuthCodeValidStatus(String authCode, boolean valid) {
         PersistentAuthCode persistentAuthCode = getAuthCodeContainer().get(authCode);
@@ -188,12 +200,18 @@ public class HazelcastDBManager implements DBManager {
         getAuthCodeContainer().put(authCode, persistentAuthCode);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#storeAccessToken(com.apifest.oauth20.AccessToken)
+     */
     @Override
     public void storeAccessToken(AccessToken accessToken) {
         getAccessTokenContainer().put(accessToken.getToken(), PersistenceTransformations.toPersistentAccessToken(accessToken),
                 Integer.valueOf(accessToken.getExpiresIn()), TimeUnit.SECONDS);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#findAccessTokenByRefreshToken(java.lang.String, java.lang.String)
+     */
     @Override
     @SuppressWarnings("unchecked")
     public AccessToken findAccessTokenByRefreshToken(String refreshToken, String clientId) {
@@ -207,6 +225,9 @@ public class HazelcastDBManager implements DBManager {
         return PersistenceTransformations.toAccessToken(values.iterator().next());
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#updateAccessTokenValidStatus(java.lang.String, boolean)
+     */
     @Override
     public void updateAccessTokenValidStatus(String accessToken, boolean valid) {
         PersistentAccessToken persistentAccessToken = getAccessTokenContainer().get(accessToken);
@@ -214,6 +235,9 @@ public class HazelcastDBManager implements DBManager {
         getAccessTokenContainer().put(accessToken, persistentAccessToken);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#findAccessToken(java.lang.String)
+     */
     @Override
     public AccessToken findAccessToken(String accessToken) {
         PersistentAccessToken tokenStored = getAccessTokenContainer().get(accessToken);
@@ -224,6 +248,9 @@ public class HazelcastDBManager implements DBManager {
         }
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#findAuthCode(java.lang.String, java.lang.String)
+     */
     @Override
     @SuppressWarnings("unchecked")
     public AuthCode findAuthCode(String authCode, String redirectUri) {
@@ -236,17 +263,26 @@ public class HazelcastDBManager implements DBManager {
         return PersistenceTransformations.toAuthCode(values.iterator().next());
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#findClientCredentials(java.lang.String)
+     */
     @Override
     public ClientCredentials findClientCredentials(String clientId) {
         return PersistenceTransformations.toClientCredentials(getClientCredentialsContainer().get(clientId));
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#storeScope(com.apifest.oauth20.Scope)
+     */
     @Override
     public boolean storeScope(Scope scope) {
         getScopesContainer().put(scope.getScope(), PersistenceTransformations.toPersistentScope(scope));
         return true;
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#getAllScopes()
+     */
     @Override
     public List<Scope> getAllScopes() {
         List<Scope> scopesList = new ArrayList<Scope>();
@@ -257,6 +293,9 @@ public class HazelcastDBManager implements DBManager {
         return scopesList;
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#findScope(java.lang.String)
+     */
     @Override
     public Scope findScope(String scopeName) {
         return PersistenceTransformations.toScope(getScopesContainer().get(scopeName));
@@ -311,6 +350,9 @@ public class HazelcastDBManager implements DBManager {
         return appsList;
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#deleteScope(java.lang.String)
+     */
     @Override
     public boolean deleteScope(String scopeName) {
         PersistentScope scope = getScopesContainer().remove(scopeName);

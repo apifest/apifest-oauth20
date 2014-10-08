@@ -24,6 +24,7 @@ import static org.testng.Assert.*;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -45,7 +46,7 @@ public class TokenRequestTest {
     public void when_grant_type_is_missing_throws_exception() throws Exception {
         // GIVEN
         String content = "redirect_uri=example.com" + "&code=not_valid_code";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
         tokenReq.setClientId("203598599234220");
@@ -68,7 +69,7 @@ public class TokenRequestTest {
         // GIVEN
         String content = "redirect_uri=example.com"
                 + "&grant_type=not_supported&code=not_valid_code";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
         tokenReq.setClientId("203598599234220");
@@ -90,7 +91,7 @@ public class TokenRequestTest {
         // GIVEN
         String content = "grant_type=" + TokenRequest.AUTHORIZATION_CODE
                 + "&redirect_uri=example.com";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
         tokenReq.setClientId("203598599234220");
@@ -112,7 +113,7 @@ public class TokenRequestTest {
         // GIVEN
         // "client_id=203598599234220&"
         String content = "grant_type=" + TokenRequest.AUTHORIZATION_CODE + "&code=valid_code";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
 
         TokenRequest tokenReq = new TokenRequest(req);
@@ -136,7 +137,7 @@ public class TokenRequestTest {
         // GIVEN
         String content = "grant_type=" + TokenRequest.AUTHORIZATION_CODE
                 + "code=valid_code&redirect_uri=example.com";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
 
@@ -158,7 +159,7 @@ public class TokenRequestTest {
         // GIVEN
         String content = "grant_type=" + TokenRequest.AUTHORIZATION_CODE
                 + "&code=valid_code&redirect_uri=example.com";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
         tokenReq.setClientId("203598599234220");
@@ -171,7 +172,7 @@ public class TokenRequestTest {
     public void when_grant_type_refresh_token_and_no_refresh_token_return_error() throws Exception {
         // GIVEN
         String content = "grant_type=" + TokenRequest.REFRESH_TOKEN;
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
         tokenReq.setClientId("203598599234220");
@@ -193,7 +194,7 @@ public class TokenRequestTest {
     public void when_grant_type_password_and_no_username_return_error() throws Exception {
         // GIVEN
         String content = "grant_type=" + TokenRequest.PASSWORD + "&password=pd1&wyfr";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
         tokenReq.setClientId("203598599234220");
@@ -215,7 +216,7 @@ public class TokenRequestTest {
     public void when_grant_type_password_and_no_password_return_error() throws Exception {
         // GIVEN
         String content = "grant_type=" + TokenRequest.PASSWORD + "&username=rossi";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
         tokenReq.setClientId("203598599234220");
@@ -237,7 +238,7 @@ public class TokenRequestTest {
     public void when_clientId_empty_check_mandatory_params_throws_exception() throws Exception {
         // GIVEN
         String content = "grant_type=" + TokenRequest.PASSWORD + "&username=rossi";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
         tokenReq.setClientId("");
@@ -258,7 +259,7 @@ public class TokenRequestTest {
     public void when_grantType_empty_check_mandatory_params_throws_exception() throws Exception {
         // GIVEN
         String content = "grant_type=" + "" +"&username=rossi";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
         tokenReq.setClientId("203598599234220");

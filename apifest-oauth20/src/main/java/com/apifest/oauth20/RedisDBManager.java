@@ -50,6 +50,9 @@ public class RedisDBManager implements DBManager {
         pool.returnResource(jedis);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#validClient(java.lang.String, java.lang.String)
+     */
     @Override
     public boolean validClient(String clientId, String clientSecret) {
         Jedis jedis = pool.getResource();
@@ -62,6 +65,9 @@ public class RedisDBManager implements DBManager {
         }
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#storeClientCredentials(com.apifest.oauth20.ClientCredentials)
+     */
     @Override
     public void storeClientCredentials(ClientCredentials clientCreds) {
         Jedis jedis = pool.getResource();
@@ -79,6 +85,9 @@ public class RedisDBManager implements DBManager {
         pool.returnResource(jedis);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#storeAuthCode(com.apifest.oauth20.AuthCode)
+     */
     @Override
     public void storeAuthCode(AuthCode authCode) {
         Map<String, String> authCodeMap = new HashMap<String, String>();
@@ -103,6 +112,9 @@ public class RedisDBManager implements DBManager {
         pool.returnResource(jedis);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#updateAuthCodeValidStatus(java.lang.String, boolean)
+     */
     @Override
     public void updateAuthCodeValidStatus(String authCode, boolean valid) {
         Jedis jedis = pool.getResource();
@@ -110,6 +122,9 @@ public class RedisDBManager implements DBManager {
         pool.returnResource(jedis);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#storeAccessToken(com.apifest.oauth20.AccessToken)
+     */
     @Override
     public void storeAccessToken(AccessToken accessToken) {
         Map<String, String> accessTokenMap = new HashMap<String, String>();
@@ -134,6 +149,9 @@ public class RedisDBManager implements DBManager {
         pool.returnResource(jedis);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#findAccessTokenByRefreshToken(java.lang.String, java.lang.String)
+     */
     @Override
     public AccessToken findAccessTokenByRefreshToken(String refreshToken, String clientId) {
         Jedis jedis = pool.getResource();
@@ -147,6 +165,9 @@ public class RedisDBManager implements DBManager {
         return AccessToken.loadFromStringMap(accessTokenMap);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#updateAccessTokenValidStatus(java.lang.String, boolean)
+     */
     @Override
     public void updateAccessTokenValidStatus(String accessToken, boolean valid) {
         Jedis jedis = pool.getResource();
@@ -154,6 +175,9 @@ public class RedisDBManager implements DBManager {
         pool.returnResource(jedis);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#findAccessToken(java.lang.String)
+     */
     @Override
     public AccessToken findAccessToken(String accessToken) {
         Jedis jedis = pool.getResource();
@@ -166,6 +190,9 @@ public class RedisDBManager implements DBManager {
         return AccessToken.loadFromStringMap(accessTokenMap);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#findAuthCode(java.lang.String, java.lang.String)
+     */
     @Override
     public AuthCode findAuthCode(String authCode, String redirectUri) {
         Jedis jedis = pool.getResource();
@@ -180,6 +207,9 @@ public class RedisDBManager implements DBManager {
         return AuthCode.loadFromStringMap(authCodeMap);
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#findClientCredentials(java.lang.String)
+     */
     @Override
     public ClientCredentials findClientCredentials(String clientId) {
         Jedis jedis = pool.getResource();
@@ -281,6 +311,9 @@ public class RedisDBManager implements DBManager {
         return list;
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#deleteScope(java.lang.String)
+     */
     @Override
     public boolean deleteScope(String scopeName) {
         Jedis jedis = pool.getResource();

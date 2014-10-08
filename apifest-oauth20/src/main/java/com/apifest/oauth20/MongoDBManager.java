@@ -72,10 +72,8 @@ public class MongoDBManager implements DBManager {
         db = MongoUtil.getMongoClient().getDB("apifest");
     }
 
-    /**
-     * Stores client credentials in the DB.
-     *
-     * @param clientCreds
+    /*
+     * @see com.apifest.oauth20.DBManager#storeClientCredentials(com.apifest.oauth20.ClientCredentials)
      */
     // REVISIT: change interface to throw IOException
     @Override
@@ -87,11 +85,8 @@ public class MongoDBManager implements DBManager {
         }
     }
 
-    /**
-     * Loads a client credentials from DB by passed clientId.
-     *
-     * @param clientId client id
-     * @return client credential object that will be stored in the DB
+    /*
+     * @see com.apifest.oauth20.DBManager#findClientCredentials(java.lang.String)
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -107,10 +102,8 @@ public class MongoDBManager implements DBManager {
         }
     }
 
-    /**
-     * Stores auth codes in the DB.
-     *
-     * @param authCode that will be stored in the DB
+    /*
+     * @see com.apifest.oauth20.DBManager#storeAuthCode(com.apifest.oauth20.AuthCode)
      */
     @Override
     public void storeAuthCode(AuthCode authCode) {
@@ -121,11 +114,8 @@ public class MongoDBManager implements DBManager {
         }
     }
 
-    /**
-     * Loads an auth code record from DB by passed authCode with status valid=true.
-     *
-     * @param authCode authCode
-     * @return auth code object
+    /*
+     * @see com.apifest.oauth20.DBManager#findAuthCode(java.lang.String, java.lang.String)
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -147,10 +137,8 @@ public class MongoDBManager implements DBManager {
         return null;
     }
 
-    /**
-     * Stores access tokens in the DB.
-     *
-     * @param authCode that will be stored in the DB
+    /*
+     * @see com.apifest.oauth20.DBManager#storeAccessToken(com.apifest.oauth20.AccessToken)
      */
     @Override
     public void storeAccessToken(AccessToken accessToken) {
@@ -161,11 +149,8 @@ public class MongoDBManager implements DBManager {
         }
     }
 
-    /**
-     * Loads an access token record from DB by passed accessToken
-     *
-     * @param accessToken access token
-     * @return access token object
+    /*
+     * @see com.apifest.oauth20.DBManager#findAccessToken(java.lang.String)
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -194,12 +179,8 @@ public class MongoDBManager implements DBManager {
         }
     }
 
-    /**
-     * Loads an access token record from DB by passed refreshToken
-     *
-     * @param refreshToken refresh token
-     * @param clientId client id
-     * @return access token object
+    /*
+     * @see com.apifest.oauth20.DBManager#findAccessTokenByRefreshToken(java.lang.String, java.lang.String)
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -225,6 +206,9 @@ public class MongoDBManager implements DBManager {
         }
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#updateAccessTokenValidStatus(java.lang.String, boolean)
+     */
     @Override
     public void updateAccessTokenValidStatus(String accessToken, boolean valid) {
         BasicDBObject dbObject = new BasicDBObject();
@@ -238,6 +222,9 @@ public class MongoDBManager implements DBManager {
         }
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#updateAuthCodeValidStatus(java.lang.String, boolean)
+     */
     @Override
     public void updateAuthCodeValidStatus(String authCode, boolean valid) {
         BasicDBObject dbObject = new BasicDBObject();
@@ -251,12 +238,8 @@ public class MongoDBManager implements DBManager {
         }
     }
 
-    /**
-     * Validates passed clientId and clientSecret.
-     *
-     * @param clientId client id of the client
-     * @param clientSecret client secret of the client
-     * @return true when such a client exists, otherwise false
+    /*
+     * @see com.apifest.oauth20.DBManager#validClient(java.lang.String, java.lang.String)
      */
     @Override
     public boolean validClient(String clientId, String clientSecret) {
@@ -269,8 +252,8 @@ public class MongoDBManager implements DBManager {
         return false;
     }
 
-    /**
-     * Stores OAuth20 scope. If the scope already exists, updates it.
+    /*
+     * @see com.apifest.oauth20.DBManager#storeScope(com.apifest.oauth20.Scope)
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -416,6 +399,7 @@ public class MongoDBManager implements DBManager {
      * @see com.apifest.oauth20.DBManager#getAllApplications()
      */
     @Override
+    @SuppressWarnings("unchecked")
     public List<ClientCredentials> getAllApplications() {
         List<ClientCredentials> list = new ArrayList<ClientCredentials>();
         DBCollection coll = db.getCollection(CLIENTS_COLLECTION_NAME);
@@ -429,6 +413,9 @@ public class MongoDBManager implements DBManager {
         return list;
     }
 
+    /*
+     * @see com.apifest.oauth20.DBManager#deleteScope(java.lang.String)
+     */
     @Override
     public boolean deleteScope(String scopeName) {
         DBCollection coll = db.getCollection(SCOPE_COLLECTION_NAME);

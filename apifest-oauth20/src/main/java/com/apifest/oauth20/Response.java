@@ -23,6 +23,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.jboss.netty.util.CharsetUtil;
 
 /**
  * Contains all supported responses and response messages.
@@ -62,7 +63,7 @@ public final class Response {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         if(message != null) {
-            ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
+            ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
             response.setContent(buf);
             response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         }
@@ -74,7 +75,7 @@ public final class Response {
     public static HttpResponse createNotFoundResponse() {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(NOT_FOUND_CONTENT.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(NOT_FOUND_CONTENT.getBytes(CharsetUtil.UTF_8));
         response.setContent(buf);
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         response.headers().set(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
@@ -84,7 +85,7 @@ public final class Response {
 
     public static HttpResponse createOkResponse(String jsonString) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(jsonString.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(jsonString.getBytes(CharsetUtil.UTF_8));
         response.setContent(buf);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
@@ -95,7 +96,7 @@ public final class Response {
 
     public static HttpResponse createOAuthExceptionResponse(OAuthException ex) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, ex.getHttpStatus());
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(ex.getMessage().getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(ex.getMessage().getBytes(CharsetUtil.UTF_8));
         response.setContent(buf);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
@@ -106,7 +107,7 @@ public final class Response {
 
     public static HttpResponse createUnauthorizedResponse() {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(Response.INVALID_ACCESS_TOKEN.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(Response.INVALID_ACCESS_TOKEN.getBytes(CharsetUtil.UTF_8));
         response.setContent(buf);
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         response.headers().set(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
@@ -118,7 +119,7 @@ public final class Response {
     public static HttpResponse createResponse(HttpResponseStatus status, String message) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status);
         if (message != null) {
-            ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
+            ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
             response.setContent(buf);
             response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         }
