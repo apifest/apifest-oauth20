@@ -16,6 +16,8 @@
 
 package com.apifest.oauth20.api;
 
+import org.jboss.netty.handler.codec.http.HttpResponse;
+
 /**
  * Exception thrown when something goes wrong with authentication.
  *
@@ -27,12 +29,30 @@ public class AuthenticationException extends Exception {
 
     private String message;
 
+    // an HTTP response that should be returned as a result of issue access token
+    // for instance, if the user authentication requires more user details
+    private HttpResponse response;
+
     public AuthenticationException(String message) {
         this.message = message;
+    }
+
+    public AuthenticationException(HttpResponse response) {
+        this.response = response;
     }
 
     @Override
     public String getMessage() {
         return message;
     }
+
+    /**
+     * Returns the HTTP response that should be returned.
+     *
+     * @return {@link HttpResponse} response
+     */
+    public HttpResponse getResponse() {
+        return response;
+    }
+
 }

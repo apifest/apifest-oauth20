@@ -24,6 +24,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
@@ -224,8 +225,15 @@ public class AuthorizationServer {
                     throw new OAuthException(Response.INVALID_USERNAME_PASSWORD, HttpResponseStatus.UNAUTHORIZED);
                 }
             } catch (AuthenticationException e) {
-                log.error("Cannot authenticate user", e);
-                throw new OAuthException(e, Response.CANNOT_AUTHENTICATE_USER, HttpResponseStatus.UNAUTHORIZED); // NOSONAR
+                // in case some custom response should be returned other than HTTP 401
+                // for instance, if the user authentication requires more user details as a subsequent step
+                if (e.getResponse() != null) {
+                    String responseContent = new String(e.getResponse().getContent().array(), CharsetUtil.UTF_8);
+                    throw new OAuthException(e, responseContent, e.getResponse().getStatus());
+                } else {
+                    log.error("Cannot authenticate user", e);
+                    throw new OAuthException(e, Response.CANNOT_AUTHENTICATE_USER, HttpResponseStatus.UNAUTHORIZED); // NOSONAR
+                }
             }
         } else if (tokenRequest.getGrantType().equals(OAuthServer.getCustomGrantType())) {
             String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());

@@ -29,10 +29,10 @@ import com.apifest.oauth20.api.UserDetails;
 public interface IUserAuthentication {
 
     /**
-     * Authenticates the user using username, password and what info required from the auth request.
+     * Authenticates the user using username, password and what info required from the authentication request.
      * @param username username
      * @param password password
-     * @param authRequest the authorization request
+     * @param authRequest the authentication request
      * @return details about the authenticated user
      * @throws AuthenticationException
      */
