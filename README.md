@@ -127,4 +127,4 @@ When the server starts, you will see:
 * **/oauth20/scope** - creates a new scope (POST method)
 * **/oauth20/scope/[scope_name]** - returns info about a scope - name, description and expires_in (GET method), 
 updates a scope (PUT method), deletes a scope (DELETE method)
-
+* **/oauth20/scope?client_id=[client_id]** - returns scopes by client_id
