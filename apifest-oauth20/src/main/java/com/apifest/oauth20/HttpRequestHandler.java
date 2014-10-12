@@ -59,7 +59,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected static final String ACCESS_TOKEN_REVOKE_URI = "/oauth20/token/revoke";
     protected static final String OAUTH_CLIENT_SCOPE_URI = "/oauth20/scope";
 
-    protected static final Pattern OAUTH_CLIENT_SCOPE_DELETE_PATTERN = Pattern.compile("/oauth20/scope/((\\p{Alnum}+-?_?)+$)");
+    protected static final Pattern OAUTH_CLIENT_SCOPE_PATTERN = Pattern.compile("/oauth20/scope/((\\p{Alnum}+-?_?)+$)");
+    protected static final Pattern APPLICATION_PATTERN = Pattern.compile("/oauth20/application/([a-f[0-9]]+)$");
 
     protected Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 
@@ -100,17 +101,21 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             } else if (ACCESS_TOKEN_VALIDATE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleTokenValidate(req);
             } else if (APPLICATION_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
-                response = handleApplicationInfo(req);
+                response = handleGetAllClientApplications(req);
+            } else if (rawUri.startsWith(APPLICATION_URI) && method.equals(HttpMethod.GET)) {
+                    response = handleGetClientApplication(req);
             } else if (ACCESS_TOKEN_REVOKE_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
                 response = handleTokenRevoke(req);
+            } else if (OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
+                response = handleGetAllScopes(req);
             } else if (OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
                 response = handleRegisterScope(req);
-            } else if (OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.PUT)) {
+            } else if (rawUri.startsWith(OAUTH_CLIENT_SCOPE_URI) && method.equals(HttpMethod.PUT)) {
                 response = handleUpdateScope(req);
-            } else if (OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
-                response = handleGetScopes(req);
-            } else if (APPLICATION_URI.equals(rawUri) && method.equals(HttpMethod.PUT)) {
-                response = handleUpdateClientApp(req);
+            } else if (rawUri.startsWith(OAUTH_CLIENT_SCOPE_URI) && method.equals(HttpMethod.GET)) {
+                response = handleGetScope(req);
+            } else if (rawUri.startsWith(APPLICATION_URI) && method.equals(HttpMethod.PUT)) {
+                response = handleUpdateClientApplication(req);
             } else if (rawUri.startsWith(OAUTH_CLIENT_SCOPE_URI) && method.equals(HttpMethod.DELETE)) {
                 response = handleDeleteScope(req);
             } else {
@@ -126,18 +131,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    protected HttpResponse handleApplicationInfo(HttpRequest req) {
+    protected HttpResponse handleGetClientApplication(HttpRequest req) {
         HttpResponse response = null;
-        QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
-        Map<String, List<String>> params = dec.getParameters();
-        String clientId = QueryParameter.getFirstElement(params, "client_id");
-        // if no clientId passed, then list all clients
-        if (clientId == null || clientId.length() == 0) {
-           return handleGetApplications(req);
-        }
-        boolean valid = auth.isValidClientId(clientId);
-        log.debug("client_id valid:" + valid);
-        if (valid) {
+        Matcher m = APPLICATION_PATTERN.matcher(req.getUri());
+        if (m.find()) {
+            String clientId = m.group(1);
             ApplicationInfo appInfo = auth.getApplicationInfo(clientId);
             ObjectMapper mapper = new ObjectMapper();
             try {
@@ -155,7 +153,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 invokeExceptionHandler(e, req);
             }
         } else {
-            response = Response.createBadRequestResponse(Response.INVALID_CLIENT_ID);
+            response = Response.createNotFoundResponse();
         }
         return response;
     }
@@ -320,19 +318,25 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     }
 
     protected HttpResponse handleUpdateScope(HttpRequest req) {
-        ScopeService scopeService = getScopeService();
         HttpResponse response = null;
-        try {
-            String responseMsg = scopeService.updateScope(req);
-            response = Response.createOkResponse(responseMsg);
-        } catch (OAuthException e) {
-            invokeExceptionHandler(e, req);
-            response = Response.createResponse(e.getHttpStatus(), e.getMessage());
+        Matcher m = OAUTH_CLIENT_SCOPE_PATTERN.matcher(req.getUri());
+        if (m.find()) {
+            String scopeName = m.group(1);
+            ScopeService scopeService = getScopeService();
+            try {
+                String responseMsg = scopeService.updateScope(req, scopeName);
+                response = Response.createOkResponse(responseMsg);
+            } catch (OAuthException e) {
+                invokeExceptionHandler(e, req);
+                response = Response.createResponse(e.getHttpStatus(), e.getMessage());
+            }
+        } else {
+            response = Response.createNotFoundResponse();
         }
         return response;
     }
 
-    protected HttpResponse handleGetScopes(HttpRequest req) {
+    protected HttpResponse handleGetAllScopes(HttpRequest req) {
         ScopeService scopeService = getScopeService();
         String jsonString = null;
         try {
@@ -343,9 +347,28 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return Response.createOkResponse(jsonString);
     }
 
+    protected HttpResponse handleGetScope(HttpRequest req) {
+        HttpResponse response = null;
+        Matcher m = OAUTH_CLIENT_SCOPE_PATTERN.matcher(req.getUri());
+        if (m.find()) {
+            String scopeName = m.group(1);
+            ScopeService scopeService = getScopeService();
+            try {
+                String responseMsg = scopeService.getScopeByName(scopeName);
+                response = Response.createOkResponse(responseMsg);
+            } catch (OAuthException e) {
+                invokeExceptionHandler(e, req);
+                response = Response.createResponse(e.getHttpStatus(), e.getMessage());
+            }
+        } else {
+            response = Response.createNotFoundResponse();
+        }
+        return response;
+    }
+
     protected HttpResponse handleDeleteScope(HttpRequest req) {
         HttpResponse response = null;
-        Matcher m = OAUTH_CLIENT_SCOPE_DELETE_PATTERN.matcher(req.getUri());
+        Matcher m = OAUTH_CLIENT_SCOPE_PATTERN.matcher(req.getUri());
         if (m.find()) {
             String scopeName = m.group(1);
             ScopeService scopeService = getScopeService();
@@ -366,20 +389,26 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return new ScopeService();
     }
 
-    protected HttpResponse handleUpdateClientApp(HttpRequest req) {
+    protected HttpResponse handleUpdateClientApplication(HttpRequest req) {
         HttpResponse response = null;
-        try {
-            if (auth.updateClientApp(req)) {
-                response = Response.createOkResponse("{\"status\":\"client application updated\"}");
+        Matcher m = APPLICATION_PATTERN.matcher(req.getUri());
+        if (m.find()) {
+            String clientId = m.group(1);
+            try {
+                if (auth.updateClientApp(req, clientId)) {
+                    response = Response.createOkResponse("{\"status\":\"client application updated\"}");
+                }
+            } catch (OAuthException ex) {
+                response = Response.createOAuthExceptionResponse(ex);
+                invokeExceptionHandler(ex, req);
             }
-        } catch (OAuthException ex) {
-            response = Response.createOAuthExceptionResponse(ex);
-            invokeExceptionHandler(ex, req);
+        } else {
+            response = Response.createNotFoundResponse();
         }
         return response;
     }
 
-    protected HttpResponse handleGetApplications(HttpRequest req) {
+    protected HttpResponse handleGetAllClientApplications(HttpRequest req) {
         List<ClientCredentials> apps = DBManagerFactory.getInstance().getAllApplications();
         Gson gson = new Gson();
         String jsonString = gson.toJson(apps);

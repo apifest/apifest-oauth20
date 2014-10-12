@@ -222,7 +222,7 @@ public class ScopeService {
      * @param req http request
      * @return String message that will be returned in the response
      */
-    public String updateScope(HttpRequest req) throws OAuthException {
+    public String updateScope(HttpRequest req, String scopeName) throws OAuthException {
         String content = req.getContent().toString(CharsetUtil.UTF_8);
         String contentType = (req.headers() != null) ? req.headers().get(HttpHeaders.Names.CONTENT_TYPE) : null;
         String responseMsg = "";
@@ -232,7 +232,7 @@ public class ScopeService {
             try {
                 Scope scope = mapper.readValue(content, Scope.class);
                 if (scope.validForUpdate()) {
-                    Scope foundScope = DBManagerFactory.getInstance().findScope(scope.getScope());
+                    Scope foundScope = DBManagerFactory.getInstance().findScope(scopeName);
                     if (foundScope == null) {
                         log.error("scope does not exist");
                         throw new OAuthException(SCOPE_NOT_EXIST, HttpResponseStatus.BAD_REQUEST);
@@ -294,6 +294,27 @@ public class ScopeService {
         return responseMsg;
     }
 
+    public String getScopeByName(String scopeName) throws OAuthException {
+        String jsonString = null;
+        Scope scope = DBManagerFactory.getInstance().findScope(scopeName);
+        if (scope != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                jsonString = mapper.writeValueAsString(scope);
+            } catch (JsonGenerationException e) {
+                log.error("cannot load scopes", e);
+                throw new OAuthException(e, null, HttpResponseStatus.BAD_REQUEST);
+            } catch (JsonMappingException e) {
+                log.error("cannot load scopes", e);
+                throw new OAuthException(e, null, HttpResponseStatus.BAD_REQUEST);
+            } catch (IOException e) {
+                log.error("cannot load scopes", e);
+                throw new OAuthException(e, null, HttpResponseStatus.BAD_REQUEST);
+            }
+        }
+        return jsonString;
+    }
+
     protected List<ClientCredentials> getClientAppsByScope(String scopeName) {
         List<ClientCredentials> scopeApps = new ArrayList<ClientCredentials>();
         List<ClientCredentials> allApps = DBManagerFactory.getInstance().getAllApplications();
@@ -308,6 +329,7 @@ public class ScopeService {
 
     protected void setScopeEmptyValues(Scope scope, Scope foundScope) {
         // if some fields are null, keep the old values
+        scope.setScope(foundScope.getScope());
         if (scope.getDescription() == null || scope.getDescription().length() == 0) {
             scope.setDescription(foundScope.getDescription());
         }

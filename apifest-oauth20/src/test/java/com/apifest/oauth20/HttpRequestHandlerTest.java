@@ -207,7 +207,7 @@ public class HttpRequestHandlerTest {
         willReturn("basic extended").given(scopeService).getScopes(req);
 
         // WHEN
-        handler.handleGetScopes(req);
+        handler.handleGetAllScopes(req);
 
         // THEN
         verify(scopeService).getScopes(req);
@@ -234,15 +234,16 @@ public class HttpRequestHandlerTest {
     public void when_handle_updateScope_invoke_scope_service_update() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
+        willReturn("/oauth20/scope/scopeName").given(req).getUri();
         ScopeService scopeService = mock(ScopeService.class);
         willReturn(scopeService).given(handler).getScopeService();
-        willReturn("OK").given(scopeService).updateScope(req);
+        willReturn("OK").given(scopeService).updateScope(req, "scopeName");
 
         // WHEN
         handler.handleUpdateScope(req);
 
         // THEN
-        verify(scopeService).updateScope(req);
+        verify(scopeService).updateScope(req, "scopeName");
     }
 
     @Test
@@ -270,31 +271,47 @@ public class HttpRequestHandlerTest {
         MessageEvent event = mock(MessageEvent.class);
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI);
         willReturn(req).given(event).getMessage();
-        willReturn(mock(HttpResponse.class)).given(handler).handleGetScopes(req);
+        willReturn(mock(HttpResponse.class)).given(handler).handleGetAllScopes(req);
 
         // WHEN
         handler.messageReceived(ctx, event);
 
         // THEN
-        verify(handler).handleGetScopes(req);
+        verify(handler).handleGetAllScopes(req);
     }
 
     @Test
-    public void when_GET_application_with_clientId_invoke_handleApplicationInfo() throws Exception {
+    public void when_GET_application_with_clientId_invoke_handleGetClientApplication() throws Exception {
         // GIVEN
         ChannelHandlerContext ctx = mockChannelHandlerContext();
         MessageEvent event = mock(MessageEvent.class);
-        String uri = HttpRequestHandler.APPLICATION_URI + "?clientId=123";
+        String uri = HttpRequestHandler.APPLICATION_URI + "/218900b6c8d973881cf4185ecf2c6aba";
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
         willReturn(req).given(event).getMessage();
-        willReturn(mock(HttpResponse.class)).given(handler).handleApplicationInfo(req);
+        willReturn(mock(HttpResponse.class)).given(handler).handleGetClientApplication(req);
 
         // WHEN
         handler.messageReceived(ctx, event);
 
         // THEN
-        verify(handler).handleApplicationInfo(req);
-        verify(handler, times(0)).handleGetApplications(req);
+        verify(handler).handleGetClientApplication(req);
+    }
+
+    @Test
+    public void when_GET_application_with_clientId_invoke_get_application_with_client_id() throws Exception {
+        // GIVEN
+        String uri = HttpRequestHandler.APPLICATION_URI + "/218900b6c8d973881cf4185ecf2c6aba";
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
+        AuthorizationServer auth = mock(AuthorizationServer.class);
+        ApplicationInfo info = new ApplicationInfo();
+        willReturn(info).given(auth).getApplicationInfo("218900b6c8d973881cf4185ecf2c6aba");
+        handler.auth = auth;
+
+        // WHEN
+        handler.handleGetClientApplication(req);
+
+        // THEN
+        verify(handler.auth).getApplicationInfo("218900b6c8d973881cf4185ecf2c6aba");
     }
 
     @Test
@@ -305,13 +322,13 @@ public class HttpRequestHandlerTest {
         MessageEvent event = mock(MessageEvent.class);
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, HttpRequestHandler.APPLICATION_URI);
         willReturn(req).given(event).getMessage();
-        willReturn(mock(HttpResponse.class)).given(handler).handleUpdateClientApp(req);
+        willReturn(mock(HttpResponse.class)).given(handler).handleUpdateClientApplication(req);
 
         // WHEN
         handler.messageReceived(ctx, event);
 
         // THEN
-        verify(handler).handleUpdateClientApp(req);
+        verify(handler).handleUpdateClientApplication(req);
     }
 
     @Test
@@ -332,20 +349,20 @@ public class HttpRequestHandlerTest {
     }
 
     @Test
-    public void when_GET_applications_invoke_handleGetApplications() throws Exception {
+    public void when_GET_applications_invoke_handleGetAllClientApplications() throws Exception {
         // GIVEN
         ChannelHandlerContext ctx = mockChannelHandlerContext();
 
         MessageEvent event = mock(MessageEvent.class);
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, HttpRequestHandler.APPLICATION_URI);
         willReturn(req).given(event).getMessage();
-        willReturn(mock(HttpResponse.class)).given(handler).handleGetApplications(req);
+        willReturn(mock(HttpResponse.class)).given(handler).handleGetAllClientApplications(req);
 
         // WHEN
         handler.messageReceived(ctx, event);
 
         // THEN
-        verify(handler).handleGetApplications(req);
+        verify(handler).handleGetAllClientApplications(req);
     }
 
     @Test

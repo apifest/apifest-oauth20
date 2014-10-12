@@ -24,7 +24,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
@@ -399,14 +398,14 @@ public class AuthorizationServer {
         return false;
     }
 
-    public boolean updateClientApp(HttpRequest req) throws OAuthException {
+    public boolean updateClientApp(HttpRequest req, String clientId) throws OAuthException {
         String content = req.getContent().toString(CharsetUtil.UTF_8);
         String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
-            String clientId = getBasicAuthorizationClientId(req);
-            if (clientId == null) {
-                throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
-            }
+//            String clientId = getBasicAuthorizationClientId(req);
+//            if (clientId == null) {
+//                throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
+//            }
             ObjectMapper mapper = new ObjectMapper();
             ApplicationInfo appInfo;
             try {

@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 public class DBManagerFactoryTest {
 
     @Test
-    public void when_no_oauth20_database_set_return_mongodb() throws Exception {
+    public void when_mongo_oauth20_database_set_return_mongodb_manager() throws Exception {
         // GIVEN
         OAuthServer.log = mock(Logger.class);
         String path = getClass().getClassLoader().getResource("apifest-oauth-test.properties").getPath();
