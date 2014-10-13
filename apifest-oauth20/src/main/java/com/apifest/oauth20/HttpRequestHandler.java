@@ -52,15 +52,15 @@ import com.google.gson.JsonObject;
  */
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
-    protected static final String AUTH_CODE_GENERATE_URI = "/oauth20/authorize";
-    protected static final String ACCESS_TOKEN_GENERATE_URI = "/oauth20/token";
-    protected static final String ACCESS_TOKEN_VALIDATE_URI = "/oauth20/token/validate";
-    protected static final String APPLICATION_URI = "/oauth20/application";
-    protected static final String ACCESS_TOKEN_REVOKE_URI = "/oauth20/token/revoke";
-    protected static final String OAUTH_CLIENT_SCOPE_URI = "/oauth20/scope";
+    protected static final String AUTH_CODE_GENERATE_URI = "/oauth20/auth-codes";
+    protected static final String ACCESS_TOKEN_GENERATE_URI = "/oauth20/tokens";
+    protected static final String ACCESS_TOKEN_VALIDATE_URI = "/oauth20/tokens/validate";
+    protected static final String APPLICATION_URI = "/oauth20/applications";
+    protected static final String ACCESS_TOKEN_REVOKE_URI = "/oauth20/tokens/revoke";
+    protected static final String OAUTH_CLIENT_SCOPE_URI = "/oauth20/scopes";
 
-    protected static final Pattern OAUTH_CLIENT_SCOPE_PATTERN = Pattern.compile("/oauth20/scope/((\\p{Alnum}+-?_?)+$)");
-    protected static final Pattern APPLICATION_PATTERN = Pattern.compile("/oauth20/application/([a-f[0-9]]+)$");
+    protected static final Pattern OAUTH_CLIENT_SCOPE_PATTERN = Pattern.compile("/oauth20/scopes/((\\p{Alnum}+-?_?)+$)");
+    protected static final Pattern APPLICATION_PATTERN = Pattern.compile("/oauth20/applications/([a-f[0-9]]+)$");
 
     protected Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 

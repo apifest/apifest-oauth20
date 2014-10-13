@@ -234,16 +234,17 @@ public class HttpRequestHandlerTest {
     public void when_handle_updateScope_invoke_scope_service_update() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        willReturn("/oauth20/scope/scopeName").given(req).getUri();
+        String scopeName = "scopeName";
+        willReturn(HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI + "/" + scopeName).given(req).getUri();
         ScopeService scopeService = mock(ScopeService.class);
         willReturn(scopeService).given(handler).getScopeService();
-        willReturn("OK").given(scopeService).updateScope(req, "scopeName");
+        willReturn("OK").given(scopeService).updateScope(req, scopeName);
 
         // WHEN
         handler.handleUpdateScope(req);
 
         // THEN
-        verify(scopeService).updateScope(req, "scopeName");
+        verify(scopeService).updateScope(req, scopeName);
     }
 
     @Test
@@ -453,7 +454,7 @@ public class HttpRequestHandlerTest {
     public void when_oauth20_delete_contains_scope_extract_scope_name() throws Exception {
         // GIVEN
         String scopeName = "my-super-scope";
-        String uri = "/oauth20/scope/" + scopeName;
+        String uri = HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI + "/" + scopeName;
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, uri);
         ScopeService scopeService = mock(ScopeService.class);
         willReturn("OK").given(scopeService).deleteScope(scopeName);
@@ -470,7 +471,7 @@ public class HttpRequestHandlerTest {
     public void when_oauth20_delete_contains_invalid_scope_return_not_found_response() throws Exception {
         // GIVEN
         String scopeName = "my-super-scope invalid";
-        String uri = "/oauth20/scope/" + scopeName;
+        String uri = HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI + "/" + scopeName;
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, uri);
         ScopeService scopeService = mock(ScopeService.class);
         willReturn("OK").given(scopeService).deleteScope(scopeName);

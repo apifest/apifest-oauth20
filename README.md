@@ -118,13 +118,13 @@ When the server starts, you will see:
 ```ApiFest OAuth 2.0 Server started at [host]:[port]```
 
 ##ApiFest OAuth 2.0 Endpoints:
-* **/oauth20/application** - registers client applications (POST method), returns all client applications info (GET method)
-* **/oauth20/application/[client_id]** - returns client application info (GET method), updates a client application (PUT method)
-* **/oauth20/authorize** - issues auth codes
-* **/oauth20/token** - issues access tokens
-* **/oauth20/token/validate** - validates access tokens
-* **/oauth20/token/revoke** - revokes access tokens
-* **/oauth20/scope** - creates a new scope (POST method)
-* **/oauth20/scope/[scope_name]** - returns info about a scope - name, description and expires_in (GET method), 
+* **/oauth20/applications** - registers client applications (POST method), returns all client applications info (GET method)
+* **/oauth20/applications/[client_id]** - returns client application info (GET method), updates a client application (PUT method)
+* **/oauth20/auth-codes** - issues auth codes
+* **/oauth20/tokens** - issues access tokens
+* **/oauth20/tokens/validations** - validates access tokens
+* **/oauth20/tokens/revocations** - revokes access tokens
+* **/oauth20/scopes** - creates a new scope (POST method)
+* **/oauth20/scopes/[scope_name]** - returns info about a scope - name, description and expires_in (GET method),
 updates a scope (PUT method), deletes a scope (DELETE method)
-* **/oauth20/scope?client_id=[client_id]** - returns scopes by client_id
+* **/oauth20/scopes?client_id=[client_id]** - returns scopes by client_id
