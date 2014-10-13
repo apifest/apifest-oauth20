@@ -17,16 +17,9 @@
 package com.apifest.oauth20;
 
 import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,9 +27,12 @@ import java.util.List;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
+import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
@@ -761,5 +757,28 @@ public class ScopeServiceTest {
 
         // THEN
         assertTrue(scopeApps.size() == 0);
+    }
+
+    @Test
+    public void when_get_scopes_with_invalid_client_id_throw_oauth_exception_with_not_found_status() throws Exception {
+        // GIVEN
+        String clientId = "203598599234220";
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, HttpRequestHandler.OAUTH_CLIENT_SCOPE_URI + "?client_id=" + clientId);
+        req.headers().add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        String content = "any content here";
+        req.setContent(ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
+        willReturn(null).given(DBManagerFactory.dbManager).findClientCredentials(clientId);
+
+        // WHEN
+        HttpResponseStatus status = null;
+        try {
+            service.getScopes(req);
+        } catch (OAuthException e) {
+            status = e.getHttpStatus();
+        }
+
+        // THEN
+        verify(DBManagerFactory.dbManager, times(0)).getAllScopes();
+        assertEquals(status, HttpResponseStatus.NOT_FOUND);
     }
 }

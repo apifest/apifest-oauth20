@@ -162,15 +162,20 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         HttpResponse response = null;
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
         Map<String, List<String>> params = dec.getParameters();
-        AccessToken token = auth.isValidToken(QueryParameter.getFirstElement(params, "token"));
-        log.debug("token valid:" + token);
-        if (token != null) {
-            Gson gson = new Gson();
-            String json = gson.toJson(token);
-            log.debug(json);
-            response = Response.createOkResponse(json);
+        String tokenParam = QueryParameter.getFirstElement(params, "token");
+        if (tokenParam == null || tokenParam.isEmpty()) {
+            response = Response.createBadRequestResponse();
         } else {
-            response = Response.createUnauthorizedResponse();
+            AccessToken token = auth.isValidToken(tokenParam);
+            log.debug("token valid:" + token);
+            if (token != null) {
+                Gson gson = new Gson();
+                String json = gson.toJson(token);
+                log.debug(json);
+                response = Response.createOkResponse(json);
+            } else {
+                response = Response.createUnauthorizedResponse();
+            }
         }
         return response;
     }
@@ -338,13 +343,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
     protected HttpResponse handleGetAllScopes(HttpRequest req) {
         ScopeService scopeService = getScopeService();
-        String jsonString = null;
+        HttpResponse response = null;
         try {
-            jsonString = scopeService.getScopes(req);
+            String jsonString = scopeService.getScopes(req);
+            response = Response.createOkResponse(jsonString);
         } catch (OAuthException e) {
             invokeExceptionHandler(e, req);
+            response = Response.createResponse(e.getHttpStatus(), e.getMessage());
         }
-        return Response.createOkResponse(jsonString);
+        return response;
     }
 
     protected HttpResponse handleGetScope(HttpRequest req) {

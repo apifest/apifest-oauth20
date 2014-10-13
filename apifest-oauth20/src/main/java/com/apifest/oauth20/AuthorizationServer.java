@@ -406,6 +406,9 @@ public class AuthorizationServer {
 //            if (clientId == null) {
 //                throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
 //            }
+            if (!isValidClientId(clientId)) {
+                throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
+            }
             ObjectMapper mapper = new ObjectMapper();
             ApplicationInfo appInfo;
             try {

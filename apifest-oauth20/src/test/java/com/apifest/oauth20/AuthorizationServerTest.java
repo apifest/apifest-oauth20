@@ -20,9 +20,12 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpStatus;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
+import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
@@ -1444,5 +1447,29 @@ public class AuthorizationServerTest {
         verify(userDetails).getDetails();
     }
 
+    @Test
+    public void when_update_client_app_with_invalid_client_id_throws_oauth_exception_with_bad_request_status() throws Exception {
+        // GIVEN
+        String clientId = "203598599234220";
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, HttpRequestHandler.APPLICATION_URI + "/" + clientId);
+        req.headers().add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        String content = "any content here";
+        req.setContent(ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
+        willReturn(false).given(authServer).isValidClientId(clientId);
+
+        // WHEN
+        HttpResponseStatus status = null;
+        String message = null;
+        try {
+            authServer.updateClientApp(req, clientId);
+        } catch(OAuthException e) {
+            status = e.getHttpStatus();
+            message = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(status, HttpResponseStatus.BAD_REQUEST);
+        assertEquals(message, Response.INVALID_CLIENT_ID);
+    }
 }
 

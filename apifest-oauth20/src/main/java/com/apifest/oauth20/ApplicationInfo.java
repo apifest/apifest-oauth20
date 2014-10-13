@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Rossitsa Borissova
  */
 @JsonPropertyOrder({ "name", "description", "client_id", "client_secret", "scope", "registered", "redirect_uri", "status"})
-@JsonSerialize(include = Inclusion.NON_NULL)
+@JsonSerialize(include = Inclusion.NON_EMPTY)
 public class ApplicationInfo implements Serializable {
 
     protected static Logger log = LoggerFactory.getLogger(ApplicationInfo.class);

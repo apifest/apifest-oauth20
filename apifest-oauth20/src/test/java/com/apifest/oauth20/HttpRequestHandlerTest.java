@@ -485,6 +485,38 @@ public class HttpRequestHandlerTest {
         assertEquals(response.getStatus(), HttpResponseStatus.NOT_FOUND);
     }
 
+    @Test
+    public void when_token_is_null_do_not_try_to_validate_it() throws Exception {
+        // GIVEN
+        String uri = HttpRequestHandler.ACCESS_TOKEN_VALIDATE_URI;
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
+        AuthorizationServer auth = mock(AuthorizationServer.class);
+        handler.auth = auth;
+
+        // WHEN
+        HttpResponse response = handler.handleTokenValidate(req);
+
+        // THEN
+        verify(handler.auth, times(0)).isValidToken(anyString());
+        assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void when_token_is_empty_do_not_try_to_validate_it() throws Exception {
+        // GIVEN
+        String uri = HttpRequestHandler.ACCESS_TOKEN_VALIDATE_URI + "?token=";
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
+        AuthorizationServer auth = mock(AuthorizationServer.class);
+        handler.auth = auth;
+
+        // WHEN
+        HttpResponse response = handler.handleTokenValidate(req);
+
+        // THEN
+        verify(handler.auth, times(0)).isValidToken(anyString());
+        assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
+    }
+
     private ChannelHandlerContext mockChannelHandlerContext() {
         ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
         Channel channel = mock(Channel.class);
