@@ -33,6 +33,7 @@ import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
@@ -182,32 +183,36 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
     protected HttpResponse handleToken(HttpRequest request) {
         HttpResponse response = null;
-        try {
-            AccessToken accessToken = auth.issueAccessToken(request);
-            if (accessToken != null) {
-                ObjectMapper mapper = new ObjectMapper();
-                String jsonString = mapper.writeValueAsString(accessToken);
-                log.debug("access token:" + jsonString);
-                response = Response.createOkResponse(jsonString);
-                accessTokensLog.debug("token {}", jsonString);
+        String contentType = request.headers().get(HttpHeaders.Names.CONTENT_TYPE);
+        if (contentType.contains(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
+            try {
+                AccessToken accessToken = auth.issueAccessToken(request);
+                if (accessToken != null) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    String jsonString = mapper.writeValueAsString(accessToken);
+                    log.debug("access token:" + jsonString);
+                    response = Response.createOkResponse(jsonString);
+                    accessTokensLog.debug("token {}", jsonString);
+                }
+            } catch (OAuthException ex) {
+                response = Response.createOAuthExceptionResponse(ex);
+                invokeExceptionHandler(ex, request);
+            } catch (JsonGenerationException e1) {
+                log.error("error handle token", e1);
+                invokeExceptionHandler(e1, request);
+            } catch (JsonMappingException e1) {
+                log.error("error handle token", e1);
+                invokeExceptionHandler(e1, request);
+            } catch (IOException e1) {
+                log.error("error handle token", e1);
+                invokeExceptionHandler(e1, request);
             }
-        } catch (OAuthException ex) {
-            response = Response.createOAuthExceptionResponse(ex);
-            invokeExceptionHandler(ex, request);
-        } catch (JsonGenerationException e1) {
-            log.error("error handle token", e1);
-            invokeExceptionHandler(e1, request);
-        } catch (JsonMappingException e1) {
-            log.error("error handle token", e1);
-            invokeExceptionHandler(e1, request);
-        } catch (IOException e1) {
-            log.error("error handle token", e1);
-            invokeExceptionHandler(e1, request);
+            if (response == null) {
+                response = Response.createBadRequestResponse(Response.CANNOT_ISSUE_TOKEN);
+            }
+        } else {
+            response = Response.createResponse(HttpResponseStatus.BAD_REQUEST, Response.UNSUPPORTED_MEDIA_TYPE);
         }
-        if (response == null) {
-            response = Response.createBadRequestResponse(Response.CANNOT_ISSUE_TOKEN);
-        }
-
         return response;
     }
 
@@ -250,21 +255,26 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    private HttpResponse handleAuthorize(HttpRequest req) {
+    protected HttpResponse handleAuthorize(HttpRequest req) {
         HttpResponse response = null;
-        try {
-            String redirectURI = auth.issueAuthorizationCode(req);
-            // TODO: validation http protocol?
-            log.debug("redirectURI: {}", redirectURI);
+        String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
+        if (contentType.contains(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
+            try {
+                String redirectURI = auth.issueAuthorizationCode(req);
+                // TODO: validation http protocol?
+                log.debug("redirectURI: {}", redirectURI);
 
-            // return auth_code
-            JsonObject obj = new JsonObject();
-            obj.addProperty("redirect_uri", redirectURI);
-            response = Response.createOkResponse(obj.toString());
-            accessTokensLog.info("authCode {}", obj.toString());
-        } catch (OAuthException ex) {
-            response = Response.createOAuthExceptionResponse(ex);
-            invokeExceptionHandler(ex, req);
+                // return auth_code
+                JsonObject obj = new JsonObject();
+                obj.addProperty("redirect_uri", redirectURI);
+                response = Response.createOkResponse(obj.toString());
+                accessTokensLog.info("authCode {}", obj.toString());
+            } catch (OAuthException ex) {
+                response = Response.createOAuthExceptionResponse(ex);
+                invokeExceptionHandler(ex, req);
+            }
+        } else {
+            response = Response.createResponse(HttpResponseStatus.BAD_REQUEST, Response.UNSUPPORTED_MEDIA_TYPE);
         }
         return response;
     }

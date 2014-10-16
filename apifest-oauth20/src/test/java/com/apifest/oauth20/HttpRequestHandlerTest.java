@@ -29,7 +29,9 @@ import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.handler.codec.http.DefaultHttpHeaders;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
@@ -533,6 +535,38 @@ public class HttpRequestHandlerTest {
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.NOT_FOUND);
         assertEquals(response.getContent().toString(CharsetUtil.UTF_8), Response.CLIENT_APP_NOT_EXIST);
+    }
+
+    @Test
+    public void when_content_type_is_not_application_form_urlencoded_on_post_tokens_return_400_and_unsupported_metida_type() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        HttpHeaders headers = new DefaultHttpHeaders();
+        headers.add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        willReturn(headers).given(req).headers();
+
+        // WHEN
+        HttpResponse response = handler.handleToken(req);
+
+        // THEN
+        assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), Response.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+    @Test
+    public void when_content_type_is_not_application_form_urlencoded_on_post_auth_code_return_400_and_unsupported_metida_type() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        HttpHeaders headers = new DefaultHttpHeaders();
+        headers.add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        willReturn(headers).given(req).headers();
+
+        // WHEN
+        HttpResponse response = handler.handleAuthorize(req);
+
+        // THEN
+        assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), Response.UNSUPPORTED_MEDIA_TYPE);
     }
 
     private ChannelHandlerContext mockChannelHandlerContext() {
