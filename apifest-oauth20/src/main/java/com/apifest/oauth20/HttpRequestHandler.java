@@ -36,6 +36,7 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,11 +76,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         if (message instanceof HttpRequest) {
             HttpRequest req = (HttpRequest) message;
             invokeRequestEventHandlers(req, null);
-
-            if (log.isDebugEnabled()) {
-                String content = new String(req.getContent().array());
-                log.debug("content: {}", content);
-            }
 
             HttpMethod method = req.getMethod();
             String rawUri = req.getUri();
@@ -137,20 +133,24 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         if (m.find()) {
             String clientId = m.group(1);
             ApplicationInfo appInfo = auth.getApplicationInfo(clientId);
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                String json = mapper.writeValueAsString(appInfo);
-                log.debug(json);
-                response = Response.createOkResponse(json);
-            } catch (JsonGenerationException e) {
-                log.error("error get application info", e);
-                invokeExceptionHandler(e, req);
-            } catch (JsonMappingException e) {
-                log.error("error get application info", e);
-                invokeExceptionHandler(e, req);
-            } catch (IOException e) {
-                log.error("error get application info", e);
-                invokeExceptionHandler(e, req);
+            if (appInfo != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    String json = mapper.writeValueAsString(appInfo);
+                    log.debug(json);
+                    response = Response.createOkResponse(json);
+                } catch (JsonGenerationException e) {
+                    log.error("error get application info", e);
+                    invokeExceptionHandler(e, req);
+                } catch (JsonMappingException e) {
+                    log.error("error get application info", e);
+                    invokeExceptionHandler(e, req);
+                } catch (IOException e) {
+                    log.error("error get application info", e);
+                    invokeExceptionHandler(e, req);
+                }
+            } else {
+                response = Response.createResponse(HttpResponseStatus.NOT_FOUND, Response.CLIENT_APP_NOT_EXIST);
             }
         } else {
             response = Response.createNotFoundResponse();

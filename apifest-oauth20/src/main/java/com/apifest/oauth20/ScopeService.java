@@ -311,6 +311,8 @@ public class ScopeService {
                 log.error("cannot load scopes", e);
                 throw new OAuthException(e, null, HttpResponseStatus.BAD_REQUEST);
             }
+        } else {
+            throw new OAuthException(SCOPE_NOT_EXIST, HttpResponseStatus.NOT_FOUND);
         }
         return jsonString;
     }

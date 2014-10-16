@@ -78,7 +78,7 @@ public class HttpRequestHandlerTest {
 
         // THEN
         verify(handler.auth).issueClientCredentials(req);
-        String res = new String(response.getContent().array());
+        String res = response.getContent().toString(CharsetUtil.UTF_8);
         assertTrue(res.contains("client_id"));
     }
 
@@ -98,7 +98,7 @@ public class HttpRequestHandlerTest {
         HttpResponse response = handler.handleRegister(req);
 
         // THEN
-        String res = new String(response.getContent().array());
+        String res = response.getContent().toString(CharsetUtil.UTF_8);
         assertTrue(res.contains(Response.NAME_OR_SCOPE_OR_URI_IS_NULL));
     }
 
@@ -148,7 +148,7 @@ public class HttpRequestHandlerTest {
         HttpResponse response = handler.handleTokenRevoke(req);
 
         // THEN
-        assertEquals(new String(response.getContent().array()), "{\"revoked\":\"true\"}");
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "{\"revoked\":\"true\"}");
     }
 
     @Test
@@ -163,7 +163,7 @@ public class HttpRequestHandlerTest {
         HttpResponse response = handler.handleTokenRevoke(req);
 
         // THEN
-        assertEquals(new String(response.getContent().array()), "{\"revoked\":\"false\"}");
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "{\"revoked\":\"false\"}");
     }
 
     @Test
@@ -180,7 +180,7 @@ public class HttpRequestHandlerTest {
         HttpResponse response = handler.handleTokenRevoke(req);
 
         // THEN
-        assertEquals(new String(response.getContent().array()), "{\"revoked\":\"false\"}");
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "{\"revoked\":\"false\"}");
     }
 
     @Test
@@ -394,7 +394,7 @@ public class HttpRequestHandlerTest {
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.OK);
-        assertEquals(new String(response.getContent().array()), ScopeService.SCOPE_STORED_OK_MESSAGE);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), ScopeService.SCOPE_STORED_OK_MESSAGE);
     }
 
     @Test
@@ -412,7 +412,7 @@ public class HttpRequestHandlerTest {
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.OK);
-        assertEquals(new String(response.getContent().array()), ScopeService.SCOPE_UPDATED_NOK_MESSAGE);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), ScopeService.SCOPE_UPDATED_NOK_MESSAGE);
     }
 
     @Test
@@ -430,7 +430,7 @@ public class HttpRequestHandlerTest {
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
-        assertEquals(new String(response.getContent().array()), ScopeService.SCOPE_NOT_EXIST);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), ScopeService.SCOPE_NOT_EXIST);
     }
 
     @Test
@@ -515,6 +515,24 @@ public class HttpRequestHandlerTest {
         // THEN
         verify(handler.auth, times(0)).isValidToken(anyString());
         assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void when_handleGetClientApplication_with_non_existing_clientId_return_not_found_status() throws Exception {
+        // GIVEN
+        String clientId = "acf627defb833";
+        String uri = HttpRequestHandler.APPLICATION_URI + "/" + clientId;
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
+        AuthorizationServer auth = mock(AuthorizationServer.class);
+        willReturn(null).given(auth).getApplicationInfo(clientId);
+        handler.auth = auth;
+
+        // WHEN
+        HttpResponse response = handler.handleGetClientApplication(req);
+
+        // THEN
+        assertEquals(response.getStatus(), HttpResponseStatus.NOT_FOUND);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), Response.CLIENT_APP_NOT_EXIST);
     }
 
     private ChannelHandlerContext mockChannelHandlerContext() {

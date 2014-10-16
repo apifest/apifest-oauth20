@@ -51,6 +51,7 @@ public final class Response {
     public static final String CANNOT_UPDATE_APP = "{\"error\": \"cannot update client application\"}";
     public static final String UPDATE_APP_MANDATORY_PARAM_MISSING = "{\"error\": \"scope, description or status is missing or invalid\"}";
     public static final String ALREADY_REGISTERED_APP = "{\"error\": \"already registered client application\"}";
+    public static final String CLIENT_APP_NOT_EXIST = "{\"error\": \"client application does not exist\"}";
 
     public static final String APPLICATION_JSON = "application/json";
 

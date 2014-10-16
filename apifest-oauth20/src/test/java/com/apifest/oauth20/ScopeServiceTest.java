@@ -781,4 +781,25 @@ public class ScopeServiceTest {
         verify(DBManagerFactory.dbManager, times(0)).getAllScopes();
         assertEquals(status, HttpResponseStatus.NOT_FOUND);
     }
+
+    @Test
+    public void when_GET_non_existing_scope_by_name_return_error_scope_does_not_exist_message() throws Exception {
+        // GIVEN
+        String scope = "scope";
+        willReturn(null).given(DBManagerFactory.dbManager).findScope(scope);
+
+        // WHEN
+        String errorMessage = null;
+        HttpResponseStatus errorStatus = null;
+        try {
+            service.getScopeByName(scope);
+        } catch (OAuthException e) {
+            errorMessage = e.getMessage();
+            errorStatus = e.getHttpStatus();
+        }
+
+        // THEN
+        assertEquals(errorMessage, ScopeService.SCOPE_NOT_EXIST);
+        assertEquals(errorStatus, HttpResponseStatus.NOT_FOUND);
+    }
 }

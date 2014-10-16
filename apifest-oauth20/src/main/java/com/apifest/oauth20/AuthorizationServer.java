@@ -227,7 +227,7 @@ public class AuthorizationServer {
                 // in case some custom response should be returned other than HTTP 401
                 // for instance, if the user authentication requires more user details as a subsequent step
                 if (e.getResponse() != null) {
-                    String responseContent = new String(e.getResponse().getContent().array(), CharsetUtil.UTF_8);
+                    String responseContent = e.getResponse().getContent().toString(CharsetUtil.UTF_8);
                     throw new OAuthException(e, responseContent, e.getResponse().getStatus());
                 } else {
                     log.error("Cannot authenticate user", e);
