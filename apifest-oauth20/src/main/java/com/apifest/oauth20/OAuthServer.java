@@ -141,7 +141,7 @@ public final class OAuthServer {
                 }
             }
         }
-        if (customJar == null) {
+        if (customJar == null || customJar.isEmpty()) {
             log.warn("Set value for user_authenticate_jar in properties file, otherwise user authentication will always pass successfully");
         } else {
             if (userAuthClass != null && userAuthClass.length() > 0) {

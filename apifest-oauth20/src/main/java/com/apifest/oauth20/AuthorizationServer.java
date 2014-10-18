@@ -36,8 +36,6 @@ import com.apifest.oauth20.api.AuthenticationException;
 import com.apifest.oauth20.api.ICustomGrantTypeHandler;
 import com.apifest.oauth20.api.IUserAuthentication;
 import com.apifest.oauth20.api.UserDetails;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 /**
  * Main class for authorization.
@@ -373,12 +371,14 @@ public class AuthorizationServer {
     }
 
     public boolean revokeToken(HttpRequest req) throws OAuthException {
-        String clientId = getBasicAuthorizationClientId(req);
-        if (clientId == null) {
-            throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
+        RevokeTokenRequest revokeRequest = new RevokeTokenRequest(req);
+        revokeRequest.checkMandatoryParams();
+        String clientId = revokeRequest.getClientId();
+        // check valid client_id and client_secret
+        if (!isValidClientCredentials(clientId, revokeRequest.getClientSecret())) {
+            throw new OAuthException(Response.INVALID_CLIENT_CREDENTIALS, HttpResponseStatus.BAD_REQUEST);
         }
-
-        String token = getAccessToken(req);
+        String token = revokeRequest.getAccessToken();
         AccessToken accessToken = db.findAccessToken(token);
         if (accessToken != null) {
             if (accessToken.tokenExpired()) {
@@ -439,10 +439,4 @@ public class AuthorizationServer {
         return true;
     }
 
-    private String getAccessToken(HttpRequest req) {
-        String content = req.getContent().toString(CharsetUtil.UTF_8);
-        JsonParser parser = new JsonParser();
-        JsonObject jsonObj= parser.parse(content).getAsJsonObject();
-        return jsonObj.get("access_token").getAsString();
-    }
 }

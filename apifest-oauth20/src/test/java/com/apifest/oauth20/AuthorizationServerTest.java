@@ -873,28 +873,32 @@ public class AuthorizationServerTest {
         assertNull(result);
     }
 
-    @Test
-    public void when_revoke_token_get_client_id_from_req_header() throws Exception {
-        // GIVEN
-        HttpRequest req = mock(HttpRequest.class);
-        willReturn(null).given(authServer).getBasicAuthorizationClientId(req);
-
-        // WHEN
-        try {
-            authServer.revokeToken(req);
-        } catch (OAuthException e) {
-            // do nothing
-        }
-
-        // THEN
-        verify(authServer).getBasicAuthorizationClientId(req);
-    }
+//    @Test
+//    public void when_revoke_token_get_client_id_from_req_header() throws Exception {
+//        // GIVEN
+//        HttpRequest req = mock(HttpRequest.class);
+//        willReturn(null).given(authServer).getBasicAuthorizationClientId(req);
+//
+//        // WHEN
+//        try {
+//            authServer.revokeToken(req);
+//        } catch (OAuthException e) {
+//            // do nothing
+//        }
+//
+//        // THEN
+//        verify(authServer).getBasicAuthorizationClientId(req);
+//    }
 
     @Test(expectedExceptions = OAuthException.class)
     public void when_revoke_token_with_client_id_null_will_throw_exception() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        willReturn(null).given(authServer).getBasicAuthorizationClientId(req);
+        String content = "{\"access_token\":\"9376e098e8190835a0b41d83355f92d66f425469\"," +
+            "\"client_secret\":\"bb635eb22c5b5ce3de06e31bb88be7ae\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        willReturn(buf).given(req).getContent();
+        //willReturn(null).given(authServer).getBasicAuthorizationClientId(req);
 
         // WHEN
         authServer.revokeToken(req);
@@ -904,13 +908,17 @@ public class AuthorizationServerTest {
     public void when_revoke_token_get_access_token_null_return_false() throws Exception {
         // GIVEN
         String clientId = "203598599234220";
+        String clientSecret = "bb635eb22c5b5ce3de06e31bb88be7ae";
+        String accessToken = "9376e098e8190835a0b41d83355f92d66f425469";
         HttpRequest req = mock(HttpRequest.class);
-        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
-        String token = "{\"access_token\":\"172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7\"}";
-        ChannelBuffer buff = ChannelBuffers.copiedBuffer(token.getBytes());
-        willReturn(buff).given(req).getContent();
-        willReturn(null).given(authServer.db).findAccessToken(
-                "172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7");
+        String content = "{\"access_token\":" + accessToken + "," +
+            "\"client_id\":" + clientId + ",\"client_secret\":" + clientSecret + "}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        willReturn(buf).given(req).getContent();
+        willReturn(true).given(authServer).isValidClientCredentials(clientId, clientSecret);
+        //willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+
+        willReturn(null).given(authServer.db).findAccessToken(accessToken);
 
         // WHEN
         boolean revoked = authServer.revokeToken(req);
@@ -923,15 +931,19 @@ public class AuthorizationServerTest {
     public void when_revoke_token_get_access_token_expired_then_return_true() throws Exception {
         // GIVEN
         String clientId = "203598599234220";
+        String clientSecret = "bb635eb22c5b5ce3de06e31bb88be7ae";
+        String accessToken = "9376e098e8190835a0b41d83355f92d66f425469";
         HttpRequest req = mock(HttpRequest.class);
-        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
-        String token = "{\"access_token\":\"172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7\"}";
-        ChannelBuffer buff = ChannelBuffers.copiedBuffer(token.getBytes());
-        willReturn(buff).given(req).getContent();
-        AccessToken accessToken = mock(AccessToken.class);
-        willReturn(true).given(accessToken).tokenExpired();
-        willReturn(accessToken).given(authServer.db).findAccessToken(
-                "172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7");
+        String content = "{\"access_token\":" + accessToken + "," +
+            "\"client_id\":" + clientId + ",\"client_secret\":" + clientSecret + "}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        willReturn(buf).given(req).getContent();
+        willReturn(true).given(authServer).isValidClientCredentials(clientId, clientSecret);
+        //willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+
+        AccessToken dbAccessToken = mock(AccessToken.class);
+        willReturn(true).given(dbAccessToken).tokenExpired();
+        willReturn(dbAccessToken).given(authServer.db).findAccessToken(accessToken);
 
         // WHEN
         boolean revoked = authServer.revokeToken(req);
@@ -944,22 +956,25 @@ public class AuthorizationServerTest {
     public void when_revoke_token_get_access_token_not_expired_then_expire_it() throws Exception {
         // GIVEN
         String clientId = "203598599234220";
+        String clientSecret = "bb635eb22c5b5ce3de06e31bb88be7ae";
+        String accessToken = "9376e098e8190835a0b41d83355f92d66f425469";
         HttpRequest req = mock(HttpRequest.class);
-        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
-        String token = "{\"access_token\":\"172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7\"}";
-        ChannelBuffer buff = ChannelBuffers.copiedBuffer(token.getBytes());
-        willReturn(buff).given(req).getContent();
-        AccessToken accessToken = mock(AccessToken.class);
-        willReturn(false).given(accessToken).tokenExpired();
-        willReturn(clientId).given(accessToken).getClientId();
-        willReturn(accessToken).given(authServer.db).findAccessToken(
-                "172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7");
+        String content = "{\"access_token\":" + accessToken + "," +
+            "\"client_id\":" + clientId + ",\"client_secret\":" + clientSecret + "}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        willReturn(buf).given(req).getContent();
+        willReturn(true).given(authServer).isValidClientCredentials(clientId, clientSecret);
+
+        AccessToken dbAccessToken = mock(AccessToken.class);
+        willReturn(false).given(dbAccessToken).tokenExpired();
+        willReturn(clientId).given(dbAccessToken).getClientId();
+        willReturn(dbAccessToken).given(authServer.db).findAccessToken(accessToken);
 
         // WHEN
         boolean revoked = authServer.revokeToken(req);
 
         // THEN
-        verify(authServer.db).updateAccessTokenValidStatus(accessToken.getToken(), false);
+        verify(authServer.db).updateAccessTokenValidStatus(dbAccessToken.getToken(), false);
         assertTrue(revoked);
     }
 
@@ -968,23 +983,55 @@ public class AuthorizationServerTest {
             throws Exception {
         // GIVEN
         String clientId = "203598599234220";
+        String clientSecret = "bb635eb22c5b5ce3de06e31bb88be7ae";
+        String accessToken = "9376e098e8190835a0b41d83355f92d66f425469";
         HttpRequest req = mock(HttpRequest.class);
-        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
-        String token = "{\"access_token\":\"172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7\"}";
-        ChannelBuffer buff = ChannelBuffers.copiedBuffer(token.getBytes());
-        willReturn(buff).given(req).getContent();
-        AccessToken accessToken = mock(AccessToken.class);
-        willReturn(false).given(accessToken).tokenExpired();
-        willReturn("0345901231313").given(accessToken).getClientId();
-        willReturn(accessToken).given(authServer.db).findAccessToken(
-                "172ece50c15c8a2701ec20d17a22811d95c86af654f068858a7c140e69ad58f7");
+        String content = "{\"access_token\":" + accessToken + "," +
+            "\"client_id\":" + clientId + ",\"client_secret\":" + clientSecret + "}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        willReturn(buf).given(req).getContent();
+        willReturn(true).given(authServer).isValidClientCredentials(clientId, clientSecret);
+
+        AccessToken dbAccessToken = mock(AccessToken.class);
+        willReturn(false).given(dbAccessToken).tokenExpired();
+        willReturn("0345901231313").given(dbAccessToken).getClientId();
+        willReturn(dbAccessToken).given(authServer.db).findAccessToken(accessToken);
 
         // WHEN
         boolean revoked = authServer.revokeToken(req);
 
         // THEN
-        verify(authServer.db, times(0)).updateAccessTokenValidStatus(accessToken.getToken(), false);
+        verify(authServer.db, times(0)).updateAccessTokenValidStatus(dbAccessToken.getToken(), false);
         assertFalse(revoked);
+    }
+
+    @Test
+    public void when_revoke_token_with_invalid_client_credentials_return_bad_request()
+            throws Exception {
+        // GIVEN
+        String clientId = "203598599234220";
+        String clientSecret = "bb635eb22c5b5ce3de06e31bb88be7ae";
+        String accessToken = "9376e098e8190835a0b41d83355f92d66f425469";
+        HttpRequest req = mock(HttpRequest.class);
+        String content = "{\"access_token\":" + accessToken + "," +
+            "\"client_id\":" + clientId + ",\"client_secret\":" + clientSecret + "}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        willReturn(buf).given(req).getContent();
+        willReturn(false).given(authServer).isValidClientCredentials(clientId, clientSecret);
+
+        // WHEN
+        String errorMsg = null;
+        HttpResponseStatus status = null;
+        try {
+            authServer.revokeToken(req);
+        } catch(OAuthException e) {
+            errorMsg = e.getMessage();
+            status = e.getHttpStatus();
+        }
+
+        // THEN
+        assertEquals(errorMsg, Response.INVALID_CLIENT_CREDENTIALS);
+        assertEquals(status, HttpResponseStatus.BAD_REQUEST);
     }
 
     @Test

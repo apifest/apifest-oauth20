@@ -16,10 +16,7 @@
 
 package com.apifest.oauth20.persistence.hazelcast;
 
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertNull;
 
 import org.testng.annotations.Test;
 

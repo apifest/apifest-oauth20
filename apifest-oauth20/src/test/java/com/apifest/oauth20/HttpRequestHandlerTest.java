@@ -169,12 +169,13 @@ public class HttpRequestHandlerTest {
     }
 
     @Test
-    public void when_revoke_token_throws_exception_return_revoked_false_message() throws Exception {
+    public void when_revoke_token_throws_exception_return_bad_request_message() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
         OAuthException.log = mock(Logger.class);
         AuthorizationServer auth = mock(AuthorizationServer.class);
-        willThrow(new OAuthException("something wrong", HttpResponseStatus.BAD_REQUEST))
+        String errorMsg = "something wrong";
+        willThrow(new OAuthException(errorMsg, HttpResponseStatus.BAD_REQUEST))
                 .given(auth).revokeToken(req);
         handler.auth = auth;
 
@@ -182,7 +183,8 @@ public class HttpRequestHandlerTest {
         HttpResponse response = handler.handleTokenRevoke(req);
 
         // THEN
-        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "{\"revoked\":\"false\"}");
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), errorMsg);
+        assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
     }
 
     @Test
@@ -554,19 +556,20 @@ public class HttpRequestHandlerTest {
     }
 
     @Test
-    public void when_content_type_is_not_application_form_urlencoded_on_post_auth_code_return_400_and_unsupported_metida_type() throws Exception {
+    public void when_revoke_token_and_oauth_exception_return_error_response() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        HttpHeaders headers = new DefaultHttpHeaders();
-        headers.add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
-        willReturn(headers).given(req).headers();
+        AuthorizationServer auth = mock(AuthorizationServer.class);
+        handler.auth = auth;
+        willThrow(new OAuthException(Response.INVALID_CLIENT_CREDENTIALS, HttpResponseStatus.BAD_REQUEST))
+            .given(handler.auth).revokeToken(req);
 
         // WHEN
-        HttpResponse response = handler.handleAuthorize(req);
+        HttpResponse response = handler.handleTokenRevoke(req);
 
         // THEN
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), Response.INVALID_CLIENT_CREDENTIALS);
         assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
-        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), Response.UNSUPPORTED_MEDIA_TYPE);
     }
 
     private ChannelHandlerContext mockChannelHandlerContext() {

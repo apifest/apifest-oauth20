@@ -257,24 +257,19 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
     protected HttpResponse handleAuthorize(HttpRequest req) {
         HttpResponse response = null;
-        String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
-        if (contentType.contains(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
-            try {
-                String redirectURI = auth.issueAuthorizationCode(req);
-                // TODO: validation http protocol?
-                log.debug("redirectURI: {}", redirectURI);
+        try {
+            String redirectURI = auth.issueAuthorizationCode(req);
+            // TODO: validation http protocol?
+            log.debug("redirectURI: {}", redirectURI);
 
-                // return auth_code
-                JsonObject obj = new JsonObject();
-                obj.addProperty("redirect_uri", redirectURI);
-                response = Response.createOkResponse(obj.toString());
-                accessTokensLog.info("authCode {}", obj.toString());
-            } catch (OAuthException ex) {
-                response = Response.createOAuthExceptionResponse(ex);
-                invokeExceptionHandler(ex, req);
-            }
-        } else {
-            response = Response.createResponse(HttpResponseStatus.BAD_REQUEST, Response.UNSUPPORTED_MEDIA_TYPE);
+            // return auth_code
+            JsonObject obj = new JsonObject();
+            obj.addProperty("redirect_uri", redirectURI);
+            response = Response.createOkResponse(obj.toString());
+            accessTokensLog.info("authCode {}", obj.toString());
+        } catch (OAuthException ex) {
+            response = Response.createOAuthExceptionResponse(ex);
+            invokeExceptionHandler(ex, req);
         }
         return response;
     }
@@ -313,6 +308,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         } catch (OAuthException e) {
             log.error("cannot revoke token", e);
             invokeExceptionHandler(e, req);
+            return Response.createOAuthExceptionResponse(e);
         }
         String json = "{\"revoked\":\"" + revoked + "\"}";
         HttpResponse response = Response.createOkResponse(json);

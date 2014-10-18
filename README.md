@@ -112,7 +112,7 @@ The custom grant_type class implementation should be contained in the custom.cla
 
 You can start the ApiFest OAuth 2.0 Server with the following command:
 
-```java -Dproperties.file=[apifest_properties_file_path] -Dlog4j.configuration=file:///[log4j_xml_file_path] -jar apifest-oauth20-0.1.0-jar-with-dependencies.jar```
+```java -Dproperties.file=[apifest_properties_file_path] -Dlog4j.configuration=file:///[log4j_xml_file_path] -jar apifest-oauth20-0.1.2-SNAPSHOT-jar-with-dependencies.jar```
 
 When the server starts, you will see:
 ```ApiFest OAuth 2.0 Server started at [host]:[port]```
@@ -122,8 +122,8 @@ When the server starts, you will see:
 * **/oauth20/applications/[client_id]** - returns client application info (GET method), updates a client application (PUT method)
 * **/oauth20/auth-codes** - issues auth codes
 * **/oauth20/tokens** - issues access tokens
-* **/oauth20/tokens/validations** - validates access tokens
-* **/oauth20/tokens/revocations** - revokes access tokens
+* **/oauth20/tokens/validate** - validates access tokens
+* **/oauth20/tokens/revoke** - revokes access tokens
 * **/oauth20/scopes** - creates a new scope (POST method)
 * **/oauth20/scopes/[scope_name]** - returns info about a scope - name, description and expires_in (GET method),
 updates a scope (PUT method), deletes a scope (DELETE method)

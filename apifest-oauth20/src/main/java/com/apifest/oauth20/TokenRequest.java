@@ -113,11 +113,11 @@ public class TokenRequest {
     }
 
     protected void checkMandatoryParams() throws OAuthException {
-        if (clientId == null || clientId.length() == 0) {
+        if (clientId == null || clientId.isEmpty()) {
             throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CLIENT_ID),
                     HttpResponseStatus.BAD_REQUEST);
         }
-        if (grantType == null || grantType.length() == 0) {
+        if (grantType == null || grantType.isEmpty()) {
             throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, GRANT_TYPE),
                     HttpResponseStatus.BAD_REQUEST);
         }
