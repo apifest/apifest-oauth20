@@ -82,6 +82,7 @@ public class HazelcastDBManager implements DBManager {
         hazelcastClient = Hazelcast.newHazelcastInstance(config);
         hazelcastClient.getMap(APIFEST_AUTH_CODE).addIndex("codeURI", false);
         hazelcastClient.getMap(APIFEST_ACCESS_TOKEN).addIndex("refreshTokenByClient", false);
+        hazelcastClient.getMap(APIFEST_ACCESS_TOKEN).addIndex("accessTokenByUserIdAndClient", false);
     }
 
     private static Map<String, MapConfig> createMapConfigs() {
@@ -357,6 +358,24 @@ public class HazelcastDBManager implements DBManager {
     public boolean deleteScope(String scopeName) {
         PersistentScope scope = getScopesContainer().remove(scopeName);
         return (scope != null) ? true : false;
+    }
+
+    /*
+     * @see com.apifest.oauth20.DBManager#getAccessTokenByUserIdAndClientApp(java.lang.String, java.lang.String)
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<AccessToken> getAccessTokenByUserIdAndClientApp(String userId, String clientId) {
+        List<AccessToken> accessTokens = new ArrayList<AccessToken>();
+        EntryObject eo = new PredicateBuilder().getEntryObject();
+        Predicate<String, String> predicate = eo.get("accessTokenByUserIdAndClient").equal(userId + clientId + true);
+        Collection<PersistentAccessToken> values = getAccessTokenContainer().values(predicate);
+        if (!values.isEmpty()) {
+            for (PersistentAccessToken token : values) {
+                accessTokens.add(PersistenceTransformations.toAccessToken(token));
+            }
+        }
+        return accessTokens;
     }
 
 }

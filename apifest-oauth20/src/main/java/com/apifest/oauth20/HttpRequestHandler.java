@@ -54,8 +54,8 @@ import com.google.gson.JsonObject;
  */
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
-    protected static final String AUTH_CODE_GENERATE_URI = "/oauth20/auth-codes";
-    protected static final String ACCESS_TOKEN_GENERATE_URI = "/oauth20/tokens";
+    protected static final String AUTH_CODE_URI = "/oauth20/auth-codes";
+    protected static final String ACCESS_TOKEN_URI = "/oauth20/tokens";
     protected static final String ACCESS_TOKEN_VALIDATE_URI = "/oauth20/tokens/validate";
     protected static final String APPLICATION_URI = "/oauth20/applications";
     protected static final String ACCESS_TOKEN_REVOKE_URI = "/oauth20/tokens/revoke";
@@ -91,9 +91,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             HttpResponse response = null;
             if (APPLICATION_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
                 response = handleRegister(req);
-            } else if (AUTH_CODE_GENERATE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
+            } else if (AUTH_CODE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleAuthorize(req);
-            } else if (ACCESS_TOKEN_GENERATE_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
+            } else if (ACCESS_TOKEN_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
                 response = handleToken(req);
             } else if (ACCESS_TOKEN_VALIDATE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleTokenValidate(req);
@@ -107,6 +107,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 response = handleGetAllScopes(req);
             } else if (OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
                 response = handleRegisterScope(req);
+            } else if (ACCESS_TOKEN_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
+                response = handleGetAccessTokens(req);
             } else if (rawUri.startsWith(OAUTH_CLIENT_SCOPE_URI) && method.equals(HttpMethod.PUT)) {
                 response = handleUpdateScope(req);
             } else if (rawUri.startsWith(OAUTH_CLIENT_SCOPE_URI) && method.equals(HttpMethod.GET)) {
@@ -163,7 +165,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         HttpResponse response = null;
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
         Map<String, List<String>> params = dec.getParameters();
-        String tokenParam = QueryParameter.getFirstElement(params, "token");
+        String tokenParam = QueryParameter.getFirstElement(params, QueryParameter.TOKEN);
         if (tokenParam == null || tokenParam.isEmpty()) {
             response = Response.createBadRequestResponse();
         } else {
@@ -426,5 +428,28 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         Gson gson = new Gson();
         String jsonString = gson.toJson(apps);
         return Response.createOkResponse(jsonString);
+    }
+
+    protected HttpResponse handleGetAccessTokens(HttpRequest req) {
+        HttpResponse response = null;
+        QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
+        Map<String, List<String>> params = dec.getParameters();
+        String clientId = QueryParameter.getFirstElement(params, QueryParameter.CLIENT_ID);
+        String userId = QueryParameter.getFirstElement(params, QueryParameter.USER_ID);
+        if (clientId == null || clientId.isEmpty()) {
+            response = Response.createBadRequestResponse(String.format(Response.MANDATORY_PARAM_MISSING, QueryParameter.CLIENT_ID));
+        } else if (userId == null || userId.isEmpty()) {
+            response = Response.createBadRequestResponse(String.format(Response.MANDATORY_PARAM_MISSING, QueryParameter.USER_ID));
+        } else {
+            if (!auth.isValidClientId(clientId)) {
+                response = Response.createBadRequestResponse(Response.INVALID_CLIENT_ID);
+            } else {
+                List<AccessToken> accessTokens = DBManagerFactory.getInstance().getAccessTokenByUserIdAndClientApp(userId, clientId);
+                Gson gson = new Gson();
+                String jsonString = gson.toJson(accessTokens);
+                response = Response.createOkResponse(jsonString);
+            }
+        }
+        return response;
     }
 }

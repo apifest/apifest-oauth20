@@ -152,4 +152,12 @@ public interface DBManager {
      */
     boolean deleteScope(String scopeName);
 
+    /**
+     * Returns a list of all active access tokens for a user and a client application.
+     *
+     * @param userId the id of the user
+     * @param clientId the id of the client application
+     * @return {@link List} of {@link AccessToken}
+     */
+    List<AccessToken> getAccessTokenByUserIdAndClientApp(String userId, String clientId);
 }

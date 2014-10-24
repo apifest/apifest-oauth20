@@ -130,4 +130,8 @@ public class PersistentAccessToken implements Serializable {
     public String getRefreshTokenByClient() {
         return this.refreshToken + this.getClientId() + this.isValid();
     }
+
+    public String getAccessTokenByUserIdAndClient() {
+        return this.userId + this.getClientId() + this.isValid();
+    }
 }

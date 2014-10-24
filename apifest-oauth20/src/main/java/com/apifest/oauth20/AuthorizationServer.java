@@ -46,7 +46,6 @@ public class AuthorizationServer {
 
     static final String BASIC = "Basic ";
     private static final String TOKEN_TYPE_BEARER = "Bearer";
-    protected static final String SCOPE_NOK_MESSAGE = "{\"status\":\"scope not valid\"}";
 
     protected static Logger log = LoggerFactory.getLogger(AuthorizationServer.class);
 
@@ -113,7 +112,7 @@ public class AuthorizationServer {
 
         String scope = scopeService.getValidScope(authRequest.getScope(), authRequest.getClientId());
         if (scope == null) {
-            throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
+            throw new OAuthException(Response.SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
         }
 
         AuthCode authCode = new AuthCode(generateCode(), authRequest.getClientId(), authRequest.getRedirectUri(),
@@ -178,7 +177,7 @@ public class AuthorizationServer {
                     if (scopeService.scopeAllowed(tokenRequest.getScope(), accessToken.getScope())) {
                         validScope = tokenRequest.getScope();
                     } else {
-                        throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
+                        throw new OAuthException(Response.SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
                     }
                 } else {
                     validScope = accessToken.getScope();
@@ -197,7 +196,7 @@ public class AuthorizationServer {
         } else if (TokenRequest.CLIENT_CREDENTIALS.equals(tokenRequest.getGrantType())) {
             String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());
             if (scope == null) {
-                throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(Response.SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
             }
 
             accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.CLIENT_CREDENTIALS, scope),
@@ -207,7 +206,7 @@ public class AuthorizationServer {
         } else if (TokenRequest.PASSWORD.equals(tokenRequest.getGrantType())) {
             String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());
             if (scope == null) {
-                throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(Response.SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
             }
 
             try {
@@ -235,7 +234,7 @@ public class AuthorizationServer {
         } else if (tokenRequest.getGrantType().equals(OAuthServer.getCustomGrantType())) {
             String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());
             if (scope == null) {
-                throw new OAuthException(SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(Response.SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
             }
             try {
                 accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope);

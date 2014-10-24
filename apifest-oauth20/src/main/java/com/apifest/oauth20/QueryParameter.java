@@ -26,6 +26,10 @@ import java.util.Map;
  */
 public final class QueryParameter {
 
+    public static final String TOKEN = "token";
+    public static final String CLIENT_ID = "client_id";
+    public static final String USER_ID = "user_id";
+
     public static String getFirstElement(Map<String, List<String>> map, String key) {
         String value = null;
         if (map.get(key) != null) {

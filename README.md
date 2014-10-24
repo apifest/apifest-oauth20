@@ -128,3 +128,4 @@ When the server starts, you will see:
 * **/oauth20/scopes/[scope_name]** - returns info about a scope - name, description and expires_in (GET method),
 updates a scope (PUT method), deletes a scope (DELETE method)
 * **/oauth20/scopes?client_id=[client_id]** - returns scopes by client_id
+* **/oauth20/tokens?client_id=[client_id]&user_id=[user_id]** - returns all active tokens for a given user and client application

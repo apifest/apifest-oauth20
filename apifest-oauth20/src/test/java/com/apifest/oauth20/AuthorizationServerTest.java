@@ -1076,7 +1076,7 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, AuthorizationServer.SCOPE_NOK_MESSAGE);
+        assertEquals(errorMsg, Response.SCOPE_NOK_MESSAGE);
         assertTrue(httpStatus == HttpStatus.SC_BAD_REQUEST);
     }
 
@@ -1120,7 +1120,7 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, AuthorizationServer.SCOPE_NOK_MESSAGE);
+        assertEquals(errorMsg, Response.SCOPE_NOK_MESSAGE);
     }
 
     @Test
@@ -1165,7 +1165,7 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, AuthorizationServer.SCOPE_NOK_MESSAGE);
+        assertEquals(errorMsg, Response.SCOPE_NOK_MESSAGE);
     }
 
     @Test
@@ -1252,7 +1252,7 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, AuthorizationServer.SCOPE_NOK_MESSAGE);
+        assertEquals(errorMsg, Response.SCOPE_NOK_MESSAGE);
     }
 
     @Test
@@ -1466,7 +1466,7 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, AuthorizationServer.SCOPE_NOK_MESSAGE);
+        assertEquals(errorMsg, Response.SCOPE_NOK_MESSAGE);
     }
 
     @Test

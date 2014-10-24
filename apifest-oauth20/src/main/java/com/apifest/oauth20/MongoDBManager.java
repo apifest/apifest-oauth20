@@ -68,6 +68,8 @@ public class MongoDBManager implements DBManager {
     protected static final String SCOPE_COLLECTION_NAME = "scopes";
     protected static final String SCOPE_ID_NAME = "name";
 
+    protected static final String USER_ID = "userId";
+
     public MongoDBManager() {
         db = MongoUtil.getMongoClient().getDB("apifest");
     }
@@ -186,6 +188,7 @@ public class MongoDBManager implements DBManager {
     @Override
     public AccessToken findAccessTokenByRefreshToken(String refreshToken, String clientId) {
         BasicDBObject dbObject = new BasicDBObject();
+        // TODO: add indexes
         dbObject.put(REFRESH_TOKEN_ID_NAME, refreshToken);
         dbObject.put(CLIENTS_ID_NAME, clientId);
         dbObject.put(VALID_NAME, true);
@@ -422,6 +425,33 @@ public class MongoDBManager implements DBManager {
         BasicDBObject query = new BasicDBObject(ID_NAME, scopeName);
         WriteResult result = coll.remove(query);
         return (result.getN() == 1) ? true : false;
+    }
+
+    /*
+     * @see com.apifest.oauth20.DBManager#getAccessTokenByUserIdAndClientApp(java.lang.String, java.lang.String)
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<AccessToken> getAccessTokenByUserIdAndClientApp(String userId, String clientId) {
+        List<AccessToken> accessTokens = new ArrayList<AccessToken>();
+        BasicDBObject dbObject = new BasicDBObject();
+        // TODO: add indexes
+        dbObject.put(USER_ID, userId);
+        dbObject.put(CLIENTS_ID_NAME, clientId);
+        dbObject.put(VALID_NAME, true);
+        DBCollection coll = db.getCollection(ACCESS_TOKEN_COLLECTION_NAME);
+        List<DBObject> list = coll.find(dbObject).toArray();
+        for (DBObject object : list) {
+            Map<String, Object> mapLoaded = object.toMap();
+            // convert details list to String
+            if (mapLoaded.get("details") instanceof BasicDBObject) {
+                BasicDBObject details = (BasicDBObject) mapLoaded.get("details");
+                mapLoaded.put("details", details.toString());
+            }
+            AccessToken loadedAccessToken = AccessToken.loadFromMap(mapLoaded);
+            accessTokens.add(loadedAccessToken);
+        }
+        return accessTokens;
     }
 
 }

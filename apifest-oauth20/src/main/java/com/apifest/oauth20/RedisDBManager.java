@@ -30,6 +30,10 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 
 public class RedisDBManager implements DBManager {
+
+    private static final String ACCESS_TOKEN_BY_USER_ID_PREFIX_NAME = "atuid:";
+    private static final String ACCESS_TOKEN_PREFIX_NAME = "at:";
+
     private static Set<String> sentinels;
     private static JedisSentinelPool pool;
     private static String storeAuthCodeScript = "";
@@ -146,6 +150,13 @@ public class RedisDBManager implements DBManager {
                 "access_token", accessToken.getToken());
         jedis.expire("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(),
                 Integer.valueOf(accessToken.getExpiresIn()));
+
+        // store access tokens by user id and client app
+        // TODO: Replace with Lua script
+        Long uniqueId = System.currentTimeMillis();
+        String key = accessToken.getUserId() + ":" + accessToken.getClientId() + ":" + uniqueId;
+        jedis.hset(ACCESS_TOKEN_BY_USER_ID_PREFIX_NAME + key, "access_token", accessToken.getToken());
+        jedis.expire(ACCESS_TOKEN_BY_USER_ID_PREFIX_NAME + key, Integer.valueOf(accessToken.getExpiresIn()));
         pool.returnResource(jedis);
     }
 
@@ -158,7 +169,6 @@ public class RedisDBManager implements DBManager {
         String accessToken = jedis.hget("atr:" + refreshToken + clientId, "access_token");
         Map<String, String> accessTokenMap = jedis.hgetAll("at:" + accessToken);
         pool.returnResource(jedis);
-        // REVISIT: check valid=true
         if (accessTokenMap.isEmpty() || "false".equals(accessTokenMap.get("valid"))) {
             return null;
         }
@@ -183,7 +193,6 @@ public class RedisDBManager implements DBManager {
         Jedis jedis = pool.getResource();
         Map<String, String> accessTokenMap = jedis.hgetAll("at:" + accessToken);
         pool.returnResource(jedis);
-        // REVISIT: Check valid=true
         if (accessTokenMap.isEmpty() || "false".equals(accessTokenMap.get("valid"))) {
             return null;
         }
@@ -321,6 +330,25 @@ public class RedisDBManager implements DBManager {
         pool.returnResource(jedis);
         // 1 if deleted, 0 - nothing deleted
         return (deleted.intValue() == 1) ? true : false;
+    }
+
+    /*
+     * @see com.apifest.oauth20.DBManager#getAccessTokenByUserIdAndClientApp(java.lang.String, java.lang.String)
+     */
+    @Override
+    public List<AccessToken> getAccessTokenByUserIdAndClientApp(String userId, String clientId) {
+        List<AccessToken> accessTokens = new ArrayList<AccessToken>();
+        Jedis jedis = pool.getResource();
+        Set<String> keys = jedis.keys(ACCESS_TOKEN_BY_USER_ID_PREFIX_NAME + userId + ":" + clientId + ":*");
+        for (String key : keys) {
+            String token = jedis.hget(key, "access_token");
+            Map<String, String> accessTokenMap = jedis.hgetAll(ACCESS_TOKEN_PREFIX_NAME + token);
+            if (!accessTokenMap.isEmpty() && "true".equals(accessTokenMap.get("valid"))) {
+                accessTokens.add(AccessToken.loadFromStringMap(accessTokenMap));
+            }
+        }
+        pool.returnResource(jedis);
+        return accessTokens;
     }
 
 }

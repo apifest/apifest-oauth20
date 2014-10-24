@@ -24,6 +24,9 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -570,6 +573,117 @@ public class HttpRequestHandlerTest {
         // THEN
         assertEquals(response.getContent().toString(CharsetUtil.UTF_8), Response.INVALID_CLIENT_CREDENTIALS);
         assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void when_get_tokens_request_invoke_handleGetTokens_method() throws Exception {
+        // GIVEN
+        ChannelHandlerContext ctx = mockChannelHandlerContext();
+
+        MessageEvent event = mock(MessageEvent.class);
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, HttpRequestHandler.ACCESS_TOKEN_URI);
+        willReturn(req).given(event).getMessage();
+        willReturn(mock(HttpResponse.class)).given(handler).handleGetAccessTokens(req);
+
+        // WHEN
+        handler.messageReceived(ctx, event);
+
+        // THEN
+        verify(handler).handleGetAccessTokens(req);
+    }
+
+    @Test
+    public void when_get_tokens_and_client_id_is_null_return_missing_param_client_id() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        willReturn(HttpRequestHandler.ACCESS_TOKEN_URI + "?user_id=12343").given(req).getUri();
+
+        // WHEN
+        HttpResponse response = handler.handleGetAccessTokens(req);
+
+        // THEN
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), String.format(Response.MANDATORY_PARAM_MISSING, "client_id"));
+    }
+
+    @Test
+    public void when_get_tokens_and_client_id_is_empty_return_missing_param_client_id() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        willReturn(HttpRequestHandler.ACCESS_TOKEN_URI + "?user_id=12343&client_id=").given(req).getUri();
+
+        // WHEN
+        HttpResponse response = handler.handleGetAccessTokens(req);
+
+        // THEN
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), String.format(Response.MANDATORY_PARAM_MISSING, "client_id"));
+    }
+
+    @Test
+    public void when_get_tokens_and_user_id_is_null_return_missing_param_user_id() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        willReturn(HttpRequestHandler.ACCESS_TOKEN_URI + "?client_id=218900b6c8d973881cf4185ecf").given(req).getUri();
+
+        // WHEN
+        HttpResponse response = handler.handleGetAccessTokens(req);
+
+        // THEN
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), String.format(Response.MANDATORY_PARAM_MISSING, "user_id"));
+    }
+
+    @Test
+    public void when_get_tokens_and_user_id_is_empty_return_missing_param_user_id() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        willReturn(HttpRequestHandler.ACCESS_TOKEN_URI + "?client_id=218900b6c8d973881cf4185ecf&user_id=").given(req).getUri();
+
+        // WHEN
+        HttpResponse response = handler.handleGetAccessTokens(req);
+
+        // THEN
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), String.format(Response.MANDATORY_PARAM_MISSING, "user_id"));
+    }
+
+    @Test
+    public void when_get_tokens_client_id_invalid_return_invalid_client_id() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String userId = "214331231";
+        String clientId = "218900b6c8d973881cf4185ecf";
+        willReturn(HttpRequestHandler.ACCESS_TOKEN_URI + "?client_id=" + clientId + "&user_id=" + userId).given(req).getUri();
+        AuthorizationServer auth = mock(AuthorizationServer.class);
+        handler.auth = auth;
+        willReturn(false).given(handler.auth).isValidClientId(clientId);
+
+
+        // WHEN
+        HttpResponse response = handler.handleGetAccessTokens(req);
+
+        // THEN
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), Response.INVALID_CLIENT_ID);
+    }
+
+    @Test
+    public void when_get_tokens_invoke_get_token_by_user_and_client() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String userId = "214331231";
+        String clientId = "218900b6c8d973881cf4185ecf";
+        willReturn(HttpRequestHandler.ACCESS_TOKEN_URI + "?client_id=" + clientId + "&user_id=" + userId).given(req).getUri();
+        AuthorizationServer auth = mock(AuthorizationServer.class);
+        handler.auth = auth;
+        willReturn(true).given(handler.auth).isValidClientId(clientId);
+        MockDBManagerFactory.install();
+        List<AccessToken> tokens = new ArrayList<AccessToken>();
+        willReturn(tokens).given(DBManagerFactory.getInstance()).getAccessTokenByUserIdAndClientApp(userId, clientId);
+
+
+        // WHEN
+        HttpResponse response = handler.handleGetAccessTokens(req);
+
+        // THEN
+        verify(DBManagerFactory.getInstance()).getAccessTokenByUserIdAndClientApp(userId, clientId);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "[]");
     }
 
     private ChannelHandlerContext mockChannelHandlerContext() {
