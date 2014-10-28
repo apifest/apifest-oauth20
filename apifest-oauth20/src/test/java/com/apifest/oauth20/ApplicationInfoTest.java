@@ -170,4 +170,34 @@ public class ApplicationInfoTest {
         // THEN
         assertFalse(result);
     }
+
+    @Test
+    public void when_scope_descr_and_status_is_not_null_but_status_is_not_valid_return_false() throws Exception {
+        // GIVEN
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.setDescription("descr");
+        appInfo.setScope("scope");
+        appInfo.setStatus(3);
+
+        // WHEN
+        boolean result = appInfo.validForUpdate();
+
+        // THEN
+        assertFalse(result);
+    }
+
+    @Test
+    public void when_scope_descr_and_status_is_active_return_true() throws Exception {
+        // GIVEN
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.setDescription("descr");
+        appInfo.setScope("scope");
+        appInfo.setStatus(ClientCredentials.ACTIVE_STATUS);
+
+        // WHEN
+        boolean result = appInfo.validForUpdate();
+
+        // THEN
+        assertTrue(result);
+    }
 }

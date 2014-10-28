@@ -170,7 +170,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             response = Response.createBadRequestResponse();
         } else {
             AccessToken token = auth.isValidToken(tokenParam);
-            log.debug("token valid:" + token);
             if (token != null) {
                 Gson gson = new Gson();
                 String json = gson.toJson(token);
@@ -441,7 +440,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         } else if (userId == null || userId.isEmpty()) {
             response = Response.createBadRequestResponse(String.format(Response.MANDATORY_PARAM_MISSING, QueryParameter.USER_ID));
         } else {
-            if (!auth.isValidClientId(clientId)) {
+            // check that clientId exists, no matter whether it is active or not
+            if (!auth.isExistingClient(clientId)) {
                 response = Response.createBadRequestResponse(Response.INVALID_CLIENT_ID);
             } else {
                 List<AccessToken> accessTokens = DBManagerFactory.getInstance().getAccessTokenByUserIdAndClientApp(userId, clientId);

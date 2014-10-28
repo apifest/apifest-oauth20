@@ -105,7 +105,7 @@ public class AuthorizationServer {
     public String issueAuthorizationCode(HttpRequest req) throws OAuthException {
         AuthRequest authRequest = new AuthRequest(req);
         log.debug("received client_id:" + authRequest.getClientId());
-        if (!isValidClientId(authRequest.getClientId())) {
+        if (!isActiveClientId(authRequest.getClientId())) {
             throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
         }
         authRequest.validate();
@@ -132,15 +132,15 @@ public class AuthorizationServer {
         if (tokenRequest.getClientId() == null) {
             String clientId = getBasicAuthorizationClientId(req);
             // TODO: check Basic Auth is OK
-            if (clientId == null || !isValidClientId(clientId)) {
+            if (clientId == null || !isActiveClientId(clientId)) {
                 throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
             }
             tokenRequest.setClientId(clientId);
             tokenRequest.validate();
         } else {
             tokenRequest.validate();
-            // check valid client_id and client_secret
-            if (!isValidClientCredentials(tokenRequest.getClientId(), tokenRequest.getClientSecret())) {
+            // check valid client_id, client_secret and status of the client app should be active
+            if (!isActiveClient(tokenRequest.getClientId(), tokenRequest.getClientSecret())) {
                 throw new OAuthException(Response.INVALID_CLIENT_CREDENTIALS, HttpResponseStatus.BAD_REQUEST);
             }
         }
@@ -350,16 +350,34 @@ public class AuthorizationServer {
         return AuthCode.generate();
     }
 
-    protected boolean isValidClientId(String clientId) {
-        if (db.findClientCredentials(clientId) != null) {
+    protected boolean isActiveClientId(String clientId) {
+        ClientCredentials creds = db.findClientCredentials(clientId);
+        if (creds != null && creds.getStatus() == ClientCredentials.ACTIVE_STATUS) {
             return true;
         }
         return false;
     }
 
+    // check only that clientId and clientSecret are valid, NOT that the status is active
     protected boolean isValidClientCredentials(String clientId, String clientSecret) {
         ClientCredentials creds = db.findClientCredentials(clientId);
         if (creds != null && creds.getSecret().equals(clientSecret)) {
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean isActiveClient(String clientId, String clientSecret) {
+        ClientCredentials creds = db.findClientCredentials(clientId);
+        if (creds != null && creds.getSecret().equals(clientSecret) && creds.getStatus() == ClientCredentials.ACTIVE_STATUS) {
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean isExistingClient(String clientId) {
+        ClientCredentials creds = db.findClientCredentials(clientId);
+        if (creds != null) {
             return true;
         }
         return false;
@@ -373,7 +391,7 @@ public class AuthorizationServer {
         RevokeTokenRequest revokeRequest = new RevokeTokenRequest(req);
         revokeRequest.checkMandatoryParams();
         String clientId = revokeRequest.getClientId();
-        // check valid client_id and client_secret
+        // check valid client_id and client_secret, status does not matter as token of inactive client app could be revoked too
         if (!isValidClientCredentials(clientId, revokeRequest.getClientSecret())) {
             throw new OAuthException(Response.INVALID_CLIENT_CREDENTIALS, HttpResponseStatus.BAD_REQUEST);
         }
@@ -405,7 +423,7 @@ public class AuthorizationServer {
 //            if (clientId == null) {
 //                throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
 //            }
-            if (!isValidClientId(clientId)) {
+            if (!isExistingClient(clientId)) {
                 throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
             }
             ObjectMapper mapper = new ObjectMapper();

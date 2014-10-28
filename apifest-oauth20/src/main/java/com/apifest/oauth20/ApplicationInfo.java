@@ -146,9 +146,11 @@ public class ApplicationInfo implements Serializable {
 
     public boolean validForUpdate() {
         boolean valid = false;
-        if ((scope != null && scope.length() > 0) || (description != null && description.length() > 0) ||
-                (status != null && (status == 0 || status == 1))) {
+        if ((scope != null && !scope.isEmpty()) || (description != null && !description.isEmpty()) || status != null) {
            valid = true;
+        }
+        if (status != null && (status != ClientCredentials.ACTIVE_STATUS && status != ClientCredentials.INACTIVE_STATUS)) {
+            valid = false;
         }
         return valid;
     }

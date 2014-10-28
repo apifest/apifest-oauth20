@@ -653,7 +653,7 @@ public class HttpRequestHandlerTest {
         willReturn(HttpRequestHandler.ACCESS_TOKEN_URI + "?client_id=" + clientId + "&user_id=" + userId).given(req).getUri();
         AuthorizationServer auth = mock(AuthorizationServer.class);
         handler.auth = auth;
-        willReturn(false).given(handler.auth).isValidClientId(clientId);
+        willReturn(false).given(handler.auth).isActiveClientId(clientId);
 
 
         // WHEN
@@ -672,7 +672,7 @@ public class HttpRequestHandlerTest {
         willReturn(HttpRequestHandler.ACCESS_TOKEN_URI + "?client_id=" + clientId + "&user_id=" + userId).given(req).getUri();
         AuthorizationServer auth = mock(AuthorizationServer.class);
         handler.auth = auth;
-        willReturn(true).given(handler.auth).isValidClientId(clientId);
+        willReturn(true).given(handler.auth).isExistingClient(clientId);
         MockDBManagerFactory.install();
         List<AccessToken> tokens = new ArrayList<AccessToken>();
         willReturn(tokens).given(DBManagerFactory.getInstance()).getAccessTokenByUserIdAndClientApp(userId, clientId);

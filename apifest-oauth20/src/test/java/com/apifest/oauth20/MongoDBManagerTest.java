@@ -153,6 +153,7 @@ public class MongoDBManagerTest {
         given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
         BSONObject bson = mock(BSONObject.class);
         given(bson.get("secret")).willReturn(clientSecret);
+        given(bson.get("status")).willReturn(String.valueOf(ClientCredentials.ACTIVE_STATUS));
         willReturn(bson).given(dbManager).getObject(any(DBCollection.class),
                 any(BasicDBObject.class));
 
@@ -219,5 +220,24 @@ public class MongoDBManagerTest {
 
         // THEN
         assertNull(scope);
+    }
+
+    @Test
+    public void when_valid_client_and_secret_but_status_not_valid_return_false() throws Exception {
+        // GIVEN
+        String clientId = "clientId";
+        String clientSecret = "clientSecret";
+        given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
+        BSONObject bson = mock(BSONObject.class);
+        given(bson.get("secret")).willReturn(clientSecret);
+        given(bson.get("status")).willReturn(String.valueOf(ClientCredentials.INACTIVE_STATUS));
+        willReturn(bson).given(dbManager).getObject(any(DBCollection.class),
+                any(BasicDBObject.class));
+
+        // WHEN
+        boolean result = dbManager.validClient(clientId, clientSecret);
+
+        // THEN
+        assertFalse(result);
     }
 }

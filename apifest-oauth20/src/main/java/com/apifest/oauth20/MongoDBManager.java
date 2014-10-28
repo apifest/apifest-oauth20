@@ -250,7 +250,7 @@ public class MongoDBManager implements DBManager {
         BasicDBObject query = new BasicDBObject(ID_NAME, clientId);
         BSONObject result = (BSONObject) getObject(coll, query);
         if (result != null) {
-            return result.get("secret").equals(clientSecret);
+            return (result.get("secret").equals(clientSecret) && String.valueOf(ClientCredentials.ACTIVE_STATUS).equals(result.get("status")));
         }
         return false;
     }

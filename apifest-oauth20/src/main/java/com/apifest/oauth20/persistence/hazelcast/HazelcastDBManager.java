@@ -167,7 +167,7 @@ public class HazelcastDBManager implements DBManager {
     @Override
     public boolean validClient(String clientId, String clientSecret) {
         ClientCredentials clientCredentials = findClientCredentials(clientId);
-        if (clientCredentials != null && clientCredentials.getSecret().equals(clientSecret)) {
+        if (clientCredentials != null && clientCredentials.getSecret().equals(clientSecret) && clientCredentials.getStatus() == ClientCredentials.ACTIVE_STATUS) {
             return true;
         }
         return false;

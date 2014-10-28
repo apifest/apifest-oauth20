@@ -36,6 +36,9 @@ public class ClientCredentials implements Serializable {
 
     private static final int CLIENT_ID_LENGTH = 15;
 
+    public static final int ACTIVE_STATUS = 1;
+    public static final int INACTIVE_STATUS = 0;
+
     @JsonProperty("client_id")
     private String id = "";
 

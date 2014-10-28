@@ -62,7 +62,7 @@ public class RedisDBManager implements DBManager {
         Jedis jedis = pool.getResource();
         String secret = jedis.hget("cc:" + clientId, "secret");
         pool.returnResource(jedis);
-        if (clientSecret.equals(secret)) {
+        if (clientSecret.equals(secret) && String.valueOf(ClientCredentials.ACTIVE_STATUS).equals(jedis.hget("cc:" + clientId, "status"))) {
             return true;
         } else {
             return false;
