@@ -101,6 +101,7 @@ public class HazelcastDBManager implements DBManager {
     private static MapConfig createMapConfig(String mapName) {
         MapConfig mapConfig = new MapConfig(mapName);
         mapConfig.setInMemoryFormat(InMemoryFormat.OBJECT);
+        mapConfig.setBackupCount(1);
         mapConfig.setEvictionPolicy(EvictionPolicy.NONE);
         mapConfig.setMaxSizeConfig(new MaxSizeConfig(0, MaxSizePolicy.PER_NODE));
         mapConfig.setEvictionPercentage(0);
@@ -219,7 +220,6 @@ public class HazelcastDBManager implements DBManager {
         EntryObject eo = new PredicateBuilder().getEntryObject();
         Predicate<String, String> predicate = eo.get("refreshTokenByClient").equal(refreshToken + clientId + true);
         Collection<PersistentAccessToken> values = getAccessTokenContainer().values(predicate);
-        // TODO: ensure only one active refresh token + client_id
         if (values.isEmpty()) {
             return null;
         }
