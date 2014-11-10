@@ -374,6 +374,90 @@ public class HttpRequestHandlerTest {
     }
 
     @Test
+    public void when_GET_applications_with_active_status_query_params_and_no_active_app_return_empty_list() throws Exception {
+        // GIVEN
+        String uri = HttpRequestHandler.APPLICATION_URI + "?status=" + ClientCredentials.ACTIVE_STATUS;
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
+        ClientCredentials creds = mock(ClientCredentials.class);
+        willReturn(ClientCredentials.INACTIVE_STATUS).given(creds).getStatus();
+        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
+        apps.add(creds);
+        MockDBManagerFactory.install();
+        willReturn(apps).given(DBManagerFactory.getInstance()).getAllApplications();
+
+        // WHEN
+        HttpResponse response = handler.handleGetAllClientApplications(req);
+
+        // THEN
+        verify(handler).filterClientApps(req, apps);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "[]");
+    }
+
+    @Test
+    public void when_GET_applications_with_active_status_query_params_return_client_apps_with_active_status() throws Exception {
+        // GIVEN
+        String uri = HttpRequestHandler.APPLICATION_URI + "?status=" + ClientCredentials.ACTIVE_STATUS;
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
+        ClientCredentials creds = new ClientCredentials();
+        creds.setStatus(ClientCredentials.ACTIVE_STATUS);
+        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
+        apps.add(creds);
+        MockDBManagerFactory.install();
+        willReturn(apps).given(DBManagerFactory.getInstance()).getAllApplications();
+
+        // WHEN
+        HttpResponse response = handler.handleGetAllClientApplications(req);
+
+        // THEN
+        verify(handler).filterClientApps(req, apps);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "[{\"id\":\"\",\"secret\":\"\",\"scope\":\"\","
+                + "\"name\":\"\",\"uri\":\"\",\"descr\":\"\",\"type\":0,\"status\":1}]");
+    }
+
+    @Test
+    public void when_GET_applications_with_not_valid_status_query_params_return_all_client_apps() throws Exception {
+        // GIVEN
+        String uri = HttpRequestHandler.APPLICATION_URI + "?status=some";
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
+        ClientCredentials creds = new ClientCredentials();
+        creds.setStatus(ClientCredentials.ACTIVE_STATUS);
+        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
+        apps.add(creds);
+        MockDBManagerFactory.install();
+        willReturn(apps).given(DBManagerFactory.getInstance()).getAllApplications();
+
+        // WHEN
+        HttpResponse response = handler.handleGetAllClientApplications(req);
+
+        // THEN
+        verify(handler).filterClientApps(req, apps);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "[{\"id\":\"\",\"secret\":\"\",\"scope\":\"\","
+                + "\"name\":\"\",\"uri\":\"\",\"descr\":\"\",\"type\":0,\"status\":1}]");
+    }
+
+    @Test
+    public void when_GET_applications_with_empty_status_query_params_return_all_client_apps() throws Exception {
+        // GIVEN
+        String uri = HttpRequestHandler.APPLICATION_URI + "?status=";
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
+        ClientCredentials creds = new ClientCredentials();
+        creds.setStatus(ClientCredentials.ACTIVE_STATUS);
+        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
+        apps.add(creds);
+        MockDBManagerFactory.install();
+        willReturn(apps).given(DBManagerFactory.getInstance()).getAllApplications();
+
+        // WHEN
+        HttpResponse response = handler.handleGetAllClientApplications(req);
+
+        // THEN
+        verify(handler).filterClientApps(req, apps);
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "[{\"id\":\"\",\"secret\":\"\",\"scope\":\"\","
+                + "\"name\":\"\",\"uri\":\"\",\"descr\":\"\",\"type\":0,\"status\":1}]");
+    }
+
+
+    @Test
     public void when_uri_does_not_match_OAUTH_SCOPE_DELETE_PATTERN_return_not_found() throws Exception {
         // GIVEN
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, HttpRequestHandler.APPLICATION_URI);

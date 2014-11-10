@@ -19,6 +19,8 @@ package com.apifest.oauth20;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -410,7 +412,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             String clientId = m.group(1);
             try {
                 if (auth.updateClientApp(req, clientId)) {
-                    response = Response.createOkResponse("{\"status\":\"client application updated\"}");
+                    response = Response.createOkResponse(Response.CLIENT_APP_UPDATED);
                 }
             } catch (OAuthException ex) {
                 response = Response.createOAuthExceptionResponse(ex);
@@ -423,10 +425,36 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     }
 
     protected HttpResponse handleGetAllClientApplications(HttpRequest req) {
-        List<ClientCredentials> apps = DBManagerFactory.getInstance().getAllApplications();
+        List<ClientCredentials> apps = filterClientApps(req, DBManagerFactory.getInstance().getAllApplications());
         Gson gson = new Gson();
         String jsonString = gson.toJson(apps);
         return Response.createOkResponse(jsonString);
+    }
+
+    protected List<ClientCredentials> filterClientApps(HttpRequest req, List<ClientCredentials> apps) {
+        List<ClientCredentials> filteredApps = new ArrayList<ClientCredentials>();
+        QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
+        Map<String, List<String>> params = dec.getParameters();
+        if (params != null) {
+            String status = QueryParameter.getFirstElement(params, "status");
+            Integer statusInt = null;
+            if (status != null && !status.isEmpty()) {
+                try {
+                    statusInt = Integer.valueOf(status);
+                    for (ClientCredentials app : apps) {
+                        if (app.getStatus() == statusInt) {
+                            filteredApps.add(app);
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    // status is invalid, ignore it
+                    filteredApps = Collections.unmodifiableList(apps);
+                }
+            } else {
+                filteredApps = Collections.unmodifiableList(apps);
+            }
+        }
+        return filteredApps;
     }
 
     protected HttpResponse handleGetAccessTokens(HttpRequest req) {

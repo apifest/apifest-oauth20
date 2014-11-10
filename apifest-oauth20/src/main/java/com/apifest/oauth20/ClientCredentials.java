@@ -77,6 +77,7 @@ public class ClientCredentials implements Serializable {
         this.id = generateClientId();
         this.secret = generateClientSecret();
         this.created = (new Date()).getTime();
+        this.status = INACTIVE_STATUS;
     }
 
     public ClientCredentials(String appName, String scope, String description, String uri, String clientId, String clientSecret) {
@@ -87,6 +88,7 @@ public class ClientCredentials implements Serializable {
         this.id = clientId;
         this.secret = clientSecret;
         this.created = (new Date()).getTime();
+        this.status = INACTIVE_STATUS;
     }
 
     public ClientCredentials() {
