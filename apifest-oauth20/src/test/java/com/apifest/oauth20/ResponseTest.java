@@ -58,6 +58,95 @@ public class ResponseTest {
         assertEquals(response.headers().get(HttpHeaders.Names.CACHE_CONTROL),
                 HttpHeaders.Values.NO_STORE);
         assertEquals(response.headers().get(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_LENGTH),
+                String.valueOf(Response.NAME_OR_SCOPE_OR_URI_IS_NULL.getBytes().length));
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_TYPE), "application/json");
         verify(ex).getMessage();
+    }
+
+    @Test
+    public void when_create_response_with_message_set_content_type() throws Exception {
+        // WHEN
+        HttpResponse response = Response.createResponse(HttpResponseStatus.BAD_REQUEST, Response.ALREADY_REGISTERED_APP);
+
+        // THEN
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_TYPE), "application/json");
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_LENGTH),
+                String.valueOf(Response.ALREADY_REGISTERED_APP.getBytes().length));
+        assertEquals(response.headers().get(HttpHeaders.Names.CACHE_CONTROL),
+                HttpHeaders.Values.NO_STORE);
+        assertEquals(response.headers().get(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
+    }
+
+    @Test
+    public void when_create_unauthorized_response_set_headers() throws Exception {
+        // WHEN
+        HttpResponse response = Response.createUnauthorizedResponse();
+
+        // THEN
+        assertEquals(response.getStatus(), HttpResponseStatus.UNAUTHORIZED);
+        assertEquals(response.headers().get(HttpHeaders.Names.CACHE_CONTROL),
+                HttpHeaders.Values.NO_STORE);
+        assertEquals(response.headers().get(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_TYPE), "application/json");
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_LENGTH),
+                String.valueOf(Response.INVALID_ACCESS_TOKEN.getBytes().length));
+    }
+
+    @Test
+    public void when_create_ok_response_with_message_set_headers() throws Exception {
+        // WHEN
+        HttpResponse response = Response.createOkResponse(Response.CLIENT_APP_UPDATED);
+
+        // THEN
+        assertEquals(response.getStatus(), HttpResponseStatus.OK);
+        assertEquals(response.headers().get(HttpHeaders.Names.CACHE_CONTROL),
+                HttpHeaders.Values.NO_STORE);
+        assertEquals(response.headers().get(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_TYPE), "application/json");
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_LENGTH),
+                String.valueOf(Response.CLIENT_APP_UPDATED.getBytes().length));
+    }
+
+    @Test
+    public void when_create_not_found_response_set_headers() throws Exception {
+        // WHEN
+        HttpResponse response = Response.createNotFoundResponse();
+
+        // THEN
+        assertEquals(response.getStatus(), HttpResponseStatus.NOT_FOUND);
+        assertEquals(response.headers().get(HttpHeaders.Names.CACHE_CONTROL),
+                HttpHeaders.Values.NO_STORE);
+        assertEquals(response.headers().get(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_TYPE), "application/json");
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_LENGTH),
+                String.valueOf(Response.NOT_FOUND_CONTENT.getBytes().length));
+    }
+
+    @Test
+    public void when_create_bad_request_response_with_message_set_headers() throws Exception {
+        // WHEN
+        HttpResponse response = Response.createBadRequestResponse(Response.CANNOT_REGISTER_APP);
+
+        // THEN
+        assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
+        assertEquals(response.headers().get(HttpHeaders.Names.CACHE_CONTROL),
+                HttpHeaders.Values.NO_STORE);
+        assertEquals(response.headers().get(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_TYPE), "application/json");
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_LENGTH),
+                String.valueOf(Response.CANNOT_REGISTER_APP.getBytes().length));
+    }
+
+    @Test
+    public void when_create_bad_request_response_set_headers() throws Exception {
+        // WHEN
+        HttpResponse response = Response.createBadRequestResponse();
+
+        // THEN
+        assertEquals(response.getStatus(), HttpResponseStatus.BAD_REQUEST);
+        assertEquals(response.headers().get(HttpHeaders.Names.CACHE_CONTROL),
+                HttpHeaders.Values.NO_STORE);
+        assertEquals(response.headers().get(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
     }
 }
