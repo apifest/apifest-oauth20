@@ -122,9 +122,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             } else {
                 response = Response.createNotFoundResponse();
             }
+
             invokeResponseEventHandlers(req, response);
             ChannelFuture future = channel.write(response);
-            future.addListener(ChannelFutureListener.CLOSE);
+
+            if(!HttpHeaders.isKeepAlive(req)) {
+                future.addListener(ChannelFutureListener.CLOSE);
+            }
             return;
 
         } else {
