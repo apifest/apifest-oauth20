@@ -131,7 +131,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             }
             return;
 
-        } else {
+			} else {
             log.info("write response here from the BE");
         }
     }
