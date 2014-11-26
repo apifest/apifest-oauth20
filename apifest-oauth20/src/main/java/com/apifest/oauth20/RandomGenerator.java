@@ -81,6 +81,19 @@ public final class RandomGenerator {
      * @return random string
      */
     public static String generateRandomString() {
+        return generateRandomString("SHA-256");
+    }
+
+    /**
+     * Generates short random string.
+     *
+     * @return random string
+     */
+    public static String generateShortRandomString() {
+        return generateRandomString("SHA-1");
+    }
+
+    private static String generateRandomString(String algorithm) {
         SecureRandom rand = new SecureRandom();
         int random = rand.nextInt();
         long time = System.currentTimeMillis();
@@ -88,7 +101,7 @@ public final class RandomGenerator {
         MessageDigest md = null;
         String result = null;
         try {
-            md = MessageDigest.getInstance("SHA-1");
+            md = MessageDigest.getInstance(algorithm);
             String input = random + time + id + SALT;
             byte [] hashed = md.digest(input.getBytes("UTF-8"));
             result = new BigInteger(1, hashed).toString(16);

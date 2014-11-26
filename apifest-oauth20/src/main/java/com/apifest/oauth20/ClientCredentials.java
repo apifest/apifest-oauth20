@@ -34,8 +34,6 @@ public class ClientCredentials implements Serializable {
 
     private static final long serialVersionUID = 6443754960051591393L;
 
-    private static final int CLIENT_ID_LENGTH = 15;
-
     public static final int ACTIVE_STATUS = 1;
     public static final int INACTIVE_STATUS = 0;
 
@@ -168,7 +166,7 @@ public class ClientCredentials implements Serializable {
     }
 
     private String generateClientId() {
-        return RandomGenerator.generateDigitsString(CLIENT_ID_LENGTH);
+        return RandomGenerator.generateShortRandomString();
     }
 
     private String generateClientSecret() {
