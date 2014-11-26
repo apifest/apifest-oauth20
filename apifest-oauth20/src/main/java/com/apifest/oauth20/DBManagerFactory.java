@@ -23,9 +23,9 @@ import com.apifest.oauth20.persistence.hazelcast.HazelcastDBManager;
 
 public class DBManagerFactory {
 
-    protected static DBManager dbManager;
+    protected static volatile DBManager dbManager;
 
-    public static DBManager getInstance() {
+    public synchronized static DBManager getInstance() {
         if (dbManager == null) {
             if ("redis".equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new RedisDBManager();

@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.apifest</groupId>
   <artifactId>apifest-oauth20</artifactId>
-  <version>0.1.2-SNAPSHOT</version>
+  <version>0.1.2</version>
   <name>ApiFest-OAuth20</name>
 
   <properties>
@@ -61,7 +61,7 @@
     <dependency>
       <groupId>com.apifest</groupId>
       <artifactId>apifest-oauth20-api</artifactId>
-      <version>0.1.2-SNAPSHOT</version>
+      <version>0.1.2</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
