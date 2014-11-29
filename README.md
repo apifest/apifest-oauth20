@@ -76,7 +76,7 @@ e.g.
 
 ```db_host = mongodb://host1:port1,host2:port2,...,hostN:portN/database?replicaSet=my_replica```
 
-Unless overridden, the following default values are set for the connection: connectTimeoutMS=2
+Unless overridden, the following default values are set for the connection: ```connectTimeoutMS=2```
 
 * **Setup Redis**
 
