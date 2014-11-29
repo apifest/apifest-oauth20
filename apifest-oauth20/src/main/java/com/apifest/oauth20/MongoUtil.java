@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.MongoClientOptions;
 
 /**
@@ -33,15 +34,22 @@ import com.mongodb.MongoClientOptions;
 public class MongoUtil {
 
     private static MongoClient mongoClient;
+    private static String database = "apifest";
     private static Logger log = LoggerFactory.getLogger(MongoUtil.class);
 
     public static MongoClient getMongoClient() {
         if (mongoClient == null) {
             try {
-                MongoClientOptions options = new MongoClientOptions.Builder()
+                MongoClientOptions.Builder options = new MongoClientOptions.Builder()
                         .connectionsPerHost(100).connectTimeout(2)
-                        .threadsAllowedToBlockForConnectionMultiplier(1).build();
-                mongoClient = new MongoClient(OAuthServer.getDbHost(), options);
+                        .threadsAllowedToBlockForConnectionMultiplier(1);
+                final MongoClientURI mongoClientURI  = new MongoClientURI(OAuthServer.getDbHost(), options);
+                mongoClient = new MongoClient(mongoClientURI);
+
+                if (mongoClientURI.getDatabase() != null)
+                {
+                    database = mongoClientURI.getDatabase();
+                }
             } catch (UnknownHostException e) {
                 log.error("Cannot connect to DB", e);
             }
@@ -50,7 +58,7 @@ public class MongoUtil {
     }
 
     public static DB getDB() {
-        return MongoUtil.getMongoClient().getDB("apifest");
+        return MongoUtil.getMongoClient().getDB(database);
     }
 
 }

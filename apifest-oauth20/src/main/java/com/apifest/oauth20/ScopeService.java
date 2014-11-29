@@ -68,7 +68,7 @@ public class ScopeService {
         String contentType = (req.headers() != null) ? req.headers().get(HttpHeaders.Names.CONTENT_TYPE) : null;
         String responseMsg = "";
         // check Content-Type
-        if (contentType != null && (contentType != null && contentType.contains(Response.APPLICATION_JSON))) {
+        if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             ObjectMapper mapper = new ObjectMapper();
             try {
                 Scope scope = mapper.readValue(content, Scope.class);
@@ -227,7 +227,7 @@ public class ScopeService {
         String contentType = (req.headers() != null) ? req.headers().get(HttpHeaders.Names.CONTENT_TYPE) : null;
         String responseMsg = "";
         // check Content-Type
-        if (contentType != null && (contentType != null && contentType.contains(Response.APPLICATION_JSON))) {
+        if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             ObjectMapper mapper = new ObjectMapper();
             try {
                 Scope scope = mapper.readValue(content, Scope.class);

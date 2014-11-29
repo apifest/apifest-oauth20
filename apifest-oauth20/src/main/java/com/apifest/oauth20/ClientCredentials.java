@@ -187,8 +187,8 @@ public class ClientCredentials implements Serializable {
         creds.secret = (String) map.get("secret");
         creds.uri = (String) map.get("uri");
         creds.descr = (String) map.get("descr");
-        creds.type = ((Integer) map.get("type")).intValue();
-        creds.status = ((Integer) map.get("status")).intValue();
+        creds.type = ((Number) map.get("type")).intValue();
+        creds.status = ((Number) map.get("status")).intValue();
         creds.created = (Long) map.get("created");
         creds.scope = (String) map.get("scope");
         return creds;
