@@ -34,7 +34,7 @@ public final class Response {
     public static final String CANNOT_REGISTER_APP = "{\"error\": \"cannot issue client_id and client_secret\"}";
     public static final String NAME_OR_SCOPE_OR_URI_IS_NULL = "{\"error\": \"name, scope or redirect_uri is missing or invalid\"}";
     public static final String SCOPE_NOT_EXIST = "{\"error\": \"scope does not exist\"}";
-    public static final String INVALID_CLIENT_ID = "{\"error\": \"invalid client_id\"}";
+    public static final String INVALID_CLIENT_ID = "{\"error\": \"invalid client_id/client_secret\"}";
     public static final String INVALID_CLIENT_CREDENTIALS = "{\"error\": \"invalid client_id/client_secret\"}";
     public static final String RESPONSE_TYPE_NOT_SUPPORTED = "{\"error\": \"unsupported_response_type\"}";
     public static final String INVALID_REDIRECT_URI = "{\"error\": \"invalid redirect_uri\"}";
