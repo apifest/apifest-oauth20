@@ -64,6 +64,7 @@ public final class OAuthServer {
     private static String redisMaster;
     private static String apifestOAuth20Nodes;
     private static URLClassLoader jarClassLoader;
+    private static String hazelcastPassword;
 
     // expires_in in sec for grant type password
     public static final int DEFAULT_PASSWORD_EXPIRES_IN = 900;
@@ -259,6 +260,8 @@ public final class OAuthServer {
             }
             setHostAndPort((String) props.get("oauth20.host"), (String) props.get("oauth20.port"));
             apifestOAuth20Nodes = props.getProperty("apifest-oauth20.nodes");
+            // dev-pass is the default password used in Hazelcast
+            hazelcastPassword = props.getProperty("hazelcast.password", "dev-pass");
         } catch (IOException e) {
             log.error("Cannot load properties file", e);
         }
@@ -327,4 +330,7 @@ public final class OAuthServer {
         return customGrantTypeHandler;
     }
 
+    public static String getHazelcastPassword() {
+        return hazelcastPassword;
+    }
 }

@@ -42,6 +42,7 @@ oauth20.database=
 db_host=
 redis.sentinels=
 redis.master=
+hazelcast.password=
 apifest-oauth20.nodes=
 custom.classes.jar=
 user.authenticate.class=
@@ -81,6 +82,10 @@ If Redis is used, define Redis sentinels list(as comma-separated list) in the fo
 You can define the name of Redis master in the following property in the apifest-oauth.properties file:
 
 ***redis.master***
+
+If you use Hazelcast as a storage, you can set a password using the following property (otherwise the default Hazelcast password - dev-pass will be used):
+
+***hazelcast.password***
 
 In order to run ApiFest OAuth20 distributed storage, you need to setup all ApiFest OAuth20 nodes (as comma-separated list of IPs).
 

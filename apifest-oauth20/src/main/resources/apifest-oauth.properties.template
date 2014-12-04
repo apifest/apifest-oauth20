@@ -9,3 +9,4 @@ custom.classes.jar=
 user.authenticate.class=
 custom.grant_type=
 custom.grant_type.class=
+hazelcast.password=
