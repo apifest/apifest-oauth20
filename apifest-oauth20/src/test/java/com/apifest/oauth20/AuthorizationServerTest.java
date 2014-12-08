@@ -742,9 +742,13 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
+        willReturn("basic").given(authServer.scopeService).getValidScopeByScope(anyString(), anyString());
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
-        willReturn("basic").given(authServer.scopeService).getValidScope("basic", clientId);
         willReturn(true).given(authServer).isActiveClientId(clientId);
 
         // WHEN
@@ -853,9 +857,13 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willReturn(true).given(authServer).isActiveClientId(clientId);
-        willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+        willReturn("basic").given(authServer.scopeService).getValidScopeByScope(null, "basic");
         willReturn(1800).given(authServer.scopeService).getExpiresIn(TokenRequest.CLIENT_CREDENTIALS, "basic");
 
         // WHEN
@@ -1132,9 +1140,13 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willReturn(true).given(authServer).isActiveClientId(clientId);
-        willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+        willReturn("basic").given(authServer.scopeService).getValidScopeByScope(null, "basic");
 
         // WHEN
         AccessToken accessToken = authServer.issueAccessToken(req);
@@ -1151,9 +1163,13 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willReturn(true).given(authServer).isActiveClientId(clientId);
-        willReturn(null).given(authServer.scopeService).getValidScope("ext", clientId);
+        willReturn(null).given(authServer.scopeService).getValidScopeByScope("ext", clientId);
 
         // WHEN
         String errorMsg = null;

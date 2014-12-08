@@ -64,6 +64,7 @@ public class PersistenceTransformations {
             clientCredentials.setStatus(persistentClientCredentials.getStatus());
             clientCredentials.setType(persistentClientCredentials.getType());
             clientCredentials.setCreated(persistentClientCredentials.getCreated());
+            clientCredentials.setApplicationDetails(persistentClientCredentials.getApplicationDetails());
         }
         return clientCredentials;
     }
@@ -79,6 +80,7 @@ public class PersistenceTransformations {
         persistentClientCredentials.setStatus(clientCredentials.getStatus());
         persistentClientCredentials.setType(clientCredentials.getType());
         persistentClientCredentials.setCreated(clientCredentials.getCreated());
+        persistentClientCredentials.setApplicationDetails(clientCredentials.getApplicationDetails());
         return persistentClientCredentials;
     }
 

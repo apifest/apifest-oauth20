@@ -76,13 +76,13 @@ public class AuthorizationServer {
                         // if a client app with this client_id already registered
                         if (db.findClientCredentials(appInfo.getId()) == null) {
                             creds = new ClientCredentials(appInfo.getName(), appInfo.getScope(), appInfo.getDescription(),
-                                appInfo.getRedirectUri(), appInfo.getId(), appInfo.getSecret());
+                                appInfo.getRedirectUri(), appInfo.getId(), appInfo.getSecret(), appInfo.getApplicationDetails());
                         } else {
                             throw new OAuthException(Response.ALREADY_REGISTERED_APP, HttpResponseStatus.BAD_REQUEST);
                         }
                     } else {
                         creds = new ClientCredentials(appInfo.getName(), appInfo.getScope(), appInfo.getDescription(),
-                                appInfo.getRedirectUri());
+                                appInfo.getRedirectUri(), appInfo.getApplicationDetails());
                     }
                     db.storeClientCredentials(creds);
                 } else {
@@ -194,7 +194,8 @@ public class AuthorizationServer {
                 throw new OAuthException(Response.INVALID_REFRESH_TOKEN, HttpResponseStatus.BAD_REQUEST);
             }
         } else if (TokenRequest.CLIENT_CREDENTIALS.equals(tokenRequest.getGrantType())) {
-            String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());
+            ClientCredentials clientCredentialsials = db.findClientCredentials(tokenRequest.getClientId());
+            String scope = scopeService.getValidScopeByScope(tokenRequest.getScope(), clientCredentialsials.getScope());
             if (scope == null) {
                 throw new OAuthException(Response.SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
             }
@@ -202,6 +203,7 @@ public class AuthorizationServer {
             accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.CLIENT_CREDENTIALS, scope),
                     scope, false);
             accessToken.setClientId(tokenRequest.getClientId());
+            accessToken.setDetails(clientCredentialsials.getApplicationDetails());
             db.storeAccessToken(accessToken);
         } else if (TokenRequest.PASSWORD.equals(tokenRequest.getGrantType())) {
             String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());

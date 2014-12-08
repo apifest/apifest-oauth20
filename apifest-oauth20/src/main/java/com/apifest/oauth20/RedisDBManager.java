@@ -85,6 +85,7 @@ public class RedisDBManager implements DBManager {
         credentials.put("status", String.valueOf(clientCreds.getStatus()));
         credentials.put("created", String.valueOf(clientCreds.getCreated()));
         credentials.put("scope", String.valueOf(clientCreds.getScope()));
+        credentials.put("details", JSONUtils.convertMapToJSON(clientCreds.getApplicationDetails()));
         jedis.hmset("cc:" + clientCreds.getId(), credentials);
         pool.returnResource(jedis);
     }
