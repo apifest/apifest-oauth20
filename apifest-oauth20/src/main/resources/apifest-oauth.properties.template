@@ -1,7 +1,7 @@
 oauth20.host=
 oauth20.port=
 oauth20.database=
-db_host=
+db_uri=
 redis.sentinels=
 redis.master=
 apifest-oauth20.nodes=
