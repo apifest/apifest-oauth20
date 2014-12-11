@@ -17,6 +17,7 @@
 package com.apifest.oauth20.persistence.hazelcast;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  *
@@ -48,6 +49,8 @@ public class PersistentClientCredentials implements Serializable {
 
     // 1 - active, 0 - not active
     private int status;
+
+    private Map<String, String> applicationDetails = null;
 
     public String getId() {
         return id;
@@ -119,6 +122,14 @@ public class PersistentClientCredentials implements Serializable {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public Map<String, String> getApplicationDetails() {
+        return applicationDetails;
+    }
+
+    public void setApplicationDetails(Map<String, String> applicationDetails) {
+        this.applicationDetails = applicationDetails;
     }
 
 }

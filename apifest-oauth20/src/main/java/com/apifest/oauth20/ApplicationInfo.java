@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
@@ -61,6 +62,9 @@ public class ApplicationInfo implements Serializable {
 
     @JsonProperty("client_id")
     private String id = "";
+
+    @JsonProperty("application_details")
+    private Map<String, String> applicationDetails = null;
 
     @JsonProperty("client_secret")
     private String secret = "";
@@ -127,6 +131,14 @@ public class ApplicationInfo implements Serializable {
 
     public void setSecret(String secret) {
         this.secret = secret;
+    }
+
+    public Map<String, String> getApplicationDetails() {
+        return applicationDetails;
+    }
+
+    public void setApplicationDetails(Map<String, String> applicationDetails) {
+        this.applicationDetails = applicationDetails;
     }
 
     public boolean valid() {

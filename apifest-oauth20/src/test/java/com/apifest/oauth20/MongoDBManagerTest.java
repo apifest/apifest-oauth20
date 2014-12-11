@@ -56,7 +56,7 @@ public class MongoDBManagerTest {
     @Test
     public void when_insert_client_credentials_invoke_insert_object() throws Exception {
         // GIVEN
-        ClientCredentials cred = new ClientCredentials("Test", "basic", "descr", "http://example.com");
+        ClientCredentials cred = new ClientCredentials("Test", "basic", "descr", "http://example.com", null);
         willDoNothing().given(dbManager).storeObject(cred, MongoDBManager.CLIENTS_COLLECTION_NAME);
 
         // WHEN
@@ -69,7 +69,7 @@ public class MongoDBManagerTest {
     @Test
     public void when_insert_client_credentials_invoke_insert_on_collection() throws Exception {
         // GIVEN
-        ClientCredentials cred = new ClientCredentials("Test", "basic", "descr", "http://example.com");
+        ClientCredentials cred = new ClientCredentials("Test", "basic", "descr", "http://example.com", null);
         given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
 
         // WHEN
@@ -82,7 +82,7 @@ public class MongoDBManagerTest {
     @Test
     public void when_find_client_credentials_by_id_invoke_find_objectby_id() throws Exception {
         // GIVEN
-        ClientCredentials cred = new ClientCredentials("Test", "basic", "descr", "http://example.com");
+        ClientCredentials cred = new ClientCredentials("Test", "basic", "descr", "http://example.com", null);
         BSONObject bson = mock(BSONObject.class);
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("name", "Test App");
@@ -105,7 +105,7 @@ public class MongoDBManagerTest {
 
     @Test
     public void when_find_object_by_id_invoke_find_on_collection() throws Exception {
-        ClientCredentials cred = new ClientCredentials("Test", "basic", "descr", "http://example.com");
+        ClientCredentials cred = new ClientCredentials("Test", "basic", "descr", "http://example.com", null);
         DBCursor cursor = mock(DBCursor.class);
         given(coll.find(any(DBObject.class))).willReturn(cursor);
         given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
@@ -121,7 +121,7 @@ public class MongoDBManagerTest {
     @Test
     public void when_no_object_found_find_by_id_return_null() throws Exception {
         // GIVEN
-        ClientCredentials cred = new ClientCredentials("Test", "basic", "descr", "http://example.com");
+        ClientCredentials cred = new ClientCredentials("Test", "basic", "descr", "http://example.com", null);
         willReturn(null).given(dbManager).findObjectById(cred.getId(), MongoDBManager.ID_NAME,
                 MongoDBManager.CLIENTS_COLLECTION_NAME);
 
@@ -135,7 +135,7 @@ public class MongoDBManagerTest {
     @Test
     public void when_json_contains_id_invoke_constructDbId() throws Exception {
         // GIVEN
-        ClientCredentials cred = new ClientCredentials("Test", "basic", "descr", "http://example.com");
+        ClientCredentials cred = new ClientCredentials("Test", "basic", "descr", "http://example.com", null);
         given(db.getCollection(MongoDBManager.CLIENTS_COLLECTION_NAME)).willReturn(coll);
 
         // WHEN

@@ -74,7 +74,7 @@ public class HttpRequestHandlerTest {
         HttpRequest req = mock(HttpRequest.class);
         given(req.getUri()).willReturn("http://example.com/oauth20/register?app_name=TestDemoApp");
         AuthorizationServer auth = mock(AuthorizationServer.class);
-        ClientCredentials creds = new ClientCredentials("TestDemoApp", "basic", "descr", "http://example.com");
+        ClientCredentials creds = new ClientCredentials("TestDemoApp", "basic", "descr", "http://example.com", null);
         given(auth.issueClientCredentials(req)).willReturn(creds);
         handler.auth = auth;
 
