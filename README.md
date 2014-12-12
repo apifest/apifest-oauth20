@@ -39,7 +39,7 @@ Here is a template of the apifest-oauth.properties file:
 oauth20.host=
 oauth20.port=
 oauth20.database=
-db_host=
+db_uri=
 redis.sentinels=
 redis.master=
 hazelcast.password=
@@ -69,9 +69,15 @@ You can define the type of the DB to be used (by default MongoDB is used) - vali
 
 * **Setup DB host (MongoDB)**
 
-If MongoDB is used, define the host of the database in the following property in the apifest-oauth.properties file:
+If MongoDB is used, define the mongo URI string in the following property in the apifest-oauth.properties file:
 
-***db_host***
+***db_uri***
+
+e.g.
+
+```db_uri = mongodb://host1:port1,host2:port2,...,hostN:portN/database?replicaSet=my_replica```
+
+Unless overridden, the following default values are set for the connection: ```connectTimeoutMS=2```
 
 * **Setup Redis**
 

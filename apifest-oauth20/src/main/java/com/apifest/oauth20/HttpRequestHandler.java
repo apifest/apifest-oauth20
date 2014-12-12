@@ -191,7 +191,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected HttpResponse handleToken(HttpRequest request) {
         HttpResponse response = null;
         String contentType = request.headers().get(HttpHeaders.Names.CONTENT_TYPE);
-        if (contentType.contains(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
+        if (contentType != null && contentType.contains(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
             try {
                 AccessToken accessToken = auth.issueAccessToken(request);
                 if (accessToken != null) {

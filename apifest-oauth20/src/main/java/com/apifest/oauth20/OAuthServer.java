@@ -254,7 +254,7 @@ public final class OAuthServer {
             database = props.getProperty("oauth20.database");
             redisSentinels = props.getProperty("redis.sentinels");
             redisMaster = props.getProperty("redis.master");
-            dbHost = props.getProperty("db_host");
+            dbHost = props.getProperty("db_uri");
             if (dbHost == null || dbHost.length() == 0) {
                 dbHost = "localhost";
             }

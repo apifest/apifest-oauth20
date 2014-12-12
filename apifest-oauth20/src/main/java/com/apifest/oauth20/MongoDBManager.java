@@ -71,7 +71,7 @@ public class MongoDBManager implements DBManager {
     protected static final String USER_ID = "userId";
 
     public MongoDBManager() {
-        db = MongoUtil.getMongoClient().getDB("apifest");
+        db = MongoUtil.getDB();
     }
 
     /*
