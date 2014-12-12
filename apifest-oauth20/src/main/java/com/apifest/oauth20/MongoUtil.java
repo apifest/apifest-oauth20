@@ -46,8 +46,7 @@ public class MongoUtil {
                 final MongoClientURI mongoClientURI  = new MongoClientURI(OAuthServer.getDbHost(), options);
                 mongoClient = new MongoClient(mongoClientURI);
 
-                if (mongoClientURI.getDatabase() != null)
-                {
+                if (mongoClientURI.getDatabase() != null) {
                     database = mongoClientURI.getDatabase();
                 }
             } catch (UnknownHostException e) {

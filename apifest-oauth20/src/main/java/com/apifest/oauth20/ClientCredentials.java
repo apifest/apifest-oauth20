@@ -67,7 +67,10 @@ public class ClientCredentials implements Serializable {
     @JsonIgnore
     private int status;
 
-    public ClientCredentials(String appName, String scope, String description, String uri) {
+    @JsonIgnore
+    private Map<String, String> applicationDetails = null;
+
+    public ClientCredentials(String appName, String scope, String description, String uri, Map<String, String> applicationDetails) {
         this.name = appName;
         this.scope = scope;
         this.descr = (description != null)? description : "";
@@ -76,9 +79,11 @@ public class ClientCredentials implements Serializable {
         this.secret = generateClientSecret();
         this.created = (new Date()).getTime();
         this.status = INACTIVE_STATUS;
+        this.applicationDetails = applicationDetails;
     }
 
-    public ClientCredentials(String appName, String scope, String description, String uri, String clientId, String clientSecret) {
+    public ClientCredentials(String appName, String scope, String description, String uri, String clientId, String clientSecret,
+                             Map<String, String> applicationDetails) {
         this.name = appName;
         this.scope = scope;
         this.descr = (description != null)? description : "";
@@ -87,6 +92,7 @@ public class ClientCredentials implements Serializable {
         this.secret = clientSecret;
         this.created = (new Date()).getTime();
         this.status = INACTIVE_STATUS;
+        this.applicationDetails = applicationDetails;
     }
 
     public ClientCredentials() {
@@ -165,6 +171,14 @@ public class ClientCredentials implements Serializable {
         this.scope = scope;
     }
 
+    public Map<String, String> getApplicationDetails() {
+        return applicationDetails;
+    }
+
+    public void setApplicationDetails(Map<String, String> applicationDetails) {
+        this.applicationDetails = applicationDetails;
+    }
+
     private String generateClientId() {
         return RandomGenerator.generateShortRandomString();
     }
@@ -187,8 +201,8 @@ public class ClientCredentials implements Serializable {
         creds.secret = (String) map.get("secret");
         creds.uri = (String) map.get("uri");
         creds.descr = (String) map.get("descr");
-        creds.type = ((Number) map.get("type")).intValue();
-        creds.status = ((Number) map.get("status")).intValue();
+        creds.type = ((Integer) map.get("type")).intValue();
+        creds.status = ((Integer) map.get("status")).intValue();
         creds.created = (Long) map.get("created");
         creds.scope = (String) map.get("scope");
         return creds;
@@ -205,6 +219,7 @@ public class ClientCredentials implements Serializable {
         creds.status = Integer.valueOf(map.get("status"));
         creds.created = Long.valueOf(map.get("created"));
         creds.scope = map.get("scope");
+        creds.applicationDetails = JSONUtils.convertStringToMap(map.get("details"));
         return creds;
     }
 

@@ -76,7 +76,7 @@ public class HazelcastDBManager implements DBManager {
     static {
         // REVISIT: Hazelcast configuration
         Config config = createConfiguration();
-        GroupConfig groupConfig = new GroupConfig("apifest-oauth20", "apifest-oauth20-pass");
+        GroupConfig groupConfig = new GroupConfig("apifest-oauth20", OAuthServer.getHazelcastPassword());
         config.setGroupConfig(groupConfig);
         config.setMapConfigs(createMapConfigs());
         hazelcastClient = Hazelcast.newHazelcastInstance(config);

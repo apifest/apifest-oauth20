@@ -16,6 +16,9 @@
 
 package com.apifest.oauth20;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpStatus;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -742,9 +745,13 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
+        willReturn("basic").given(authServer.scopeService).getValidScopeByScope(anyString(), anyString());
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
-        willReturn("basic").given(authServer.scopeService).getValidScope("basic", clientId);
         willReturn(true).given(authServer).isActiveClientId(clientId);
 
         // WHEN
@@ -853,9 +860,13 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willReturn(true).given(authServer).isActiveClientId(clientId);
-        willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+        willReturn("basic").given(authServer.scopeService).getValidScopeByScope(null, "basic");
         willReturn(1800).given(authServer.scopeService).getExpiresIn(TokenRequest.CLIENT_CREDENTIALS, "basic");
 
         // WHEN
@@ -1132,9 +1143,13 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willReturn(true).given(authServer).isActiveClientId(clientId);
-        willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+        willReturn("basic").given(authServer.scopeService).getValidScopeByScope(null, "basic");
 
         // WHEN
         AccessToken accessToken = authServer.issueAccessToken(req);
@@ -1151,9 +1166,13 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willReturn(true).given(authServer).isActiveClientId(clientId);
-        willReturn(null).given(authServer.scopeService).getValidScope("ext", clientId);
+        willReturn(null).given(authServer.scopeService).getValidScopeByScope("ext", clientId);
 
         // WHEN
         String errorMsg = null;
@@ -1647,5 +1666,32 @@ public class AuthorizationServerTest {
         // WHEN
         // THEN
     }
+
+    @Test
+    public void when_issuing_application_token_it_should_have_application_details() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String clientId = "203598599234220";
+        String clientSecret = "f754cb0cd78c4c36fa3c1c0325ef72bb4a011373";
+        String content = "grant_type=" + TokenRequest.CLIENT_CREDENTIALS + "&client_id=" +
+                clientId + "&client_secret=" + clientSecret;
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        given(req.getContent()).willReturn(buf);
+        willReturn(true).given(authServer).isActiveClient(clientId, clientSecret);
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        Map<String, String> applicationDetails = new HashMap<String, String>();
+        applicationDetails.put("my", "data");
+        clientCredentials.setApplicationDetails(applicationDetails );
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
+        willReturn("basic").given(authServer.scopeService).getValidScopeByScope(anyString(), anyString());
+
+        // WHEN
+        AccessToken accessToken = authServer.issueAccessToken(req);
+
+        // THEN
+        assertTrue(accessToken.getDetails() != null);
+   }
 }
 

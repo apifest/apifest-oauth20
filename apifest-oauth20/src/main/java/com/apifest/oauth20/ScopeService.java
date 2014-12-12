@@ -149,18 +149,23 @@ public class ScopeService {
      * @return the scope if it is valid, otherwise returns null
      */
     public String getValidScope(String scope, String clientId) {
-        String validScope = null;
         ClientCredentials creds = DBManagerFactory.getInstance().findClientCredentials(clientId);
-        if(creds != null) {
-            if(scope == null || scope.length() == 0) {
-                // get client scope
-                validScope = creds.getScope();
-            } else {
-                // check that scope exists and is allowed for that client app
-                boolean scopeOk = scopeAllowed(scope, creds.getScope());
-                if(scopeOk) {
-                    validScope = scope;
-                }
+        if(creds == null) {
+            return null;
+        }
+        return getValidScopeByScope(scope, creds.getScope());
+    }
+
+    public String getValidScopeByScope(String scope, String storedScope) {
+        String validScope = null;
+        if(scope == null || scope.length() == 0) {
+            // get client scope
+            validScope = storedScope;
+        } else {
+            // check that scope exists and is allowed for that client app
+            boolean scopeOk = scopeAllowed(scope, storedScope);
+            if(scopeOk) {
+                validScope = scope;
             }
         }
         return validScope;

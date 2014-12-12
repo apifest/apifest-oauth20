@@ -1,7 +1,7 @@
 oauth20.host=
 oauth20.port=
 oauth20.database=
-db_uri=
+db_host=
 redis.sentinels=
 redis.master=
 apifest-oauth20.nodes=
@@ -9,3 +9,4 @@ custom.classes.jar=
 user.authenticate.class=
 custom.grant_type=
 custom.grant_type.class=
+hazelcast.password=
