@@ -40,6 +40,7 @@ public class ClientCredentialsTest {
         map.put("created", 1365191565324l);
         map.put("type", 1);
         map.put("status", 1);
+        map.put("applicationDetails", "{\"my\":\"param\"}");
 
         // WHEN
         ClientCredentials creds = ClientCredentials.loadFromMap(map);

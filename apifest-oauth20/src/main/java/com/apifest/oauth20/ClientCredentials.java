@@ -205,6 +205,7 @@ public class ClientCredentials implements Serializable {
         creds.status = ((Integer) map.get("status")).intValue();
         creds.created = (Long) map.get("created");
         creds.scope = (String) map.get("scope");
+        creds.applicationDetails = JSONUtils.convertStringToMap(map.get("applicationDetails").toString());
         return creds;
     }
 

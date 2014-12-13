@@ -91,6 +91,8 @@ public class MongoDBManagerTest {
         map.put("created", 1365191565324l);
         map.put("type", 1);
         map.put("status", 1);
+        map.put("applicationDetails", "{\"my\":\"param\"}");
+
         willReturn(map).given(bson).toMap();
         willReturn(bson).given(dbManager).findObjectById(cred.getId(), MongoDBManager.ID_NAME,
                 MongoDBManager.CLIENTS_COLLECTION_NAME);
