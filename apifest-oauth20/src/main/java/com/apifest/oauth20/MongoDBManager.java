@@ -376,7 +376,7 @@ public class MongoDBManager implements DBManager {
      * @see com.apifest.oauth20.DBManager#updateClientAppScope(java.lang.String)
      */
     @Override
-    public boolean updateClientAppScope(String clientId, String scope, String description, Integer status) {
+    public boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails) {
         boolean updated = false;
         DBCollection coll = db.getCollection(CLIENTS_COLLECTION_NAME);
         BasicDBObject query = new BasicDBObject(ID_NAME, clientId);
@@ -391,6 +391,9 @@ public class MongoDBManager implements DBManager {
             }
             if (status != null) {
                 newObject.put("status", status);
+            }
+            if (applicationDetails != null && applicationDetails.size() > 0) {
+                newObject.put("applicationDetails", applicationDetails);
             }
             coll.findAndModify(query, newObject);
             updated = true;

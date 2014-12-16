@@ -322,7 +322,7 @@ public class HazelcastDBManager implements DBManager {
      * @see com.apifest.oauth20.DBManager#updateClientAppScope(java.lang.String)
      */
     @Override
-    public boolean updateClientAppScope(String clientId, String scope, String description, Integer status) {
+    public boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails) {
         PersistentClientCredentials clientCredentials = getClientCredentialsContainer().get(clientId);
         if (scope != null && scope.length() > 0) {
             clientCredentials.setScope(scope);
@@ -332,6 +332,9 @@ public class HazelcastDBManager implements DBManager {
         }
         if (status != null) {
             clientCredentials.setStatus(status);
+        }
+        if (applicationDetails != null) {
+            clientCredentials.setApplicationDetails(applicationDetails);
         }
         getClientCredentialsContainer().put(clientId, clientCredentials);
         return true;

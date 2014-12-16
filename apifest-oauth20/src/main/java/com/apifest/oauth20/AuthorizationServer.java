@@ -344,6 +344,7 @@ public class AuthorizationServer {
             appInfo.setRedirectUri(creds.getUri());
             appInfo.setRegistered(new Date(creds.getCreated()));
             appInfo.setStatus(creds.getStatus());
+            appInfo.setApplicationDetails(creds.getApplicationDetails());
         }
         return appInfo;
     }
@@ -441,7 +442,8 @@ public class AuthorizationServer {
                             }
                         }
                     }
-                    db.updateClientAppScope(clientId, appInfo.getScope(), appInfo.getDescription(), appInfo.getStatus());
+                    db.updateClientApp(clientId, appInfo.getScope(), appInfo.getDescription(), appInfo.getStatus(),
+                                       appInfo.getApplicationDetails());
                 } else {
                     throw new OAuthException(Response.UPDATE_APP_MANDATORY_PARAM_MISSING, HttpResponseStatus.BAD_REQUEST);
                 }
