@@ -20,6 +20,7 @@
 package com.apifest.oauth20;
 
 import java.util.List;
+import java.util.Map;
 
 public interface DBManager {
 
@@ -128,7 +129,7 @@ public interface DBManager {
     Scope findScope(String scopeName);
 
     /**
-     * Updates client application scope, description and status.
+     * Updates client application scope, description, status and details.
      *
      * @param clientId the clientId of the client app
      * @param scope the scope of the client app
@@ -136,7 +137,7 @@ public interface DBManager {
      * @param status the status of the client app
      * @return <code>true</code> if the update is successful, <code>false</code> otherwise
      */
-    boolean updateClientAppScope(String clientId, String scope, String description, Integer status);
+    boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails);
 
     /**
      * Lists all client applications stored in the DB.

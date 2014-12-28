@@ -19,6 +19,7 @@ package com.apifest.oauth20;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Date;
+import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.JsonParseException;
@@ -203,7 +204,10 @@ public class AuthorizationServer {
             accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.CLIENT_CREDENTIALS, scope),
                     scope, false);
             accessToken.setClientId(tokenRequest.getClientId());
-            accessToken.setDetails(clientCredentials.getApplicationDetails());
+            Map<String, String> applicationDetails = clientCredentials.getApplicationDetails();
+            if ((applicationDetails != null) && (applicationDetails.size() > 0)) {
+                accessToken.setDetails(applicationDetails);
+            }
             db.storeAccessToken(accessToken);
         } else if (TokenRequest.PASSWORD.equals(tokenRequest.getGrantType())) {
             String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());
@@ -344,6 +348,7 @@ public class AuthorizationServer {
             appInfo.setRedirectUri(creds.getUri());
             appInfo.setRegistered(new Date(creds.getCreated()));
             appInfo.setStatus(creds.getStatus());
+            appInfo.setApplicationDetails(creds.getApplicationDetails());
         }
         return appInfo;
     }
@@ -441,7 +446,8 @@ public class AuthorizationServer {
                             }
                         }
                     }
-                    db.updateClientAppScope(clientId, appInfo.getScope(), appInfo.getDescription(), appInfo.getStatus());
+                    db.updateClientApp(clientId, appInfo.getScope(), appInfo.getDescription(), appInfo.getStatus(),
+                                       appInfo.getApplicationDetails());
                 } else {
                     throw new OAuthException(Response.UPDATE_APP_MANDATORY_PARAM_MISSING, HttpResponseStatus.BAD_REQUEST);
                 }
