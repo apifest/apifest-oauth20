@@ -18,6 +18,8 @@ package com.apifest.oauth20;
 
 import static org.testng.Assert.*;
 
+import java.util.HashMap;
+
 import org.testng.annotations.Test;
 
 /**
@@ -193,6 +195,19 @@ public class ApplicationInfoTest {
         appInfo.setDescription("descr");
         appInfo.setScope("scope");
         appInfo.setStatus(ClientCredentials.ACTIVE_STATUS);
+
+        // WHEN
+        boolean result = appInfo.validForUpdate();
+
+        // THEN
+        assertTrue(result);
+    }
+
+    @Test
+    public void when_only_application_details_valid_for_update_return_true() throws Exception {
+        // GIVEN
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.setApplicationDetails(new HashMap<String, String>());
 
         // WHEN
         boolean result = appInfo.validForUpdate();
