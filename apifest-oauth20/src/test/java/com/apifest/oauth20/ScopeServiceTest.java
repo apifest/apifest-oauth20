@@ -638,6 +638,53 @@ public class ScopeServiceTest {
     }
 
     @Test
+    public void when_scope_with_no_refreshExpireseIn_set_it_from_the_stored_scope() throws Exception {
+        // GIVEN
+        Scope scope = new Scope();
+        scope.setScope("scope");
+        scope.setDescription("descr");
+        scope.setCcExpiresIn(1800);
+
+        Scope storedScope = new Scope();
+        storedScope.setScope("scope");
+        storedScope.setDescription("descr");
+        storedScope.setCcExpiresIn(1800);
+        storedScope.setPassExpiresIn(900);
+        scope.setRefreshExpiresIn(3600);
+
+        // WHEN
+        service.setScopeEmptyValues(scope, storedScope);
+
+        // THEN
+        assertTrue(scope.getRefreshExpiresIn() == 3600);
+    }
+
+    @Test
+    public void when_scope_with_refreshExpireseIn_do_not_update_it_from_stored_scope() throws Exception {
+        // GIVEN
+        Scope scope = new Scope();
+        scope.setScope("scope");
+        scope.setDescription("descr");
+        scope.setCcExpiresIn(1800);
+        scope.setPassExpiresIn(600);
+        scope.setRefreshExpiresIn(6000);
+
+        Scope storedScope = new Scope();
+        storedScope.setScope("scope");
+        storedScope.setDescription("descr");
+        storedScope.setCcExpiresIn(1800);
+        storedScope.setPassExpiresIn(900);
+        storedScope.setRefreshExpiresIn(3600);
+
+        // WHEN
+        service.setScopeEmptyValues(scope, storedScope);
+
+        // THEN
+        assertTrue(scope.getRefreshExpiresIn() == 6000);
+    }
+
+
+    @Test
     public void when_register_scope_with_space_return_error() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
@@ -801,5 +848,47 @@ public class ScopeServiceTest {
         // THEN
         assertEquals(errorMessage, ScopeService.SCOPE_NOT_EXIST);
         assertEquals(errorStatus, HttpResponseStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void when_scope_with_refresh_expires_in_1800_return_1800() throws Exception {
+        // GIVEN
+        String scopeName = "basic";
+        Scope scope = new Scope();
+        scope.setScope(scopeName);
+        scope.setCcExpiresIn(900);
+        scope.setPassExpiresIn(300);
+        scope.setRefreshExpiresIn(1800);
+        List<Scope> loadedScope = new ArrayList<Scope>();
+        loadedScope.add(scope);
+        willReturn(loadedScope).given(service).loadScopes(scopeName);
+
+        // WHEN
+        int result = service.getExpiresIn("refresh_token", scopeName);
+
+        // THEN
+        assertEquals(result, 1800);
+    }
+
+    @Test
+    public void when_scope_with_no_refresh_expires_in_set_it_from_the_stored_scope() throws Exception {
+        // GIVEN
+        Scope scope = new Scope();
+        scope.setScope("scope");
+        scope.setCcExpiresIn(1800);
+        scope.setPassExpiresIn(900);
+
+        Scope storedScope = new Scope();
+        storedScope.setScope("scope");
+        storedScope.setDescription("descr");
+        storedScope.setCcExpiresIn(1800);
+        storedScope.setPassExpiresIn(900);
+        storedScope.setRefreshExpiresIn(3600);
+
+        // WHEN
+        service.setScopeEmptyValues(scope, storedScope);
+
+        // THEN
+        assertTrue(scope.getRefreshExpiresIn() == 3600);
     }
 }

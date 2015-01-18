@@ -709,20 +709,17 @@ public class AuthorizationServerTest {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
         String refreshToken = "403b510679013ea1813b6fb5f76e7ddfedb8852d9eb8eef73";
-        String content = "grant_type=" + TokenRequest.REFRESH_TOKEN + "&refresh_token="
-                + refreshToken;
+        String content = "grant_type=" + TokenRequest.REFRESH_TOKEN + "&refresh_token=" + refreshToken;
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         String clientId = "203598599234220";
         willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
         willReturn(true).given(authServer).isActiveClientId(clientId);
         AccessToken accessToken = mock(AccessToken.class);
-        willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken)
-                .getToken();
-        willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken,
-                clientId);
-        willDoNothing().given(authServer.db)
-                .updateAccessTokenValidStatus(anyString(), anyBoolean());
+        willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
+        willReturn(refreshToken).given(accessToken).getRefreshToken();
+        willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken, clientId);
+        willDoNothing().given(authServer.db).updateAccessTokenValidStatus(anyString(), anyBoolean());
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
 
         // WHEN
@@ -1644,8 +1641,77 @@ public class AuthorizationServerTest {
     @Test
     public void when_update_client_app_check_client_id_exists() throws Exception {
         // GIVEN
+        String clientId = "203598599234220";
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT,
+                HttpRequestHandler.APPLICATION_URI + "/" + clientId);
+        req.headers().add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        String content = "{\"status\":\"1\"}";
+        req.setContent(ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
+        willReturn(true).given(authServer).isExistingClient(clientId);
+
         // WHEN
+        authServer.updateClientApp(req, clientId);
+
         // THEN
+        verify(authServer).isExistingClient(clientId);
+    }
+
+    @Test
+    public void when_issue_access_token_with_refresh_token_use_the_same_refresh_token() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String refreshToken = "403b510679013ea1813b6fb5f76e7ddfedb8852d9eb8eef73";
+        String content = "grant_type=" + TokenRequest.REFRESH_TOKEN + "&refresh_token=" + refreshToken;
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        given(req.getContent()).willReturn(buf);
+        String clientId = "203598599234220";
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isActiveClientId(clientId);
+        AccessToken accessToken = mock(AccessToken.class);
+        willReturn("basic").given(accessToken).getScope();
+        willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
+        willReturn(refreshToken).given(accessToken).getRefreshToken();
+        willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken, clientId);
+        willDoNothing().given(authServer.db).updateAccessTokenValidStatus(anyString(), anyBoolean());
+        willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
+        willReturn(900).given(authServer.scopeService).getExpiresIn(TokenRequest.PASSWORD, "basic");
+
+        // WHEN
+        AccessToken newAccessToken = authServer.issueAccessToken(req);
+
+        // THEN
+        assertEquals(newAccessToken.getRefreshToken(), refreshToken);
+    }
+
+    @Test
+    public void when_refresh_token_expired_invoke_update_access_token_expired_status() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String refreshToken = "403b510679013ea1813b6fb5f76e7ddfedb8852d9eb8eef73";
+        String content = "grant_type=" + TokenRequest.REFRESH_TOKEN + "&refresh_token=" + refreshToken;
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        given(req.getContent()).willReturn(buf);
+
+        String clientId = "203598599234220";
+        willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
+        willReturn(true).given(authServer).isActiveClientId(clientId);
+
+        AccessToken accessToken = mock(AccessToken.class);
+        willReturn("basic").given(accessToken).getScope();
+        willReturn("02d31ca13a0e448802b063ca2e16010b74b0e96ce9e05e953e").given(accessToken).getToken();
+        willReturn(refreshToken).given(accessToken).getRefreshToken();
+        willReturn(accessToken).given(authServer.db).findAccessTokenByRefreshToken(refreshToken, clientId);
+        willDoNothing().given(authServer.db).removeAccessToken(anyString());
+        willReturn(true).given(accessToken).refreshTokenExpired();
+
+        // WHEN
+        try {
+            authServer.issueAccessToken(req);
+        } catch (OAuthException e) {
+            // do nothing
+        }
+
+        // THEN
+        verify(authServer.db).removeAccessToken(accessToken.getToken());
     }
 }
-

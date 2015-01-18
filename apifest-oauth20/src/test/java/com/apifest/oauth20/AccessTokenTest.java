@@ -25,6 +25,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -72,7 +73,7 @@ public class AccessTokenTest {
     @Test
     public void when_create_access_token_add_refresh_token() throws Exception {
         // WHEN
-        AccessToken accessToken = new AccessToken("Bearer", "599", "basic");
+        AccessToken accessToken = new AccessToken("Bearer", "599", "basic", "1800");
 
         // THEN
         assertNotNull(accessToken.getRefreshToken());
@@ -82,7 +83,7 @@ public class AccessTokenTest {
     public void when_create_access_token_for_client_credentials_do_not_add_refresh_token()
             throws Exception {
         // WHEN
-        AccessToken accessToken = new AccessToken("Bearer", "599", "basic", false);
+        AccessToken accessToken = new AccessToken("Bearer", "599", "basic", false, "1800");
 
         // THEN
         assert ("".equals(accessToken.getRefreshToken()));
@@ -92,7 +93,7 @@ public class AccessTokenTest {
     public void when_created_plus_expiresIn_greater_then_current_time_return_true()
             throws Exception {
         // GIVEN
-        AccessToken accessToken = spy(new AccessToken("Bearer", "899", "basic", false));
+        AccessToken accessToken = spy(new AccessToken("Bearer", "899", "basic", false, "1800"));
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date(System.currentTimeMillis()));
         cal.add(Calendar.MINUTE, -16);
@@ -110,7 +111,7 @@ public class AccessTokenTest {
     @Test
     public void when_created_plus_expiresIn_less_then_current_time_return_false() throws Exception {
         // GIVEN
-        AccessToken accessToken = spy(new AccessToken("Bearer", "899", "basic", false));
+        AccessToken accessToken = spy(new AccessToken("Bearer", "899", "basic", false, "1800"));
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date(System.currentTimeMillis()));
         cal.add(Calendar.MINUTE, -14);
@@ -125,4 +126,127 @@ public class AccessTokenTest {
         assertFalse(expired);
     }
 
+    @Test
+    public void when_refresh_token_duration_less_than_now_return_false() throws Exception {
+        // GIVEN
+        AccessToken accessToken = spy(new AccessToken("Bearer", "300", "basic", true, "1800"));
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date(System.currentTimeMillis()));
+        cal.add(Calendar.MINUTE, -5);
+        Long created = cal.getTimeInMillis();
+        willReturn(created).given(accessToken).getCreated();
+
+        // WHEN
+        boolean expired = accessToken.refreshTokenExpired();
+
+        // THEN
+        assertFalse(expired);
+    }
+
+    @Test
+    public void when_refresh_token_duration_greater_than_now_return_true() throws Exception {
+        // GIVEN
+        AccessToken accessToken = spy(new AccessToken("Bearer", "300", "basic", true, "600"));
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date(System.currentTimeMillis()));
+        cal.add(Calendar.MINUTE, -11);
+        Long created = cal.getTimeInMillis();
+        willReturn(created).given(accessToken).getCreated();
+
+        // WHEN
+        boolean expired = accessToken.refreshTokenExpired();
+
+        // THEN
+        assertTrue(expired);
+    }
+
+    @Test
+    public void when_no_refresh_expires_in_set_it_to_expires_in() throws Exception {
+        // WHEN
+        AccessToken accessToken = new AccessToken("Bearer", "300", "basic", null);
+
+        // THEN
+       assertTrue(accessToken.getRefreshExpiresIn() == accessToken.getExpiresIn());
+    }
+
+    @Test
+    public void when_no_refresh_expires_in_with_create_refresh_token_true_set_it_to_expires_in() throws Exception {
+        // WHEN
+        AccessToken accessToken = new AccessToken("Bearer", "300", "basic", true, null);
+
+        // THEN
+       assertTrue(accessToken.getRefreshExpiresIn() == accessToken.getExpiresIn());
+    }
+
+    @Test
+    public void when_no_refresh_expires_in_with_predefined_refresh_token_true_set_it_to_expires_in() throws Exception {
+        // WHEN
+        AccessToken accessToken = new AccessToken("Bearer", "300", "basic", "refreshtoken", null);
+
+        // THEN
+       assertTrue(accessToken.getRefreshExpiresIn() == accessToken.getExpiresIn());
+    }
+
+    @Test
+    public void when_refresh_expires_in_empty_with_predefined_refresh_token_true_set_it_to_expires_in() throws Exception {
+        // WHEN
+        AccessToken accessToken = new AccessToken("Bearer", "300", "basic", "refreshtoken", "");
+
+        // THEN
+       assertTrue(accessToken.getRefreshExpiresIn() == accessToken.getExpiresIn());
+    }
+
+    @Test
+    public void when_refresh_expires_in_not_empty_with_predefined_refresh_token_true_use_that_value() throws Exception {
+        // WHEN
+        AccessToken accessToken = new AccessToken("Bearer", "300", "basic", "refreshtoken", "1800");
+
+        // THEN
+       assertTrue(accessToken.getRefreshExpiresIn() == "1800");
+    }
+
+
+    @Test
+    public void load_access_token_from_string_map_without_refresh_expires_in() throws Exception {
+        // GIVEN
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("token", "60c7addaadabdada583950401f998c1df9ed6e4d5da637eb914a3dcbe0b3cff0");
+        map.put("refreshToken", "b986032feac2475839ec0264c2a71b20609cabcc1ae15f8184f5538ff6f4d2bb");
+        map.put("expiresIn", "300");
+        map.put("type", "Bearer");
+        map.put("scope", "basic");
+        map.put("valid", "true");
+        map.put("clientId", "b9db6d84dc98a895035e68f972e30503d3c724c8");
+        map.put("codeId", "");
+        map.put("userId", "3534543");
+        map.put("created", "1421267589868");
+
+        // WHEN
+        AccessToken accessToken = AccessToken.loadFromStringMap(map);
+
+        // THEN
+        assertTrue(accessToken.getExpiresIn() == accessToken.getRefreshExpiresIn());
+    }
+
+    @Test
+    public void load_access_token_from_map_without_refresh_expires_in() throws Exception {
+        // GIVEN
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("token", "60c7addaadabdada583950401f998c1df9ed6e4d5da637eb914a3dcbe0b3cff0");
+        map.put("refreshToken", "b986032feac2475839ec0264c2a71b20609cabcc1ae15f8184f5538ff6f4d2bb");
+        map.put("expiresIn", "300");
+        map.put("type", "Bearer");
+        map.put("scope", "basic");
+        map.put("valid", true);
+        map.put("clientId", "b9db6d84dc98a895035e68f972e30503d3c724c8");
+        map.put("codeId", "");
+        map.put("userId", "3534543");
+        map.put("created", 1421267589868L);
+
+        // WHEN
+        AccessToken accessToken = AccessToken.loadFromMap(map);
+
+        // THEN
+        assertTrue(accessToken.getExpiresIn() == accessToken.getRefreshExpiresIn());
+    }
 }
