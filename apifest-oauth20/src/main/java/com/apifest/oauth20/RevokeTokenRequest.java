@@ -32,11 +32,9 @@ public class RevokeTokenRequest {
 
     protected static final String ACCESS_TOKEN = "access_token";
     protected static final String CLIENT_ID = "client_id";
-    protected static final String CLIENT_SECRET = "client_secret";
 
     private String accessToken;
     private String clientId;
-    private String clientSecret;
 
     public RevokeTokenRequest(HttpRequest request) {
         String content = request.getContent().toString(CharsetUtil.UTF_8);
@@ -45,7 +43,6 @@ public class RevokeTokenRequest {
             JsonObject jsonObj= parser.parse(content).getAsJsonObject();
             this.accessToken = (jsonObj.get(ACCESS_TOKEN) != null) ? jsonObj.get(ACCESS_TOKEN).getAsString() : null;
             this.clientId = (jsonObj.get(CLIENT_ID) != null) ? jsonObj.get(CLIENT_ID).getAsString() : null;
-            this.clientSecret = (jsonObj.get(CLIENT_SECRET) != null) ? jsonObj.get(CLIENT_SECRET).getAsString() : null;
         } catch (JsonSyntaxException e) {
             // do nothing
         }
@@ -67,14 +64,6 @@ public class RevokeTokenRequest {
         this.clientId = clientId;
     }
 
-    public String getClientSecret() {
-        return clientSecret;
-    }
-
-    public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
-    }
-
     protected void checkMandatoryParams() throws OAuthException {
         if (accessToken == null || accessToken.isEmpty()) {
             throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, ACCESS_TOKEN),
@@ -82,10 +71,6 @@ public class RevokeTokenRequest {
         }
         if (clientId == null || clientId.isEmpty()) {
             throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CLIENT_ID),
-                    HttpResponseStatus.BAD_REQUEST);
-        }
-        if (clientSecret == null || clientSecret.isEmpty()) {
-            throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CLIENT_SECRET),
                     HttpResponseStatus.BAD_REQUEST);
         }
     }
