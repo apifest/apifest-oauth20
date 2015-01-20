@@ -954,7 +954,7 @@ public class AuthorizationServerTest {
             "\"client_id\":" + clientId + ",\"client_secret\":" + clientSecret + "}";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
-        willReturn(true).given(authServer).isValidClientCredentials(clientId, clientSecret);
+        willReturn(true).given(authServer).isExistingClient(clientId);
         //willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
 
         willReturn(null).given(authServer.db).findAccessToken(accessToken);
@@ -964,7 +964,7 @@ public class AuthorizationServerTest {
 
         // THEN
         assertFalse(revoked);
-        verify(authServer).isValidClientCredentials(clientId, clientSecret);
+        verify(authServer).isExistingClient(clientId);
     }
 
     @Test
@@ -978,7 +978,7 @@ public class AuthorizationServerTest {
             "\"client_id\":" + clientId + ",\"client_secret\":" + clientSecret + "}";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
-        willReturn(true).given(authServer).isValidClientCredentials(clientId, clientSecret);
+        willReturn(true).given(authServer).isExistingClient(clientId);
         //willReturn(clientId).given(authServer).getBasicAuthorizationClientId(req);
 
         AccessToken dbAccessToken = mock(AccessToken.class);
@@ -1003,7 +1003,7 @@ public class AuthorizationServerTest {
             "\"client_id\":" + clientId + ",\"client_secret\":" + clientSecret + "}";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
-        willReturn(true).given(authServer).isValidClientCredentials(clientId, clientSecret);
+        willReturn(true).given(authServer).isExistingClient(clientId);
 
         AccessToken dbAccessToken = mock(AccessToken.class);
         willReturn(false).given(dbAccessToken).tokenExpired();
@@ -1030,7 +1030,7 @@ public class AuthorizationServerTest {
             "\"client_id\":" + clientId + ",\"client_secret\":" + clientSecret + "}";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
-        willReturn(true).given(authServer).isValidClientCredentials(clientId, clientSecret);
+        willReturn(true).given(authServer).isExistingClient(clientId);
 
         AccessToken dbAccessToken = mock(AccessToken.class);
         willReturn(false).given(dbAccessToken).tokenExpired();
@@ -1057,7 +1057,7 @@ public class AuthorizationServerTest {
             "\"client_id\":" + clientId + ",\"client_secret\":" + clientSecret + "}";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
-        willReturn(false).given(authServer).isValidClientCredentials(clientId, clientSecret);
+        willReturn(false).given(authServer).isExistingClient(clientId);
 
         // WHEN
         String errorMsg = null;
@@ -1070,7 +1070,7 @@ public class AuthorizationServerTest {
         }
 
         // THEN
-        assertEquals(errorMsg, Response.INVALID_CLIENT_CREDENTIALS);
+        assertEquals(errorMsg, Response.INVALID_CLIENT_ID);
         assertEquals(status, HttpResponseStatus.BAD_REQUEST);
     }
 
