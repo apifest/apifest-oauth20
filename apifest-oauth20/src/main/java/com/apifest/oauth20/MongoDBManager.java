@@ -462,8 +462,8 @@ public class MongoDBManager implements DBManager {
         if (list.size() > 0) {
             DBObject newObject = list.get(0);
             coll.findAndModify(dbObject, newObject);
+            coll.remove(dbObject);
         }
-        coll.remove(dbObject);
     }
 
 }

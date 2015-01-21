@@ -411,7 +411,7 @@ public class AuthorizationServer {
                 return true;
             }
             if (clientId.equals(accessToken.getClientId())) {
-                db.updateAccessTokenValidStatus(accessToken.getToken(), false);
+                db.removeAccessToken(accessToken.getToken());
                 log.debug("access token {} set status invalid", token);
                 return true;
             } else {

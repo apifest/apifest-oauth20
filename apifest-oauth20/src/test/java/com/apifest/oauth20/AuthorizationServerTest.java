@@ -990,7 +990,7 @@ public class AuthorizationServerTest {
     }
 
     @Test
-    public void when_revoke_token_get_access_token_not_expired_then_expire_it() throws Exception {
+    public void when_revoke_token_invoke_remove_token() throws Exception {
         // GIVEN
         String clientId = "203598599234220";
         String clientSecret = "bb635eb22c5b5ce3de06e31bb88be7ae";
@@ -1005,13 +1005,15 @@ public class AuthorizationServerTest {
         AccessToken dbAccessToken = mock(AccessToken.class);
         willReturn(false).given(dbAccessToken).tokenExpired();
         willReturn(clientId).given(dbAccessToken).getClientId();
+        willReturn(accessToken).given(dbAccessToken).getToken();
         willReturn(dbAccessToken).given(authServer.db).findAccessToken(accessToken);
+        willDoNothing().given(authServer.db).removeAccessToken(accessToken);
 
         // WHEN
         boolean revoked = authServer.revokeToken(req);
 
         // THEN
-        verify(authServer.db).updateAccessTokenValidStatus(dbAccessToken.getToken(), false);
+        verify(authServer.db).removeAccessToken(accessToken);
         assertTrue(revoked);
     }
 
