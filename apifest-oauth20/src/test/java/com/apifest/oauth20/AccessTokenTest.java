@@ -31,7 +31,6 @@ import java.util.Map;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.annotations.Test;
 
-
 /**
  * @author Rossitsa Borissova
  */
@@ -248,5 +247,23 @@ public class AccessTokenTest {
 
         // THEN
         assertTrue(accessToken.getExpiresIn() == accessToken.getRefreshExpiresIn());
+    }
+
+    @Test
+    public void when_client_credentials_token_do_not_add_refresh_expires_in() throws Exception {
+        // WHEN
+        AccessToken accessToken = new AccessToken("Bearer", "1800", "scope", false, "600");
+
+        // THEN
+        assertTrue(accessToken.getRefreshExpiresIn().isEmpty());
+    }
+
+    @Test
+    public void when_password_token_add_refresh_expires_in() throws Exception {
+        // WHEN
+        AccessToken accessToken = new AccessToken("Bearer", "300", "scope", true, "600");
+
+        // THEN
+        assertTrue(accessToken.getRefreshExpiresIn().equals("600"));
     }
 }

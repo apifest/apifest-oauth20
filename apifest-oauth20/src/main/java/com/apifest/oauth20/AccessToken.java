@@ -99,13 +99,13 @@ public class AccessToken implements Serializable {
         this.token = RandomGenerator.generateRandomString();
         if (createRefreshToken) {
             this.refreshToken = RandomGenerator.generateRandomString();
+            this.refreshExpiresIn = (refreshExpiresIn != null && !refreshExpiresIn.isEmpty())? refreshExpiresIn : expiresIn;
         }
         this.expiresIn = expiresIn;
         this.type = tokenType;
         this.scope = scope;
         this.valid = true;
         this.created = (new Date()).getTime();
-        this.refreshExpiresIn = (refreshExpiresIn != null && !refreshExpiresIn.isEmpty())? refreshExpiresIn : expiresIn;
     }
 
     /**
