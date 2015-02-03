@@ -36,6 +36,8 @@ public class PersistentScope implements Serializable {
 
     private Integer passExpiresIn;
 
+    private Integer refreshExpiresIn;
+
     public String getScope() {
         return scope;
     }
@@ -66,6 +68,14 @@ public class PersistentScope implements Serializable {
 
     public void setPassExpiresIn(Integer passExpiresIn) {
         this.passExpiresIn = passExpiresIn;
+    }
+
+    public Integer getRefreshExpiresIn() {
+        return refreshExpiresIn;
+    }
+
+    public void setRefreshExpiresIn(Integer refreshExpiresIn) {
+        this.refreshExpiresIn = refreshExpiresIn;
     }
 
 }

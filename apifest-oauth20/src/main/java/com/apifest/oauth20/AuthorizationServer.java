@@ -159,8 +159,8 @@ public class AuthorizationServer {
                 } else {
                     // invalidate the auth code
                     db.updateAuthCodeValidStatus(authCode.getCode(), false);
-                    accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD,
-                            authCode.getScope()), authCode.getScope());
+                    accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD,authCode.getScope()),
+                            authCode.getScope(), getExpiresIn(TokenRequest.REFRESH_TOKEN, authCode.getScope()));
                     accessToken.setUserId(authCode.getUserId());
                     accessToken.setClientId(authCode.getClientId());
                     accessToken.setCodeId(authCode.getId());
@@ -172,24 +172,30 @@ public class AuthorizationServer {
         } else if (TokenRequest.REFRESH_TOKEN.equals(tokenRequest.getGrantType())) {
             accessToken = db.findAccessTokenByRefreshToken(tokenRequest.getRefreshToken(), tokenRequest.getClientId());
             if (accessToken != null) {
-                String validScope = null;
-                if (tokenRequest.getScope() != null) {
-                    if (scopeService.scopeAllowed(tokenRequest.getScope(), accessToken.getScope())) {
-                        validScope = tokenRequest.getScope();
+                if (!accessToken.refreshTokenExpired()) {
+                    String validScope = null;
+                    if (tokenRequest.getScope() != null) {
+                        if (scopeService.scopeAllowed(tokenRequest.getScope(), accessToken.getScope())) {
+                            validScope = tokenRequest.getScope();
+                        } else {
+                            throw new OAuthException(Response.SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
+                        }
                     } else {
-                        throw new OAuthException(Response.SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
+                        validScope = accessToken.getScope();
                     }
+                    db.updateAccessTokenValidStatus(accessToken.getToken(), false);
+                    AccessToken newAccessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD,
+                            validScope), validScope, accessToken.getRefreshToken(), accessToken.getRefreshExpiresIn());
+                    newAccessToken.setUserId(accessToken.getUserId());
+                    newAccessToken.setDetails(accessToken.getDetails());
+                    newAccessToken.setClientId(accessToken.getClientId());
+                    db.storeAccessToken(newAccessToken);
+                    db.removeAccessToken(accessToken.getToken());
+                    return newAccessToken;
                 } else {
-                    validScope = accessToken.getScope();
+                    db.removeAccessToken(accessToken.getToken());
+                    throw new OAuthException(Response.INVALID_REFRESH_TOKEN, HttpResponseStatus.BAD_REQUEST);
                 }
-                db.updateAccessTokenValidStatus(accessToken.getToken(), false);
-                AccessToken newAccessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD,
-                        validScope), validScope);
-                newAccessToken.setUserId(accessToken.getUserId());
-                newAccessToken.setDetails(accessToken.getDetails());
-                newAccessToken.setClientId(accessToken.getClientId());
-                db.storeAccessToken(newAccessToken);
-                return newAccessToken;
             } else {
                 throw new OAuthException(Response.INVALID_REFRESH_TOKEN, HttpResponseStatus.BAD_REQUEST);
             }
@@ -200,7 +206,7 @@ public class AuthorizationServer {
             }
 
             accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.CLIENT_CREDENTIALS, scope),
-                    scope, false);
+                    scope, false, null);
             accessToken.setClientId(tokenRequest.getClientId());
             db.storeAccessToken(accessToken);
         } else if (TokenRequest.PASSWORD.equals(tokenRequest.getGrantType())) {
@@ -212,7 +218,8 @@ public class AuthorizationServer {
             try {
                 UserDetails userDetails = authenticateUser(tokenRequest.getUsername(), tokenRequest.getPassword(), req);
                 if (userDetails != null && userDetails.getUserId() != null) {
-                    accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope);
+                    accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope,
+                            getExpiresIn(TokenRequest.REFRESH_TOKEN, scope));
                     accessToken.setUserId(userDetails.getUserId());
                     accessToken.setDetails(userDetails.getDetails());
                     accessToken.setClientId(tokenRequest.getClientId());
@@ -237,7 +244,8 @@ public class AuthorizationServer {
                 throw new OAuthException(Response.SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
             }
             try {
-                accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope);
+                accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope,
+                        getExpiresIn(TokenRequest.REFRESH_TOKEN, scope));
                 accessToken.setClientId(tokenRequest.getClientId());
                 UserDetails userDetails = callCustomGrantTypeHandler(req);
                 if (userDetails != null && userDetails.getUserId() != null) {
@@ -403,7 +411,7 @@ public class AuthorizationServer {
                 return true;
             }
             if (clientId.equals(accessToken.getClientId())) {
-                db.updateAccessTokenValidStatus(accessToken.getToken(), false);
+                db.removeAccessToken(accessToken.getToken());
                 log.debug("access token {} set status invalid", token);
                 return true;
             } else {

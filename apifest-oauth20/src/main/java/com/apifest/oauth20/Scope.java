@@ -35,6 +35,7 @@ public class Scope {
     static final String DESCRIPTION_FIELD = "description";
     static final String CC_EXPIRES_IN_FIELD = "ccExpiresIn";
     static final String PASS_EXPIRES_IN_FIELD = "passExpiresIn";
+    static final String REFRESH_EXPIRES_IN_FIELD = "refreshExpiresIn";
 
     static final Pattern SCOPE_PATTERN = Pattern.compile("^(\\p{Alnum}+-?_?)+$");
 
@@ -49,6 +50,9 @@ public class Scope {
 
     @JsonProperty("pass_expires_in")
     private Integer passExpiresIn;
+
+    @JsonProperty("refresh_expires_in")
+    private Integer refreshExpiresIn;
 
     public String getScope() {
         return scope;
@@ -82,12 +86,21 @@ public class Scope {
         this.passExpiresIn = passExpiresIn;
     }
 
+    public Integer getRefreshExpiresIn() {
+        return refreshExpiresIn;
+    }
+
+    public void setRefreshExpiresIn(Integer refreshExpiresIn) {
+        this.refreshExpiresIn = refreshExpiresIn;
+    }
+
     public static Scope loadFromMap(Map<String, Object> map) {
         Scope scope = new Scope();
         scope.scope = (String) map.get("_id");
         scope.description = (String) map.get(DESCRIPTION_FIELD);
         scope.ccExpiresIn = (Integer) map.get(CC_EXPIRES_IN_FIELD);
         scope.passExpiresIn = (Integer) map.get(PASS_EXPIRES_IN_FIELD);
+        scope.refreshExpiresIn = (Integer) ((map.get(REFRESH_EXPIRES_IN_FIELD) != null) ? map.get(REFRESH_EXPIRES_IN_FIELD) : map.get(PASS_EXPIRES_IN_FIELD));
         return scope;
     }
 
@@ -97,6 +110,8 @@ public class Scope {
         scope.description = map.get(DESCRIPTION_FIELD);
         scope.ccExpiresIn = Integer.valueOf(map.get(CC_EXPIRES_IN_FIELD));
         scope.passExpiresIn = Integer.valueOf(map.get(PASS_EXPIRES_IN_FIELD));
+        String refreshExpiresIn = (map.get(REFRESH_EXPIRES_IN_FIELD) != null && map.get(REFRESH_EXPIRES_IN_FIELD).length() > 0) ? map.get(REFRESH_EXPIRES_IN_FIELD) : map.get(PASS_EXPIRES_IN_FIELD);
+        scope.refreshExpiresIn = Integer.valueOf(refreshExpiresIn);
         return scope;
     }
 
@@ -104,7 +119,12 @@ public class Scope {
         boolean validScope = scope != null && scope.length() >= 2;
         boolean validCCExpiresIn = ccExpiresIn != null && ccExpiresIn > 0;
         boolean validPassExpiresIn = passExpiresIn != null && passExpiresIn > 0;
-        if (!validScope || description == null || !validCCExpiresIn || !validPassExpiresIn) {
+        // in case refreshExpiresIn is not set, use passExpiresIn
+        if (refreshExpiresIn == null || refreshExpiresIn < 0) {
+            refreshExpiresIn = passExpiresIn;
+        }
+        boolean validRefreshExpiresIn = refreshExpiresIn != null && refreshExpiresIn > 0;
+        if (!validScope || description == null || !validCCExpiresIn || !validPassExpiresIn || !validRefreshExpiresIn) {
             return false;
         }
         return true;
@@ -114,8 +134,9 @@ public class Scope {
         boolean valid = false;
         boolean validCCExpiresIn = ccExpiresIn != null && ccExpiresIn > 0;
         boolean validPassExpiresIn = passExpiresIn != null && passExpiresIn > 0;
-        if ((description != null && description.length() > 0) || validCCExpiresIn || validPassExpiresIn) {
-           valid = true;
+        boolean validRefreshExpiresIn = refreshExpiresIn != null && refreshExpiresIn > 0;
+        if ((description != null && description.length() > 0) || validCCExpiresIn || validPassExpiresIn || validRefreshExpiresIn) {
+            valid = true;
         }
         return valid;
     }
