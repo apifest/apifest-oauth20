@@ -73,9 +73,6 @@ public class AccessToken implements Serializable {
     @JsonIgnore
     private Long created;
 
-    @JsonProperty("refresh_expires_in")
-    private String refreshExpiresIn = "";
-
     /**
      * Creates access token along with its refresh token.
      *
@@ -83,49 +80,28 @@ public class AccessToken implements Serializable {
      * @param expiresIn
      * @param scope
      */
-    public AccessToken(String tokenType, String expiresIn, String scope, String refreshExpiresIn) {
-        this(tokenType, expiresIn, scope, true, refreshExpiresIn);
+    public AccessToken(String tokenType, String expiresIn, String scope) {
+        this(tokenType, expiresIn, scope, true);
     }
 
     /**
-     * Creates access token. Used for generation of client_credentials type tokens with no refreshToken.
+     * Creates access token. Used for generation of client_credentials type tokens with not refreshToken.
      *
      * @param tokenType
      * @param expiresIn
      * @param scope
      * @param createRefreshToken
      */
-    public AccessToken(String tokenType, String expiresIn, String scope, boolean createRefreshToken, String refreshExpiresIn) {
+    public AccessToken(String tokenType, String expiresIn, String scope, boolean createRefreshToken) {
         this.token = RandomGenerator.generateRandomString();
         if (createRefreshToken) {
             this.refreshToken = RandomGenerator.generateRandomString();
-            this.refreshExpiresIn = (refreshExpiresIn != null && !refreshExpiresIn.isEmpty())? refreshExpiresIn : expiresIn;
         }
         this.expiresIn = expiresIn;
         this.type = tokenType;
         this.scope = scope;
         this.valid = true;
         this.created = (new Date()).getTime();
-    }
-
-    /**
-     * Creates access token with already generated refresh token.
-     *
-     * @param tokenType
-     * @param expiresIn
-     * @param scope
-     * @param createRefreshToken
-     * @param refreshToken
-     */
-    public AccessToken(String tokenType, String expiresIn, String scope, String refreshToken, String refreshExpiresIn) {
-        this.token = RandomGenerator.generateRandomString();
-        this.expiresIn = expiresIn;
-        this.type = tokenType;
-        this.scope = scope;
-        this.valid = true;
-        this.created = (new Date()).getTime();
-        this.refreshToken = refreshToken;
-        this.refreshExpiresIn = (refreshExpiresIn != null && !refreshExpiresIn.isEmpty()) ? refreshExpiresIn : expiresIn;
     }
 
     public AccessToken() {
@@ -219,14 +195,6 @@ public class AccessToken implements Serializable {
         this.created = created;
     }
 
-    public String getRefreshExpiresIn() {
-        return refreshExpiresIn;
-    }
-
-    public void setRefreshExpiresIn(String refreshExpiresIn) {
-        this.refreshExpiresIn = refreshExpiresIn;
-    }
-
     public static AccessToken loadFromMap(Map<String, Object> map) {
         AccessToken accessToken = new AccessToken();
         accessToken.token = (String) map.get("token");
@@ -240,7 +208,6 @@ public class AccessToken implements Serializable {
         accessToken.userId = (String) map.get("userId");
         accessToken.created = (Long) map.get("created");
         accessToken.details = JSONUtils.convertStringToMap((String) map.get("details"));
-        accessToken.refreshExpiresIn = (String) ((map.get("refreshExpiresIn") != null ? map.get("refreshExpiresIn") : accessToken.expiresIn));
         return accessToken;
     }
 
@@ -257,7 +224,6 @@ public class AccessToken implements Serializable {
         accessToken.userId = map.get("userId");
         accessToken.created = Long.parseLong(map.get("created"));
         accessToken.details = JSONUtils.convertStringToMap(map.get("details"));
-        accessToken.refreshExpiresIn = map.get("refreshExpiresIn") != null ? map.get("refreshExpiresIn") : accessToken.expiresIn;
         return accessToken;
     }
 
@@ -270,14 +236,4 @@ public class AccessToken implements Serializable {
         }
         return false;
     }
-
-    public boolean refreshTokenExpired() {
-        Long refreshExpiresInSec = Long.valueOf(getRefreshExpiresIn()) * 1000;
-        Long currentTime = System.currentTimeMillis();
-        if (refreshExpiresInSec + getCreated() < currentTime) {
-            return true;
-        }
-        return false;
-    }
-
 }

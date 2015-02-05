@@ -197,23 +197,16 @@ public class ScopeService {
         int expiresIn = Integer.MAX_VALUE;
         List<Scope> scopes = loadScopes(scope);
         boolean ccGrantType = TokenRequest.CLIENT_CREDENTIALS.equals(tokenGrantType);
-        if (TokenRequest.CLIENT_CREDENTIALS.equals(tokenGrantType)) {
+        if (ccGrantType) {
             for (Scope s : scopes) {
                 if (s.getCcExpiresIn() < expiresIn) {
                     expiresIn = s.getCcExpiresIn();
                 }
             }
-        } else if (TokenRequest.PASSWORD.equals(tokenGrantType)) {
+        } else {
             for (Scope s : scopes) {
                 if (s.getPassExpiresIn() < expiresIn) {
                     expiresIn = s.getPassExpiresIn();
-                }
-            }
-        } else {
-            // refresh_token
-            for (Scope s : scopes) {
-                if (s.getRefreshExpiresIn() < expiresIn) {
-                    expiresIn = s.getRefreshExpiresIn();
                 }
             }
         }
@@ -347,9 +340,6 @@ public class ScopeService {
         }
         if (scope.getPassExpiresIn() == null) {
             scope.setPassExpiresIn(foundScope.getPassExpiresIn());
-        }
-        if (scope.getRefreshExpiresIn() == null) {
-            scope.setRefreshExpiresIn(foundScope.getRefreshExpiresIn());
         }
     }
 

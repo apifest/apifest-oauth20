@@ -160,12 +160,4 @@ public interface DBManager {
      * @return {@link List} of {@link AccessToken}
      */
     List<AccessToken> getAccessTokenByUserIdAndClientApp(String userId, String clientId);
-
-    /**
-     * Remove an access token.
-     *
-     * @param accessToken the access token to be removed
-     */
-    void removeAccessToken(String accessToken);
-
 }

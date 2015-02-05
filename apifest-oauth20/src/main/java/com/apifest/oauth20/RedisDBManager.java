@@ -143,14 +143,13 @@ public class RedisDBManager implements DBManager {
         accessTokenMap.put("userId", accessToken.getUserId());
         accessTokenMap.put("created", String.valueOf(accessToken.getCreated()));
         accessTokenMap.put("details", JSONUtils.convertMapToJSON(accessToken.getDetails()));
-        accessTokenMap.put("refreshExpiresIn", accessToken.getRefreshExpiresIn());
         Jedis jedis = pool.getResource();
         jedis.hmset("at:" + accessToken.getToken(), accessTokenMap);
-        Integer tokenExpiration = Integer.valueOf((!accessToken.getRefreshExpiresIn().isEmpty()) ? accessToken.getRefreshExpiresIn() : accessToken.getExpiresIn());
-        jedis.expire("at:" + accessToken.getToken(), tokenExpiration);
+        jedis.expire("at:" + accessToken.getToken(), Integer.valueOf(accessToken.getExpiresIn()));
         jedis.hset("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(),
                 "access_token", accessToken.getToken());
-        jedis.expire("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(), tokenExpiration);
+        jedis.expire("atr:" + accessToken.getRefreshToken() + accessToken.getClientId(),
+                Integer.valueOf(accessToken.getExpiresIn()));
 
         // store access tokens by user id and client app
         // TODO: Replace with Lua script
@@ -170,7 +169,7 @@ public class RedisDBManager implements DBManager {
         String accessToken = jedis.hget("atr:" + refreshToken + clientId, "access_token");
         Map<String, String> accessTokenMap = jedis.hgetAll("at:" + accessToken);
         pool.returnResource(jedis);
-        if (accessTokenMap.isEmpty()) {
+        if (accessTokenMap.isEmpty() || "false".equals(accessTokenMap.get("valid"))) {
             return null;
         }
         return AccessToken.loadFromStringMap(accessTokenMap);
@@ -241,7 +240,6 @@ public class RedisDBManager implements DBManager {
         scopeMap.put(Scope.DESCRIPTION_FIELD, scope.getDescription());
         scopeMap.put(Scope.CC_EXPIRES_IN_FIELD, String.valueOf(scope.getCcExpiresIn()));
         scopeMap.put(Scope.PASS_EXPIRES_IN_FIELD, String.valueOf(scope.getPassExpiresIn()));
-        scopeMap.put(Scope.REFRESH_EXPIRES_IN_FIELD, String.valueOf(scope.getRefreshExpiresIn()));
         Jedis jedis = pool.getResource();
         jedis.hmset("sc:" + scope.getScope(), scopeMap);
         return true;
@@ -351,14 +349,6 @@ public class RedisDBManager implements DBManager {
         }
         pool.returnResource(jedis);
         return accessTokens;
-    }
-
-    @Override
-    public void removeAccessToken(String accessToken) {
-        Jedis jedis = pool.getResource();
-        jedis.expire(ACCESS_TOKEN_PREFIX_NAME + accessToken, 0);
-        // refresh token will be associated with the new access token issued
-        pool.returnResource(jedis);
     }
 
 }

@@ -191,6 +191,7 @@ public class MongoDBManager implements DBManager {
         // TODO: add indexes
         dbObject.put(REFRESH_TOKEN_ID_NAME, refreshToken);
         dbObject.put(CLIENTS_ID_NAME, clientId);
+        dbObject.put(VALID_NAME, true);
         DBCollection coll = db.getCollection(ACCESS_TOKEN_COLLECTION_NAME);
         List<DBObject> list = coll.find(dbObject).toArray();
         if (list != null && list.size() == 1) {
@@ -451,19 +452,6 @@ public class MongoDBManager implements DBManager {
             accessTokens.add(loadedAccessToken);
         }
         return accessTokens;
-    }
-
-    @Override
-    public void removeAccessToken(String accessToken) {
-        BasicDBObject dbObject = new BasicDBObject();
-        dbObject.put(ACCESS_TOKEN_ID_NAME, accessToken);
-        DBCollection coll = db.getCollection(ACCESS_TOKEN_COLLECTION_NAME);
-        List<DBObject> list = coll.find(dbObject).toArray();
-        if (list.size() > 0) {
-            DBObject newObject = list.get(0);
-            coll.findAndModify(dbObject, newObject);
-            coll.remove(dbObject);
-        }
     }
 
 }
