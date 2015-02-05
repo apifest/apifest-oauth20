@@ -38,6 +38,7 @@ public class PersistentAccessToken implements Serializable {
     private String userId = "";
     private Long created;
     private String details = "";
+    private String refreshExpiresIn = "";
 
     public String getToken() {
         return token;
@@ -127,8 +128,16 @@ public class PersistentAccessToken implements Serializable {
         this.details = details;
     }
 
+    public String getRefreshExpiresIn() {
+        return refreshExpiresIn;
+    }
+
+    public void setRefreshExpiresIn(String refreshExpiresIn) {
+        this.refreshExpiresIn = refreshExpiresIn;
+    }
+
     public String getRefreshTokenByClient() {
-        return this.refreshToken + this.getClientId() + this.isValid();
+        return this.refreshToken + this.getClientId();
     }
 
     public String getAccessTokenByUserIdAndClient() {

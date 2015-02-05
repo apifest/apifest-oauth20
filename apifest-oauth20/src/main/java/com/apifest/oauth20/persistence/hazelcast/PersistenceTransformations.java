@@ -38,6 +38,9 @@ public class PersistenceTransformations {
             scope.setPassExpiresIn(persistenceScope.getPassExpiresIn());
             scope.setDescription(persistenceScope.getDescription());
             scope.setCcExpiresIn(persistenceScope.getCcExpiresIn());
+            Integer refreshExpiresIn = persistenceScope.getRefreshExpiresIn() != null ? persistenceScope.getRefreshExpiresIn() : persistenceScope
+                    .getPassExpiresIn();
+            scope.setRefreshExpiresIn(refreshExpiresIn);
         }
         return scope;
     }
@@ -48,6 +51,8 @@ public class PersistenceTransformations {
         persistentScope.setPassExpiresIn(scope.getPassExpiresIn());
         persistentScope.setDescription(scope.getDescription());
         persistentScope.setCcExpiresIn(scope.getCcExpiresIn());
+        Integer refreshExpiresIn = scope.getRefreshExpiresIn() != null ? scope.getRefreshExpiresIn() : scope.getPassExpiresIn();
+        persistentScope.setRefreshExpiresIn(refreshExpiresIn);
         return persistentScope;
     }
 
@@ -130,6 +135,9 @@ public class PersistenceTransformations {
         persistentAccessToken.setUserId(accessToken.getUserId());
         persistentAccessToken.setValid(accessToken.isValid());
         persistentAccessToken.setDetails(JSONUtils.convertMapToJSON(accessToken.getDetails()));
+        String refreshExpiresIn = (accessToken.getRefreshExpiresIn() != null && !accessToken.getRefreshExpiresIn().isEmpty()) ?
+                accessToken.getRefreshExpiresIn() : accessToken.getExpiresIn();
+        persistentAccessToken.setRefreshExpiresIn(refreshExpiresIn);
         return persistentAccessToken;
     }
 
@@ -148,6 +156,9 @@ public class PersistenceTransformations {
             accessToken.setUserId(persistentAccessToken.getUserId());
             accessToken.setValid(persistentAccessToken.isValid());
             accessToken.setDetails(JSONUtils.convertStringToMap(persistentAccessToken.getDetails()));
+            String refreshExpiresIn = (persistentAccessToken.getRefreshExpiresIn() != null && !persistentAccessToken.getRefreshExpiresIn().isEmpty()) ?
+                    persistentAccessToken .getRefreshExpiresIn() : persistentAccessToken.getExpiresIn();
+            accessToken.setRefreshExpiresIn(refreshExpiresIn);
         }
         return accessToken;
     }
