@@ -43,7 +43,7 @@ public class MongoUtil {
                 MongoClientOptions.Builder options = new MongoClientOptions.Builder()
                         .connectionsPerHost(100).connectTimeout(2)
                         .threadsAllowedToBlockForConnectionMultiplier(1);
-                final MongoClientURI mongoClientURI  = new MongoClientURI(OAuthServer.getDbHost(), options);
+                final MongoClientURI mongoClientURI  = new MongoClientURI(OAuthServer.getDbURI(), options);
                 mongoClient = new MongoClient(mongoClientURI);
 
                 if (mongoClientURI.getDatabase() != null) {

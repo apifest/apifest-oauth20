@@ -25,12 +25,17 @@ public class DBManagerFactory {
 
     protected static volatile DBManager dbManager;
 
+    public static final String REDIS_DB = "redis";
+    public static final String MONGO_DB = "mongodb";
+    public static final String DEFAULT_DB = "hazelcast";
+
+
     public synchronized static DBManager getInstance() {
         if (dbManager == null) {
-            if ("redis".equalsIgnoreCase(OAuthServer.getDatabase())) {
+            if (REDIS_DB.equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new RedisDBManager();
                 ((RedisDBManager) dbManager).setupDBManager();
-            } else if ("mongodb".equalsIgnoreCase(OAuthServer.getDatabase())) {
+            } else if (MONGO_DB.equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new MongoDBManager();
             } else {
                 dbManager = new HazelcastDBManager();
