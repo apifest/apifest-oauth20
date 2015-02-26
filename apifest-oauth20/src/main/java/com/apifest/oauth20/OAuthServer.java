@@ -50,6 +50,10 @@ import com.apifest.oauth20.api.IUserAuthentication;
  */
 public final class OAuthServer {
 
+    protected static final Integer DEFAULT_APIFEST_OAUTH_PORT = 8080;
+    protected static final String DEFAULT_APIFEST_OAUTH_HOST = "localhost";
+    protected static final String DEFAULT_HAZELCAST_PASS = "dev-pass";
+
     private static String customJar;
     private static String userAuthClass;
     private static Class<IUserAuthentication> userAuthenticationClass;
@@ -57,8 +61,8 @@ public final class OAuthServer {
     private static String customGrantTypeClass;
     private static Class<ICustomGrantTypeHandler> customGrantTypeHandler;
     private static String host;
-    private static int portInt;
-    private static String dbHost;
+    private static int port;
+    private static String dbURI;
     private static String database;
     private static String redisSentinels;
     private static String redisMaster;
@@ -104,8 +108,8 @@ public final class OAuthServer {
         bootstrap.setOption("child.keepAlive", true);
         bootstrap.setOption("child.soLinger", -1);
 
-        bootstrap.bind(new InetSocketAddress(host, portInt));
-        log.info("ApiFest OAuth 2.0 Server started at " + host + ":" + portInt);
+        bootstrap.bind(new InetSocketAddress(host, port));
+        log.info("ApiFest OAuth 2.0 Server started at " + host + ":" + port);
     }
 
     protected static boolean loadConfig() {
@@ -119,8 +123,9 @@ public final class OAuthServer {
                     loadProperties(in);
                     loaded = true;
                 } else {
-                    log.error("Cannot load properties file");
-                    return false;
+                    log.warn("No properties file setup, default configs will be used");
+                    setDefaultConfigs();
+                    loaded = true;
                 }
             } else {
                 File file = new File(propertiesFilePath);
@@ -142,6 +147,23 @@ public final class OAuthServer {
                 }
             }
         }
+
+        if (database.equalsIgnoreCase(DBManagerFactory.MONGO_DB) && (dbURI == null || dbURI.isEmpty())) {
+            loaded = false;
+            log.error("no value set for db_uri");
+        }
+
+        if (database.equalsIgnoreCase(DBManagerFactory.REDIS_DB)) {
+            if (redisMaster == null || redisMaster.isEmpty()) {
+                loaded = false;
+                log.error("no value set for redis.master");
+            }
+            if (redisSentinels == null || redisSentinels.isEmpty()) {
+                loaded = false;
+                log.error("no value set for redis.sentinels");
+            }
+        }
+
         if (customJar == null || customJar.isEmpty()) {
             log.warn("Set value for user_authenticate_jar in properties file, otherwise user authentication will always pass successfully");
         } else {
@@ -251,15 +273,17 @@ public final class OAuthServer {
             userAuthClass = props.getProperty("user.authenticate.class");
             customGrantType = props.getProperty("custom.grant_type");
             customGrantTypeClass = props.getProperty("custom.grant_type.class");
-            database = props.getProperty("oauth20.database");
+            database = props.getProperty("oauth20.database", DBManagerFactory.DEFAULT_DB);
             redisSentinels = props.getProperty("redis.sentinels");
             redisMaster = props.getProperty("redis.master");
-            dbHost = props.getProperty("db_uri");
-            if (dbHost == null || dbHost.length() == 0) {
-                dbHost = "localhost";
-            }
+            dbURI = props.getProperty("db_uri");
             setHostAndPort((String) props.get("oauth20.host"), (String) props.get("oauth20.port"));
+
             apifestOAuth20Nodes = props.getProperty("apifest-oauth20.nodes");
+            if (apifestOAuth20Nodes == null || apifestOAuth20Nodes.isEmpty()) {
+                apifestOAuth20Nodes = DEFAULT_APIFEST_OAUTH_HOST;
+            }
+
             // dev-pass is the default password used in Hazelcast
             hazelcastPassword = props.getProperty("hazelcast.password", "dev-pass");
         } catch (IOException e) {
@@ -269,37 +293,37 @@ public final class OAuthServer {
 
     protected static void setHostAndPort(String configHost, String configPort) {
         host = configHost;
-        // if not set in properties file, loaded from env var
-        if (host == null || host.length() == 0) {
-            host = System.getProperty("oauth20.host");
-            if (host == null || host.length() == 0) {
-                log.error("oauth20.host property not set");
-                System.exit(1);
-            }
+        // if not set in properties file, set default value
+        if (host == null || host.isEmpty()) {
+            host = DEFAULT_APIFEST_OAUTH_HOST;
         }
         String portStr = configPort;
-        // if not set in properties file, loaded from env var
-        if (portStr == null || portStr.length() == 0) {
-            portStr = System.getProperty("oauth20.port");
-            if (portStr == null || portStr.length() == 0) {
-                log.error("oauth20.port property not set");
+        // if not set in properties file, set default value
+        if (portStr == null || portStr.isEmpty()) {
+            port = DEFAULT_APIFEST_OAUTH_PORT;
+        } else {
+            try {
+                port = Integer.parseInt(portStr);
+            } catch (NumberFormatException e) {
+                log.error("oauth20.port must be integer");
                 System.exit(1);
             }
         }
-        try {
-            portInt = Integer.parseInt(portStr);
-        } catch (NumberFormatException e) {
-            log.error("oauth20.port must be integer");
-            System.exit(1);
-        }
+    }
+
+    protected static void setDefaultConfigs() {
+        host = DEFAULT_APIFEST_OAUTH_HOST;
+        port = DEFAULT_APIFEST_OAUTH_PORT;
+        apifestOAuth20Nodes = DEFAULT_APIFEST_OAUTH_HOST;
+        hazelcastPassword = DEFAULT_HAZELCAST_PASS;
     }
 
     public static String getHost() {
         return host;
     }
 
-    public static String getDbHost() {
-        return dbHost;
+    public static String getDbURI() {
+        return dbURI;
     }
 
     public static String getDatabase() {
