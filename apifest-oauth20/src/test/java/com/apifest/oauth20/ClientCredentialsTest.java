@@ -16,9 +16,9 @@
 
 package com.apifest.oauth20;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,6 +67,43 @@ public class ClientCredentialsTest {
 
         // THEN
         assertNotNull(creds.getCreated());
+    }
+
+    @Test
+    public void when_no_application_details_loadFromMap_should_not_throw_exception() throws Exception {
+        // GIVEN
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("name", "Test App");
+        map.put("_id", "763273054098803");
+        map.put("secret", "2475a03c2da45c5427c25747ab80b2e1");
+        map.put("created", 1365191565324l);
+        map.put("type", 1);
+        map.put("status", 1);
+
+        // WHEN
+        ClientCredentials creds = ClientCredentials.loadFromMap(map);
+
+        // THEN
+        assertNull(creds.getApplicationDetails());
+    }
+
+
+    @Test
+    public void when_no_application_details_loadFromStringMap_should_not_throw_exception() throws Exception {
+        // GIVEN
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("name", "Test App");
+        map.put("_id", "763273054098803");
+        map.put("secret", "2475a03c2da45c5427c25747ab80b2e1");
+        map.put("created", "1365191565324");
+        map.put("type", "1");
+        map.put("status", "1");
+
+        // WHEN
+        ClientCredentials creds = ClientCredentials.loadFromStringMap(map);
+
+        // THEN
+        assertNull(creds.getApplicationDetails());
     }
 
 }

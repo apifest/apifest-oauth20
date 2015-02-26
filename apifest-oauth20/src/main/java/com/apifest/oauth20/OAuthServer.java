@@ -148,12 +148,12 @@ public final class OAuthServer {
             }
         }
 
-        if (database.equalsIgnoreCase(DBManagerFactory.MONGO_DB) && (dbURI == null || dbURI.isEmpty())) {
+        if (DBManagerFactory.MONGO_DB.equalsIgnoreCase(database) && (dbURI == null || dbURI.isEmpty())) {
             loaded = false;
             log.error("no value set for db_uri");
         }
 
-        if (database.equalsIgnoreCase(DBManagerFactory.REDIS_DB)) {
+        if (DBManagerFactory.REDIS_DB.equalsIgnoreCase(database)) {
             if (redisMaster == null || redisMaster.isEmpty()) {
                 loaded = false;
                 log.error("no value set for redis.master");

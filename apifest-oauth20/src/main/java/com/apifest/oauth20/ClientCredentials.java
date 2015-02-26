@@ -205,7 +205,9 @@ public class ClientCredentials implements Serializable {
         creds.status = ((Integer) map.get("status")).intValue();
         creds.created = (Long) map.get("created");
         creds.scope = (String) map.get("scope");
-        creds.applicationDetails = JSONUtils.convertStringToMap(map.get("applicationDetails").toString());
+        if (map.get("applicationDetails") != null) {
+            creds.applicationDetails = JSONUtils.convertStringToMap(map.get("applicationDetails").toString());
+        }
         return creds;
     }
 
@@ -220,6 +222,7 @@ public class ClientCredentials implements Serializable {
         creds.status = Integer.valueOf(map.get("status"));
         creds.created = Long.valueOf(map.get("created"));
         creds.scope = map.get("scope");
+        // TODO: check whether details is the name of the field
         creds.applicationDetails = JSONUtils.convertStringToMap(map.get("details"));
         return creds;
     }
