@@ -291,7 +291,7 @@ public class ScopeService {
             throw new OAuthException(SCOPE_NOT_EXIST, HttpResponseStatus.BAD_REQUEST);
         } else {
             // first, check whether there is a client app registered with that scope
-            List<ClientCredentials> registeredApps = getClientAppsByScope(scopeName);
+            List<ApplicationInfo> registeredApps = getClientAppsByScope(scopeName);
             if (registeredApps.size() > 0) {
                 responseMsg = SCOPE_USED_BY_APP_MESSAGE;
             } else {
@@ -329,10 +329,10 @@ public class ScopeService {
         return jsonString;
     }
 
-    protected List<ClientCredentials> getClientAppsByScope(String scopeName) {
-        List<ClientCredentials> scopeApps = new ArrayList<ClientCredentials>();
-        List<ClientCredentials> allApps = DBManagerFactory.getInstance().getAllApplications();
-        for (ClientCredentials app : allApps) {
+    protected List<ApplicationInfo> getClientAppsByScope(String scopeName) {
+        List<ApplicationInfo> scopeApps = new ArrayList<ApplicationInfo>();
+        List<ApplicationInfo> allApps = DBManagerFactory.getInstance().getAllApplications();
+        for (ApplicationInfo app : allApps) {
             if (app.getScope().contains(scopeName)) {
                 scopeApps.add(app);
                 break;

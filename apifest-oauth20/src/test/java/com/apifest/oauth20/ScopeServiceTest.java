@@ -776,14 +776,14 @@ public class ScopeServiceTest {
     public void when_application_uses_scope_add_it_to_result() throws Exception {
         // GIVEN
         String scope = "scope";
-        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
-        ClientCredentials app = mock(ClientCredentials.class);
+        List<ApplicationInfo> apps = new ArrayList<ApplicationInfo>();
+        ApplicationInfo app = mock(ApplicationInfo.class);
         willReturn("someScope" + " " + scope).given(app).getScope();
         apps.add(app);
         willReturn(apps).given(DBManagerFactory.dbManager).getAllApplications();
 
         // WHEN
-        List<ClientCredentials> scopeApps = service.getClientAppsByScope(scope);
+        List<ApplicationInfo> scopeApps = service.getClientAppsByScope(scope);
 
         // THEN
         assertTrue(scopeApps.size() == 1);
@@ -793,14 +793,14 @@ public class ScopeServiceTest {
     public void when_no_application_uses_scope_return_empty_list() throws Exception {
         // GIVEN
         String scope = "scope";
-        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
-        ClientCredentials app = mock(ClientCredentials.class);
+        List<ApplicationInfo> apps = new ArrayList<ApplicationInfo>();
+        ApplicationInfo app = mock(ApplicationInfo.class);
         willReturn("someScope").given(app).getScope();
         apps.add(app);
         willReturn(apps).given(DBManagerFactory.dbManager).getAllApplications();
 
         // WHEN
-        List<ClientCredentials> scopeApps = service.getClientAppsByScope(scope);
+        List<ApplicationInfo> scopeApps = service.getClientAppsByScope(scope);
 
         // THEN
         assertTrue(scopeApps.size() == 0);

@@ -352,6 +352,8 @@ public class AuthorizationServer {
             appInfo = new ApplicationInfo();
             appInfo.setName(creds.getName());
             appInfo.setDescription(creds.getDescr());
+            appInfo.setId(clientId);
+            appInfo.setSecret(creds.getSecret());
             appInfo.setScope(creds.getScope());
             appInfo.setRedirectUri(creds.getUri());
             appInfo.setRegistered(new Date(creds.getCreated()));

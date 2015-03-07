@@ -25,7 +25,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 
 /**
- * Holds client application credentials - client_id and client_secret.
+ * Holds a client application information as it is stored in the DB.
  *
  * @author Rossitsa Borissova
  */
