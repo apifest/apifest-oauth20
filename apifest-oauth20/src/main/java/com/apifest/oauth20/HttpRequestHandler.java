@@ -429,14 +429,31 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     }
 
     protected HttpResponse handleGetAllClientApplications(HttpRequest req) {
-        List<ClientCredentials> apps = filterClientApps(req, DBManagerFactory.getInstance().getAllApplications());
-        Gson gson = new Gson();
-        String jsonString = gson.toJson(apps);
-        return Response.createOkResponse(jsonString);
+        List<ApplicationInfo> apps = filterClientApps(req, DBManagerFactory.getInstance().getAllApplications());
+        ObjectMapper mapper = new ObjectMapper();
+        HttpResponse response = null;
+        try {
+            String jsonString = mapper.writeValueAsString(apps);
+            response = Response.createOkResponse(jsonString);
+        } catch (JsonGenerationException e) {
+            log.error("cannot list client applications", e);
+            invokeExceptionHandler(e, req);
+            response = Response.createResponse(HttpResponseStatus.BAD_REQUEST, Response.CANNOT_LIST_CLIENT_APPS);
+        } catch (JsonMappingException e) {
+            log.error("cannot list client applications", e);
+            invokeExceptionHandler(e, req);
+            response = Response.createResponse(HttpResponseStatus.BAD_REQUEST, Response.CANNOT_LIST_CLIENT_APPS);
+        } catch (IOException e) {
+            log.error("cannot list client applications", e);
+            invokeExceptionHandler(e, req);
+            response = Response.createResponse(HttpResponseStatus.BAD_REQUEST, Response.CANNOT_LIST_CLIENT_APPS);
+        }
+
+        return response;
     }
 
-    protected List<ClientCredentials> filterClientApps(HttpRequest req, List<ClientCredentials> apps) {
-        List<ClientCredentials> filteredApps = new ArrayList<ClientCredentials>();
+    protected List<ApplicationInfo> filterClientApps(HttpRequest req, List<ApplicationInfo> apps) {
+        List<ApplicationInfo> filteredApps = new ArrayList<ApplicationInfo>();
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
         Map<String, List<String>> params = dec.getParameters();
         if (params != null) {
@@ -445,7 +462,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             if (status != null && !status.isEmpty()) {
                 try {
                     statusInt = Integer.valueOf(status);
-                    for (ClientCredentials app : apps) {
+                    for (ApplicationInfo app : apps) {
                         if (app.getStatus() == statusInt) {
                             filteredApps.add(app);
                         }

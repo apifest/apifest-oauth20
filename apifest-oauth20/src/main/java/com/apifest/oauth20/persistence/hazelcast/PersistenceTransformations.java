@@ -16,7 +16,10 @@
 
 package com.apifest.oauth20.persistence.hazelcast;
 
+import java.util.Date;
+
 import com.apifest.oauth20.AccessToken;
+import com.apifest.oauth20.ApplicationInfo;
 import com.apifest.oauth20.AuthCode;
 import com.apifest.oauth20.ClientCredentials;
 import com.apifest.oauth20.JSONUtils;
@@ -162,4 +165,19 @@ public class PersistenceTransformations {
         }
         return accessToken;
     }
+
+    public static ApplicationInfo toApplicationInfo(PersistentClientCredentials clientCredentials) {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.setName(clientCredentials.getName());
+        applicationInfo.setScope(clientCredentials.getScope());
+        applicationInfo.setDescription(clientCredentials.getDescr());
+        applicationInfo.setRedirectUri(clientCredentials.getUri());
+        applicationInfo.setId(clientCredentials.getId());
+        applicationInfo.setSecret(clientCredentials.getSecret());
+        applicationInfo.setStatus(clientCredentials.getStatus());
+        applicationInfo.setRegistered(new Date(clientCredentials.getCreated()));
+        applicationInfo.setApplicationDetails(clientCredentials.getApplicationDetails());
+        return applicationInfo;
+    }
+
 }

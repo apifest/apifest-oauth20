@@ -309,8 +309,8 @@ public class RedisDBManager implements DBManager {
      * @see com.apifest.oauth20.DBManager#getAllApplications()
      */
     @Override
-    public List<ClientCredentials> getAllApplications() {
-        List<ClientCredentials> list = new ArrayList<ClientCredentials>();
+    public List<ApplicationInfo> getAllApplications() {
+        List<ApplicationInfo> list = new ArrayList<ApplicationInfo>();
         Jedis jedis = pool.getResource();
         Set<String> allApps = jedis.keys("cc*");
         for (String app : allApps) {
@@ -318,7 +318,7 @@ public class RedisDBManager implements DBManager {
             if (appMap.isEmpty()) {
                 continue;
             } else {
-                ClientCredentials creds = ClientCredentials.loadFromStringMap(appMap);
+                ApplicationInfo creds = ApplicationInfo.loadFromStringMap(appMap);
                 list.add(creds);
             }
         }

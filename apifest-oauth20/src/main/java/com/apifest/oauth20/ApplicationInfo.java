@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Rossitsa Borissova
  */
-@JsonPropertyOrder({ "name", "description", "client_id", "client_secret", "scope", "registered", "redirect_uri", "status"})
+@JsonPropertyOrder({ "name", "description", "client_id", "client_secret", "scope", "registered", "redirect_uri", "status", "application_details" })
 @JsonSerialize(include = Inclusion.NON_EMPTY)
 public class ApplicationInfo implements Serializable {
 
@@ -70,7 +70,7 @@ public class ApplicationInfo implements Serializable {
     private String secret = "";
 
     public String getRegistered() {
-        return registered.toString();
+        return (registered != null) ? registered.toString() : "";
     }
 
     public void setRegistered(Date registered) {
@@ -166,5 +166,37 @@ public class ApplicationInfo implements Serializable {
             valid = false;
         }
         return valid;
+    }
+
+    public static ApplicationInfo loadFromMap(Map<String, Object> map) {
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.name = (String) map.get("name");
+        appInfo.id = (String) map.get("_id");
+        appInfo.secret = (String) map.get("secret");
+        appInfo.redirectUri = (String) map.get("uri");
+        appInfo.description = (String) map.get("descr");
+        //appInfo.type = ((Integer) map.get("type")).intValue();
+        appInfo.status = ((Integer) map.get("status")).intValue();
+        appInfo.registered = new Date((Long) map.get("created"));
+        appInfo.scope = (String) map.get("scope");
+        if (map.get("applicationDetails") != null) {
+            appInfo.applicationDetails = JSONUtils.convertStringToMap(map.get("applicationDetails").toString());
+        }
+        return appInfo;
+    }
+
+    public static ApplicationInfo loadFromStringMap(Map<String, String> map) {
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.name = map.get("name");
+        appInfo.id = map.get("_id");
+        appInfo.secret = map.get("secret");
+        appInfo.redirectUri = map.get("uri");
+        appInfo.description = map.get("descr");
+        // appInfo.type = Integer.valueOf(map.get("type"));
+        appInfo.status = Integer.valueOf(map.get("status"));
+        appInfo.registered = new Date(Long.valueOf(map.get("created")));
+        appInfo.scope = map.get("scope");
+        appInfo.applicationDetails = JSONUtils.convertStringToMap(map.get("details"));
+        return appInfo;
     }
 }

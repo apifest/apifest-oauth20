@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.apifest.oauth20.AccessToken;
+import com.apifest.oauth20.ApplicationInfo;
 import com.apifest.oauth20.AuthCode;
 import com.apifest.oauth20.ClientCredentials;
 import com.apifest.oauth20.DBManager;
@@ -345,12 +346,12 @@ public class HazelcastDBManager implements DBManager {
      * @see com.apifest.oauth20.DBManager#getAllApplications()
      */
     @Override
-    public List<ClientCredentials> getAllApplications() {
-        List<ClientCredentials> appsList = new ArrayList<ClientCredentials>();
+    public List<ApplicationInfo> getAllApplications() {
+        List<ApplicationInfo> appsList = new ArrayList<ApplicationInfo>();
         IMap<String, PersistentClientCredentials> clientsContainer = getClientCredentialsContainer();
         for (String key : clientsContainer.keySet()) {
-            ClientCredentials creds = PersistenceTransformations.toClientCredentials(clientsContainer.get(key));
-            appsList.add(creds);
+            ApplicationInfo appInfo = PersistenceTransformations.toApplicationInfo(clientsContainer.get(key));
+            appsList.add(appInfo);
         }
         return appsList;
     }

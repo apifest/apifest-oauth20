@@ -54,6 +54,7 @@ public final class Response {
     public static final String CLIENT_APP_NOT_EXIST = "{\"error\": \"client application does not exist\"}";
     public static final String SCOPE_NOK_MESSAGE = "{\"status\":\"scope not valid\"}";
     public static final String CLIENT_APP_UPDATED = "{\"status\":\"client application updated\"}";
+    public static final String CANNOT_LIST_CLIENT_APPS = "{\"error\":\"cannot list client applications\"}";
 
     public static final String APPLICATION_JSON = "application/json";
 

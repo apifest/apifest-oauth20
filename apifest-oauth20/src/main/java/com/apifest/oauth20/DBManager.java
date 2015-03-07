@@ -144,7 +144,7 @@ public interface DBManager {
      *
      * @return {@link List} of all registered client applications
      */
-    List<ClientCredentials> getAllApplications();
+    List<ApplicationInfo> getAllApplications();
 
     /**
      * Deletes an oauth20 scope.

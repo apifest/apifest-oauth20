@@ -25,6 +25,7 @@ import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.jboss.netty.channel.Channel;
@@ -378,10 +379,10 @@ public class HttpRequestHandlerTest {
         // GIVEN
         String uri = HttpRequestHandler.APPLICATION_URI + "?status=" + ClientCredentials.ACTIVE_STATUS;
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
-        ClientCredentials creds = mock(ClientCredentials.class);
-        willReturn(ClientCredentials.INACTIVE_STATUS).given(creds).getStatus();
-        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
-        apps.add(creds);
+        ApplicationInfo app = mock(ApplicationInfo.class);
+        willReturn(ClientCredentials.INACTIVE_STATUS).given(app).getStatus();
+        List<ApplicationInfo> apps = new ArrayList<ApplicationInfo>();
+        apps.add(app);
         MockDBManagerFactory.install();
         willReturn(apps).given(DBManagerFactory.getInstance()).getAllApplications();
 
@@ -398,10 +399,11 @@ public class HttpRequestHandlerTest {
         // GIVEN
         String uri = HttpRequestHandler.APPLICATION_URI + "?status=" + ClientCredentials.ACTIVE_STATUS;
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
-        ClientCredentials creds = new ClientCredentials();
-        creds.setStatus(ClientCredentials.ACTIVE_STATUS);
-        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
-        apps.add(creds);
+        ApplicationInfo app = new ApplicationInfo();
+        app.setStatus(ClientCredentials.ACTIVE_STATUS);
+        app.setId("b9db6d84dc98a895035e68f972e30503d3c724c8");
+        List<ApplicationInfo> apps = new ArrayList<ApplicationInfo>();
+        apps.add(app);
         MockDBManagerFactory.install();
         willReturn(apps).given(DBManagerFactory.getInstance()).getAllApplications();
 
@@ -410,8 +412,7 @@ public class HttpRequestHandlerTest {
 
         // THEN
         verify(handler).filterClientApps(req, apps);
-        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "[{\"id\":\"\",\"secret\":\"\",\"scope\":\"\","
-                + "\"name\":\"\",\"uri\":\"\",\"descr\":\"\",\"type\":0,\"status\":1}]");
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "[{\"client_id\":\"b9db6d84dc98a895035e68f972e30503d3c724c8\",\"status\":1}]");
     }
 
     @Test
@@ -419,10 +420,11 @@ public class HttpRequestHandlerTest {
         // GIVEN
         String uri = HttpRequestHandler.APPLICATION_URI + "?status=some";
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
-        ClientCredentials creds = new ClientCredentials();
-        creds.setStatus(ClientCredentials.ACTIVE_STATUS);
-        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
-        apps.add(creds);
+        ApplicationInfo app = new ApplicationInfo();
+        app.setStatus(ClientCredentials.ACTIVE_STATUS);
+        app.setId("b9db6d84dc98a895035e68f972e30503d3c724c8");
+        List<ApplicationInfo> apps = new ArrayList<ApplicationInfo>();
+        apps.add(app);
         MockDBManagerFactory.install();
         willReturn(apps).given(DBManagerFactory.getInstance()).getAllApplications();
 
@@ -431,8 +433,7 @@ public class HttpRequestHandlerTest {
 
         // THEN
         verify(handler).filterClientApps(req, apps);
-        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "[{\"id\":\"\",\"secret\":\"\",\"scope\":\"\","
-                + "\"name\":\"\",\"uri\":\"\",\"descr\":\"\",\"type\":0,\"status\":1}]");
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "[{\"client_id\":\"b9db6d84dc98a895035e68f972e30503d3c724c8\",\"status\":1}]");
     }
 
     @Test
@@ -440,10 +441,10 @@ public class HttpRequestHandlerTest {
         // GIVEN
         String uri = HttpRequestHandler.APPLICATION_URI + "?status=";
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
-        ClientCredentials creds = new ClientCredentials();
-        creds.setStatus(ClientCredentials.ACTIVE_STATUS);
-        List<ClientCredentials> apps = new ArrayList<ClientCredentials>();
-        apps.add(creds);
+        ApplicationInfo app = new ApplicationInfo();
+        app.setStatus(ClientCredentials.ACTIVE_STATUS);
+        List<ApplicationInfo> apps = new ArrayList<ApplicationInfo>();
+        apps.add(app);
         MockDBManagerFactory.install();
         willReturn(apps).given(DBManagerFactory.getInstance()).getAllApplications();
 
@@ -452,8 +453,7 @@ public class HttpRequestHandlerTest {
 
         // THEN
         verify(handler).filterClientApps(req, apps);
-        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "[{\"id\":\"\",\"secret\":\"\",\"scope\":\"\","
-                + "\"name\":\"\",\"uri\":\"\",\"descr\":\"\",\"type\":0,\"status\":1}]");
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "[{\"status\":1}]");
     }
 
 

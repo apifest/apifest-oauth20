@@ -405,14 +405,14 @@ public class MongoDBManager implements DBManager {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public List<ClientCredentials> getAllApplications() {
-        List<ClientCredentials> list = new ArrayList<ClientCredentials>();
+    public List<ApplicationInfo> getAllApplications() {
+        List<ApplicationInfo> list = new ArrayList<ApplicationInfo>();
         DBCollection coll = db.getCollection(CLIENTS_COLLECTION_NAME);
         List<DBObject> result = coll.find().toArray();
         for (DBObject obj : result) {
             BSONObject bson = obj;
             Map<String, Object> mapLoaded = bson.toMap();
-            ClientCredentials loadedCreds = ClientCredentials.loadFromMap(mapLoaded);
+            ApplicationInfo loadedCreds = ApplicationInfo.loadFromMap(mapLoaded);
             list.add(loadedCreds);
         }
         return list;
