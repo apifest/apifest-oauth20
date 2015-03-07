@@ -30,7 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Contains info about client application.
+ * Contains info about a client application.
+ * Used for client application representation.
  *
  * @author Rossitsa Borissova
  */
