@@ -28,7 +28,7 @@ import org.codehaus.jackson.annotate.JsonPropertyOrder;
  *
  * @author Rossitsa Borissova
  */
-@JsonPropertyOrder({ "name", "description", "cc_expires_in", "pass_expires_in"})
+@JsonPropertyOrder({ "scope", "description", "cc_expires_in", "pass_expires_in", "refresh_expires_in" })
 public class Scope {
 
     static final String SCOPE_FIELD = "scope";
