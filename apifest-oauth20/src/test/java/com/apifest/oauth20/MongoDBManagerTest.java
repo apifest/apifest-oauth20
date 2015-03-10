@@ -46,6 +46,11 @@ public class MongoDBManagerTest {
 
     @BeforeMethod
     public void setup() {
+        OAuthServer.log = mock(Logger.class);
+        String path = getClass().getClassLoader().getResource("apifest-oauth-test.properties").getPath();
+        System.setProperty("properties.file", path);
+        OAuthServer.loadConfig();
+
         dbManager = spy(new MongoDBManager());
         MongoDBManager.log = mock(Logger.class);
         db = mock(DB.class);

@@ -35,6 +35,9 @@ public class TokenRequestTest {
 
     HttpRequest req;
 
+    String clientId = "203598599234220";
+    String clientSecret = "105ef93e7bb386da3a23c32e8563434fad005fd0a6a88315fcdf946aa761c838";
+
     @BeforeMethod
     public void setup() {
         req = mock(HttpRequest.class);
@@ -44,11 +47,10 @@ public class TokenRequestTest {
     @Test
     public void when_grant_type_is_missing_throws_exception() throws Exception {
         // GIVEN
-        String content = "redirect_uri=example.com" + "&code=not_valid_code";
+        String content = "redirect_uri=example.com" + "&code=not_valid_code" + "&client_id=" + clientId + "&client_secret=" + clientSecret;
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
-        tokenReq.setClientId("203598599234220");
 
         // WHEN
         String errorMsg = null;
@@ -59,19 +61,17 @@ public class TokenRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg,
-                String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.GRANT_TYPE));
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.GRANT_TYPE));
     }
 
     @Test
     public void when_grant_type_not_supported_throws_exception() throws Exception {
         // GIVEN
         String content = "redirect_uri=example.com"
-                + "&grant_type=not_supported&code=not_valid_code";
+                + "&grant_type=not_supported&code=not_valid_code" + "&client_id=" + clientId + "&client_secret=" + clientSecret;
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
-        tokenReq.setClientId("203598599234220");
 
         // WHEN
         String errorMsg = null;
@@ -89,11 +89,10 @@ public class TokenRequestTest {
     public void when_auth_code_is_missing_throws_exception() throws Exception {
         // GIVEN
         String content = "grant_type=" + TokenRequest.AUTHORIZATION_CODE
-                + "&redirect_uri=example.com";
+                + "&redirect_uri=example.com" + "&client_id=" + clientId + "&client_secret=" + clientSecret;
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
-        tokenReq.setClientId("203598599234220");
 
         // WHEN
         String errorMsg = null;
@@ -110,13 +109,12 @@ public class TokenRequestTest {
     @Test
     public void when_redirect_uri_is_missing_throws_exception() throws Exception {
         // GIVEN
-        // "client_id=203598599234220&"
-        String content = "grant_type=" + TokenRequest.AUTHORIZATION_CODE + "&code=valid_code";
+        String content = "grant_type=" + TokenRequest.AUTHORIZATION_CODE + "&code=valid_code&client_id=" + clientId + "&client_secret=" + clientSecret;
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
 
         TokenRequest tokenReq = new TokenRequest(req);
-        tokenReq.setClientId("203598599234220");
+
 
         // WHEN
         String errorMsg = null;
@@ -127,15 +125,14 @@ public class TokenRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg,
-                String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.REDIRECT_URI));
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.REDIRECT_URI));
     }
 
     @Test
     public void when_client_id_is_missing_throws_exception() throws Exception {
         // GIVEN
         String content = "grant_type=" + TokenRequest.AUTHORIZATION_CODE
-                + "code=valid_code&redirect_uri=example.com";
+                + "&code=valid_code&redirect_uri=example.com" + "&client_secret=" + clientSecret;
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
@@ -149,19 +146,17 @@ public class TokenRequestTest {
         }
 
         // THEN
-        assertEquals(errorMsg,
-                String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.CLIENT_ID));
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.CLIENT_ID));
     }
 
     @Test
     public void when_all_mandatory_params_present_do_not_throw_exception() throws Exception {
         // GIVEN
         String content = "grant_type=" + TokenRequest.AUTHORIZATION_CODE
-                + "&code=valid_code&redirect_uri=example.com";
+                + "&code=valid_code&redirect_uri=example.com&client_id=" + clientId + "&client_secret=" + clientSecret;
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
-        tokenReq.setClientId("203598599234220");
 
         // WHEN
         tokenReq.validate();
@@ -170,11 +165,10 @@ public class TokenRequestTest {
     @Test
     public void when_grant_type_refresh_token_and_no_refresh_token_return_error() throws Exception {
         // GIVEN
-        String content = "grant_type=" + TokenRequest.REFRESH_TOKEN;
+        String content = "grant_type=" + TokenRequest.REFRESH_TOKEN + "&client_id=" + clientId + "&client_secret=" + clientSecret;
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
-        tokenReq.setClientId("203598599234220");
 
         // WHEN
         String errorMsg = null;
@@ -192,11 +186,10 @@ public class TokenRequestTest {
     @Test
     public void when_grant_type_password_and_no_username_return_error() throws Exception {
         // GIVEN
-        String content = "grant_type=" + TokenRequest.PASSWORD + "&password=pd1&wyfr";
+        String content = "grant_type=" + TokenRequest.PASSWORD + "&password=pd1&wyfr&client_id=" + clientId + "&client_secret=" + clientSecret;
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
-        tokenReq.setClientId("203598599234220");
 
         // WHEN
         String errorMsg = null;
@@ -214,11 +207,10 @@ public class TokenRequestTest {
     @Test
     public void when_grant_type_password_and_no_password_return_error() throws Exception {
         // GIVEN
-        String content = "grant_type=" + TokenRequest.PASSWORD + "&username=rossi";
+        String content = "grant_type=" + TokenRequest.PASSWORD + "&username=rossi&client_id=" + clientId + "&client_secret=" + clientSecret;
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
-        tokenReq.setClientId("203598599234220");
 
         // WHEN
         String errorMsg = null;
@@ -236,11 +228,11 @@ public class TokenRequestTest {
     @Test
     public void when_clientId_empty_check_mandatory_params_throws_exception() throws Exception {
         // GIVEN
-        String content = "grant_type=" + TokenRequest.PASSWORD + "&username=rossi";
+        String clientId = "";
+        String content = "grant_type=" + TokenRequest.PASSWORD + "&username=rossi&client_id=" + clientId + "&client_secret=" + clientSecret;
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
-        tokenReq.setClientId("");
 
         // WHEN
         String errorMsg = null;
@@ -257,11 +249,10 @@ public class TokenRequestTest {
     @Test
     public void when_grantType_empty_check_mandatory_params_throws_exception() throws Exception {
         // GIVEN
-        String content = "grant_type=" + "" +"&username=rossi";
+        String content = "grant_type=" + "" +"&username=rossi&client_id=" + clientId + "&client_secret=" + clientSecret;
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
         TokenRequest tokenReq = new TokenRequest(req);
-        tokenReq.setClientId("203598599234220");
 
         // WHEN
         String errorMsg = null;

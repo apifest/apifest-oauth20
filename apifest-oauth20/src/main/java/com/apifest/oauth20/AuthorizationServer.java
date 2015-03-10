@@ -129,21 +129,10 @@ public class AuthorizationServer {
 
     public AccessToken issueAccessToken(HttpRequest req) throws OAuthException {
         TokenRequest tokenRequest = new TokenRequest(req);
-
-        if (tokenRequest.getClientId() == null) {
-            String clientId = getBasicAuthorizationClientId(req);
-            // TODO: check Basic Auth is OK
-            if (clientId == null || !isActiveClientId(clientId)) {
-                throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
-            }
-            tokenRequest.setClientId(clientId);
-            tokenRequest.validate();
-        } else {
-            tokenRequest.validate();
-            // check valid client_id, client_secret and status of the client app should be active
-            if (!isActiveClient(tokenRequest.getClientId(), tokenRequest.getClientSecret())) {
-                throw new OAuthException(Response.INVALID_CLIENT_CREDENTIALS, HttpResponseStatus.BAD_REQUEST);
-            }
+        tokenRequest.validate();
+        // check valid client_id, client_secret and status of the client app should be active
+        if (!isActiveClient(tokenRequest.getClientId(), tokenRequest.getClientSecret())) {
+            throw new OAuthException(Response.INVALID_CLIENT_CREDENTIALS, HttpResponseStatus.BAD_REQUEST);
         }
 
         AccessToken accessToken = null;
@@ -306,10 +295,10 @@ public class AuthorizationServer {
         return userDetails;
     }
 
-    protected String getBasicAuthorizationClientId(HttpRequest req) {
+    public static String [] getBasicAuthorizationClientCredentials(HttpRequest req) {
         // extract Basic Authorization header
         String authHeader = req.headers().get(HttpHeaders.Names.AUTHORIZATION);
-        String clientId = null;
+        String [] clientCredentials = new String [2];
         if (authHeader != null && authHeader.contains(BASIC)) {
             String value = authHeader.replace(BASIC, "");
             Base64 decoder = new Base64();
@@ -318,15 +307,11 @@ public class AuthorizationServer {
             // client_id:client_secret - should be changed by client password
             String[] str = decoded.split(":");
             if (str.length == 2) {
-                String authClientId = str[0];
-                String authClientSecret = str[1];
-                // check valid - DB call
-                if (db.validClient(authClientId, authClientSecret)) {
-                    clientId = authClientId;
-                }
+                clientCredentials [0] = str[0];
+                clientCredentials [1]  = str[1];
             }
         }
-        return clientId;
+        return clientCredentials;
     }
 
     protected AuthCode findAuthCode(TokenRequest tokenRequest) {

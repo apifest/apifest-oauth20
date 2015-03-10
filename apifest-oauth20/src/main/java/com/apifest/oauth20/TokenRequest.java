@@ -21,8 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.util.CharsetUtil;
@@ -71,6 +73,11 @@ public class TokenRequest {
         this.redirectUri = params.get(REDIRECT_URI);
         this.clientId = params.get(CLIENT_ID);
         this.clientSecret = params.get(CLIENT_SECRET);
+        if (this.clientId == null && this.clientSecret == null) {
+            String [] clientCredentials = AuthorizationServer.getBasicAuthorizationClientCredentials(request);
+            this.clientId = clientCredentials [0];
+            this.clientSecret = clientCredentials [1];
+        }
         this.refreshToken = params.get(REFRESH_TOKEN);
         this.scope = params.get(SCOPE);
         this.username = params.get(USERNAME);
@@ -115,6 +122,10 @@ public class TokenRequest {
     protected void checkMandatoryParams() throws OAuthException {
         if (clientId == null || clientId.isEmpty()) {
             throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CLIENT_ID),
+                    HttpResponseStatus.BAD_REQUEST);
+        }
+        if (clientSecret == null || clientSecret.isEmpty()) {
+            throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CLIENT_SECRET),
                     HttpResponseStatus.BAD_REQUEST);
         }
         if (grantType == null || grantType.isEmpty()) {

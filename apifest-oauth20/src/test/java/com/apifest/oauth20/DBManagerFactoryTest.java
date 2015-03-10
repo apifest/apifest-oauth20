@@ -30,6 +30,7 @@ public class DBManagerFactoryTest {
     @Test
     public void when_mongo_oauth20_database_set_return_mongodb_manager() throws Exception {
         // GIVEN
+        MockDBManagerFactory.deinstall();
         OAuthServer.log = mock(Logger.class);
         String path = getClass().getClassLoader().getResource("apifest-oauth-test.properties").getPath();
         System.setProperty("properties.file", path);
