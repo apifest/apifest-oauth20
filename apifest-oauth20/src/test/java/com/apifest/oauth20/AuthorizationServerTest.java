@@ -329,35 +329,6 @@ public class AuthorizationServerTest {
         verify(authServer).findAuthCode(any(TokenRequest.class));
     }
 
-//    @Test
-//    public void when_issue_token_extract_client_id() throws Exception {
-//        // GIVEN
-//        String clientId = "203598599234220";
-//        String clientSecret = "105ef93e7bb386da3a23c32e8563434fad005fd0a6a88315fcdf946aa761c838";
-//        HttpRequest req = mock(HttpRequest.class);
-//        // 203598599234220:105ef93e7bb386da3a23c32e8563434fad005fd0a6a88315fcdf946aa761c838
-//        String basicHeader = "Basic MjAzNTk4NTk5MjM0MjIwOjEwNWVmOTNlN2JiMzg2ZGEzYTIzYzMyZTg1NjM0MzRmYWQwMDVmZDBhNmE4ODMxNWZjZGY5NDZhYTc2MWM4Mzg=";
-//        HttpHeaders headers = new DefaultHttpHeaders();
-//        headers.set(HttpHeaders.Names.AUTHORIZATION, basicHeader);
-//        willReturn(headers).given(req).headers();
-//        String content = "redirect_uri=example.com"
-//                + "&grant_type=authorization_code&code=eWPoZNvLxVDxuoVBCnGurPXefa#ttxKfryNbLPDvPFsFSkXVhreWW=HvULXWANTnhR=UEtkiaCxsOxgv_nTpq"
-//                + "NWQFB-zGkQBHVoqQkjiWkyRuAHZWkFfn#sNeBhJVgOsR=F_vAmJwoOh_ooe#ovaJVCOiZls_DzvkhOnRVrlDRSzZrbZIB_rwGXjpoeXdJlIjZQGhSR#";
-//        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
-//        given(req.getContent()).willReturn(buf);
-//        willReturn(true).given(authServer).isActiveClient(clientId, clientSecret);
-//
-//        // WHEN
-//        try {
-//            authServer.issueAccessToken(req);
-//        } catch (OAuthException e) {
-//            // nothing to do
-//        }
-//
-//        // THEN
-//        verify(authServer, times(0)).getBasicAuthorizationClientCredentials(req);
-//    }
-
     @Test
     public void when_auth_code_not_valid_return_error() throws Exception {
         // GIVEN
@@ -930,23 +901,6 @@ public class AuthorizationServerTest {
         assertNull(result);
     }
 
-//    @Test
-//    public void when_revoke_token_get_client_id_from_req_header() throws Exception {
-//        // GIVEN
-//        HttpRequest req = mock(HttpRequest.class);
-//        willReturn(null).given(authServer).getBasicAuthorizationClientId(req);
-//
-//        // WHEN
-//        try {
-//            authServer.revokeToken(req);
-//        } catch (OAuthException e) {
-//            // do nothing
-//        }
-//
-//        // THEN
-//        verify(authServer).getBasicAuthorizationClientId(req);
-//    }
-
     @Test(expectedExceptions = OAuthException.class)
     public void when_revoke_token_with_client_id_null_will_throw_exception() throws Exception {
         // GIVEN
@@ -973,7 +927,6 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
         willReturn(true).given(authServer).isExistingClient(clientId);
-        //willReturn(getAuthorizationBasicHeader()).given(req).headers();
 
         willReturn(null).given(authServer.db).findAccessToken(accessToken);
 
@@ -997,7 +950,6 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
         willReturn(true).given(authServer).isExistingClient(clientId);
-        //willReturn(getAuthorizationBasicHeader()).given(req).headers();
 
         AccessToken dbAccessToken = mock(AccessToken.class);
         willReturn(true).given(dbAccessToken).tokenExpired();
