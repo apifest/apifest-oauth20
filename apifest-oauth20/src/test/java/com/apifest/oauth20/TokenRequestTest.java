@@ -17,16 +17,19 @@
 package com.apifest.oauth20;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.handler.codec.http.DefaultHttpHeaders;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
 
 /**
  * @author Rossitsa Borissova
@@ -264,5 +267,58 @@ public class TokenRequestTest {
 
         // THEN
         assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, TokenRequest.GRANT_TYPE));
+    }
+
+    @Test
+    public void when_client_credentials_not_in_request_body_then_extract_them_from_Authorization_header() throws Exception {
+        String content = "grant_type=password&username=rossi&password=secret";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        given(req.getContent()).willReturn(buf);
+        // clientId:clientSecret, 203598599234220:105ef93e7bb386da3a23c32e8563434fad005fd0a6a88315fcdf946aa761c838
+        String basicHeader = "Basic MjAzNTk4NTk5MjM0MjIwOjEwNWVmOTNlN2JiMzg2ZGEzYTIzYzMyZTg1NjM0MzRmYWQwMDVmZDBhNmE4ODMxNWZjZGY5NDZhYTc2MWM4Mzg=";
+        HttpHeaders headers = new DefaultHttpHeaders();
+        headers.set(HttpHeaders.Names.AUTHORIZATION, basicHeader);
+        given(req.headers()).willReturn(headers);
+
+        // WHEN
+        TokenRequest tokenReq = new TokenRequest(req);
+
+        // THEN
+        assertEquals(tokenReq.getClientId(), clientId);
+        assertEquals(tokenReq.getClientSecret(), clientSecret);
+    }
+
+    @Test
+    public void when_client_credentials_not_in_request_body_and_no_Authorization_header_then_client_credentials_are_null() throws Exception {
+        String content = "grant_type=password&username=rossi&password=secret";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        given(req.getContent()).willReturn(buf);
+        HttpHeaders headers = new DefaultHttpHeaders();
+        given(req.headers()).willReturn(headers);
+
+        // WHEN
+        TokenRequest tokenReq = new TokenRequest(req);
+
+        // THEN
+        assertNull(tokenReq.getClientId());
+        assertNull(tokenReq.getClientSecret());
+    }
+
+    @Test
+    public void when_client_credentials_not_in_request_body_and_invalid_Authorization_header_then_client_credentials_are_null() throws Exception {
+        String content = "grant_type=password&username=rossi&password=secret";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        given(req.getContent()).willReturn(buf);
+        String basicHeader = "Basic ";
+        HttpHeaders headers = new DefaultHttpHeaders();
+        headers.set(HttpHeaders.Names.AUTHORIZATION, basicHeader);
+        given(req.headers()).willReturn(headers);
+
+        // WHEN
+        TokenRequest tokenReq = new TokenRequest(req);
+
+        // THEN
+        assertNull(tokenReq.getClientId());
+        assertNull(tokenReq.getClientSecret());
     }
 }
