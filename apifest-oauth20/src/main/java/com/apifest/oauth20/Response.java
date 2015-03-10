@@ -38,7 +38,7 @@ public final class Response {
     public static final String INVALID_CLIENT_CREDENTIALS = "{\"error\": \"invalid client_id/client_secret\"}";
     public static final String RESPONSE_TYPE_NOT_SUPPORTED = "{\"error\": \"unsupported_response_type\"}";
     public static final String INVALID_REDIRECT_URI = "{\"error\": \"invalid redirect_uri\"}";
-    public static final String MANDATORY_PARAM_MISSING = "{\"error\": \"mandatory paramater %s is missing\"}";
+    public static final String MANDATORY_PARAM_MISSING = "{\"error\": \"mandatory parameter %s is missing\"}";
     public static final String CANNOT_ISSUE_TOKEN = "{\"error\": \"cannot issue token\"}";
     public static final String INVALID_AUTH_CODE = "{\"error\": \"invalid auth_code\"}";
     public static final String GRANT_TYPE_NOT_SUPPORTED = "{\"error\": \"unsupported_grant_type\"}";

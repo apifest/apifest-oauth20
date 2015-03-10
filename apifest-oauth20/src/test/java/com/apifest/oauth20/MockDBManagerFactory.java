@@ -27,4 +27,7 @@ public class MockDBManagerFactory extends DBManagerFactory {
         DBManagerFactory.dbManager = mock(DBManager.class);
     }
 
+    public static void deinstall() {
+        DBManagerFactory.dbManager = null;
+    }
 }
