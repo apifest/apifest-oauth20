@@ -183,7 +183,6 @@ public class AuthorizationServer {
                     } else {
                         validScope = accessToken.getScope();
                     }
-                    db.updateAccessTokenValidStatus(accessToken.getToken(), false);
                     AccessToken newAccessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD,
                             validScope), validScope, accessToken.getRefreshToken(), accessToken.getRefreshExpiresIn());
                     newAccessToken.setUserId(accessToken.getUserId());
@@ -331,7 +330,7 @@ public class AuthorizationServer {
         AccessToken accessToken = db.findAccessToken(token);
         if (accessToken != null && accessToken.isValid()) {
             if (accessToken.tokenExpired()) {
-                db.updateAccessTokenValidStatus(accessToken.getToken(), false);
+                db.removeAccessToken(token);
                 return null;
             }
             return accessToken;
