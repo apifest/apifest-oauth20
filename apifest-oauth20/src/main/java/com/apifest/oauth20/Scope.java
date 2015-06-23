@@ -37,21 +37,25 @@ public class Scope {
     static final String PASS_EXPIRES_IN_FIELD = "passExpiresIn";
     static final String REFRESH_EXPIRES_IN_FIELD = "refreshExpiresIn";
 
+    static final String JSON_CC_EXPIRES_IN = "cc_expires_in";
+    static final String JSON_PASS_EXPIRES_IN = "pass_expires_in";
+    static final String JSON_REFRESH_EXPIRES_IN = "refresh_expires_in";
+
     static final Pattern SCOPE_PATTERN = Pattern.compile("^(\\p{Alnum}+-?_?)+$");
 
-    @JsonProperty("scope")
+    @JsonProperty(SCOPE_FIELD)
     private String scope;
 
-    @JsonProperty("description")
+    @JsonProperty(DESCRIPTION_FIELD)
     private String description;
 
-    @JsonProperty("cc_expires_in")
+    @JsonProperty(JSON_CC_EXPIRES_IN)
     private Integer ccExpiresIn;
 
-    @JsonProperty("pass_expires_in")
+    @JsonProperty(JSON_PASS_EXPIRES_IN)
     private Integer passExpiresIn;
 
-    @JsonProperty("refresh_expires_in")
+    @JsonProperty(JSON_REFRESH_EXPIRES_IN)
     private Integer refreshExpiresIn;
 
     public String getScope() {

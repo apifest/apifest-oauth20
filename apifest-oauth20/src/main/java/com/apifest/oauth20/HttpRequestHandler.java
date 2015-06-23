@@ -419,6 +419,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                     response = Response.createOkResponse(Response.CLIENT_APP_UPDATED);
                 }
             } catch (OAuthException ex) {
+                log.info("ex: " + ex.getMessage());
                 response = Response.createOAuthExceptionResponse(ex);
                 invokeExceptionHandler(ex, req);
             }
