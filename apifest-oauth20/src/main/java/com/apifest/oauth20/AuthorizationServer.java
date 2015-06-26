@@ -24,7 +24,6 @@ import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
@@ -430,10 +429,8 @@ public class AuthorizationServer {
             if (!isExistingClient(clientId)) {
                 throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
             }
-            //ObjectMapper mapper = new ObjectMapper();
             ApplicationInfo appInfo;
             try {
-                //appInfo = mapper.readValue(content, ApplicationInfo.class);
                 appInfo = InputValidator.validate(content, ApplicationInfo.class);
                 if (appInfo.validForUpdate()) {
                     if (appInfo.getScope() != null) {

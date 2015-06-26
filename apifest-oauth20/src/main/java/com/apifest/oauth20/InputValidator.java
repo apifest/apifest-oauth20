@@ -51,7 +51,9 @@ public class InputValidator {
                 String str = delegate.getText();
                 try {
                     JsonInputValidator validator = JsonInputValidatorFactory.getValidator(clazz);
-                    validator.validate(delegate.getCurrentName(), str);
+                    if (validator != null) {
+                        validator.validate(delegate.getCurrentName(), str);
+                    }
                 } catch (OAuthException e) {
                     throw new JsonValidationException(e.getMessage());
                 }

@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -34,8 +33,6 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.JsonParser;
 
 /**
  * Responsible for storing and loading OAuth20 scopes.
@@ -245,9 +242,7 @@ public class ScopeService {
         String responseMsg = "";
         // check Content-Type
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
-            ObjectMapper mapper = new ObjectMapper();
             try {
-                //Scope scope = mapper.readValue(content, Scope.class);
                 Scope scope = InputValidator.validate(content, Scope.class);
                 if (scope.validForUpdate()) {
                     Scope foundScope = DBManagerFactory.getInstance().findScope(scopeName);

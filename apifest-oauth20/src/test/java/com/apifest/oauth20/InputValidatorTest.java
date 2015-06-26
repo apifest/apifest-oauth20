@@ -15,10 +15,9 @@
  */
 package com.apifest.oauth20;
 
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.verify;
 
 import org.testng.annotations.Test;
 
@@ -59,5 +58,12 @@ public class InputValidatorTest {
         // THEN
         verify(ApplicationInfoValidator.instance).validate(ApplicationInfo.JSON_STATUS, inputValue);
         MockApplicationInfoValidator.deinstall();
+    }
+
+    @Test
+    public void when_no_validator_do_not_throw_NPE() throws Exception {
+
+        // WHEN
+        InputValidator.validate("{\"client_id\":\"123456\"}", ClientCredentials.class);
     }
 }
