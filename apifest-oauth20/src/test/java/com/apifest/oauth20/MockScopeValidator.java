@@ -24,10 +24,10 @@ import static org.mockito.Mockito.mock;
 public class MockScopeValidator {
 
     public static void install() {
-        ScopeValidator.instance = mock(ScopeValidator.class);
+        ScopeValidator.Holder.validator = mock(ScopeValidator.class);
     }
 
     public static void deinstall() {
-        ScopeValidator.instance = null;
+        ScopeValidator.Holder.recreateInstance();
     }
 }

@@ -24,11 +24,11 @@ import static org.mockito.Mockito.mock;
 public class MockApplicationInfoValidator {
 
     public static void install() {
-        ApplicationInfoValidator.instance = mock(ApplicationInfoValidator.class);
+        ApplicationInfoValidator.Holder.validator = mock(ApplicationInfoValidator.class);
     }
 
 
     public static void deinstall() {
-        ApplicationInfoValidator.instance = null;
+        ApplicationInfoValidator.Holder.recreateInstance();
     }
 }

@@ -41,9 +41,15 @@ public class ScopeValidator implements JsonInputValidator {
     }
 
     public static ScopeValidator getInstance() {
-        if (instance == null) {
-            instance = new ScopeValidator();
+        return Holder.validator;
+    }
+
+    protected static class Holder {
+        public static ScopeValidator validator = new ScopeValidator();
+
+        // used for unit tests only!
+        protected static void recreateInstance() {
+            validator = new ScopeValidator();
         }
-        return instance;
     }
 }

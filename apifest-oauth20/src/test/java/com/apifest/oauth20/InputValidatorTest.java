@@ -40,7 +40,7 @@ public class InputValidatorTest {
         InputValidator.validate("{\"" + Scope.JSON_CC_EXPIRES_IN + "\":\"" + inputValue + "\"}", Scope.class);
 
         // THEN
-        verify(ScopeValidator.instance).validate(Scope.JSON_CC_EXPIRES_IN, inputValue);
+        verify(ScopeValidator.getInstance()).validate(Scope.JSON_CC_EXPIRES_IN, inputValue);
         MockScopeValidator.deinstall();
     }
 
@@ -56,7 +56,7 @@ public class InputValidatorTest {
         InputValidator.validate("{\"" + ApplicationInfo.JSON_STATUS + "\":\"" + inputValue + "\"}", ApplicationInfo.class);
 
         // THEN
-        verify(ApplicationInfoValidator.instance).validate(ApplicationInfo.JSON_STATUS, inputValue);
+        verify(ApplicationInfoValidator.getInstance()).validate(ApplicationInfo.JSON_STATUS, inputValue);
         MockApplicationInfoValidator.deinstall();
     }
 

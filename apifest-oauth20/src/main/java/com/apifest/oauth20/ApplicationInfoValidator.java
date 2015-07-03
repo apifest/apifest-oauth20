@@ -25,8 +25,6 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
  */
 public class ApplicationInfoValidator implements JsonInputValidator {
 
-    protected static ApplicationInfoValidator instance;
-
     private ApplicationInfoValidator() {
     }
 
@@ -41,10 +39,15 @@ public class ApplicationInfoValidator implements JsonInputValidator {
     }
 
     public static ApplicationInfoValidator getInstance() {
-        if (instance == null) {
-            instance = new ApplicationInfoValidator();
-        }
-        return instance;
+       return Holder.validator;
     }
 
+    protected static class Holder {
+        public static ApplicationInfoValidator validator = new ApplicationInfoValidator();
+
+        // used for unit tests only!
+        protected static void recreateInstance() {
+            validator = new ApplicationInfoValidator();
+        }
+    }
 }
