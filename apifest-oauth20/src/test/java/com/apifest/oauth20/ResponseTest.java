@@ -149,4 +149,13 @@ public class ResponseTest {
                 HttpHeaders.Values.NO_STORE);
         assertEquals(response.headers().get(HttpHeaders.Names.PRAGMA), HttpHeaders.Values.NO_CACHE);
     }
+
+    @Test
+    public void when_no_message_in_response_set_content_length_zero() throws Exception {
+        // WHEN
+        HttpResponse response = Response.createResponse(HttpResponseStatus.OK, null);
+
+        // THEN
+        assertEquals(response.headers().get(HttpHeaders.Names.CONTENT_LENGTH), "0");
+    }
 }
