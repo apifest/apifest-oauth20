@@ -87,9 +87,11 @@ public final class Response {
         if (message != null) {
             ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
             response.setContent(buf);
-            response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
             response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
+        } else {
+            response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, 0);
         }
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         response.headers().set(HttpHeaders.Names.CACHE_CONTROL, HttpHeaders.Values.NO_STORE);
         response.headers().set(HttpHeaders.Names.PRAGMA, HttpHeaders.Values.NO_CACHE);
         return response;
