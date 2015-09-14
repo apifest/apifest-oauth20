@@ -63,8 +63,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected static final String ACCESS_TOKEN_REVOKE_URI = "/oauth20/tokens/revoke";
     protected static final String OAUTH_CLIENT_SCOPE_URI = "/oauth20/scopes";
 
+    protected static final String CLIENT_CREDENTIALS_PATTERN_STRING = "[a-f[0-9]]+";
+    protected static final Pattern APPLICATION_PATTERN = Pattern.compile("/oauth20/applications/("+CLIENT_CREDENTIALS_PATTERN_STRING+")$");
     protected static final Pattern OAUTH_CLIENT_SCOPE_PATTERN = Pattern.compile("/oauth20/scopes/((\\p{Alnum}+-?_?)+$)");
-    protected static final Pattern APPLICATION_PATTERN = Pattern.compile("/oauth20/applications/([a-f[0-9]]+)$");
 
     protected Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 
@@ -102,7 +103,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             } else if (APPLICATION_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
                 response = handleGetAllClientApplications(req);
             } else if (rawUri.startsWith(APPLICATION_URI) && method.equals(HttpMethod.GET)) {
-                    response = handleGetClientApplication(req);
+                response = handleGetClientApplication(req);
             } else if (ACCESS_TOKEN_REVOKE_URI.equals(rawUri) && method.equals(HttpMethod.POST)) {
                 response = handleTokenRevoke(req);
             } else if (OAUTH_CLIENT_SCOPE_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {

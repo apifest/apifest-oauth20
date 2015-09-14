@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.JsonParseException;
@@ -74,12 +75,17 @@ public class AuthorizationServer {
                     // check client_id, client_secret passed
                     if ((appInfo.getId() != null && appInfo.getId().length() > 0) &&
                             (appInfo.getSecret() != null && appInfo.getSecret().length() > 0)) {
-                        // if a client app with this client_id already registered
-                        if (db.findClientCredentials(appInfo.getId()) == null) {
-                            creds = new ClientCredentials(appInfo.getName(), appInfo.getScope(), appInfo.getDescription(),
-                                appInfo.getRedirectUri(), appInfo.getId(), appInfo.getSecret(), appInfo.getApplicationDetails());
+                        // check if passed client_id, client_secret are valid
+                        if (areClientCredentialsValid(appInfo.getId(), appInfo.getSecret())) {
+                            // if a client app with this client_id already registered
+                            if (db.findClientCredentials(appInfo.getId()) == null) {
+                                creds = new ClientCredentials(appInfo.getName(), appInfo.getScope(), appInfo.getDescription(),
+                                        appInfo.getRedirectUri(), appInfo.getId(), appInfo.getSecret(), appInfo.getApplicationDetails());
+                            } else {
+                                throw new OAuthException(Response.ALREADY_REGISTERED_APP, HttpResponseStatus.BAD_REQUEST);
+                            }
                         } else {
-                            throw new OAuthException(Response.ALREADY_REGISTERED_APP, HttpResponseStatus.BAD_REQUEST);
+                            throw new OAuthException(Response.INVALID_CLIENT_CREDENTIALS, HttpResponseStatus.BAD_REQUEST);
                         }
                     } else {
                         creds = new ClientCredentials(appInfo.getName(), appInfo.getScope(), appInfo.getDescription(),
@@ -100,6 +106,14 @@ public class AuthorizationServer {
             throw new OAuthException(Response.UNSUPPORTED_MEDIA_TYPE, HttpResponseStatus.BAD_REQUEST);
         }
         return creds;
+    }
+
+    private boolean areClientCredentialsValid(String clientId, String clientSecret) {
+        Pattern pattern = Pattern.compile(HttpRequestHandler.CLIENT_CREDENTIALS_PATTERN_STRING);
+        if (pattern.matcher(clientId).find() && pattern.matcher(clientSecret).find()) {
+            return true;
+        }
+        return false;
     }
 
     // /authorize?response_type=code&client_id=s6BhdRkqt3&state=xyz&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb
