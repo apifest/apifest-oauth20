@@ -110,7 +110,7 @@ public class AuthorizationServer {
 
     private boolean areClientCredentialsValid(String clientId, String clientSecret) {
         Pattern pattern = Pattern.compile(HttpRequestHandler.CLIENT_CREDENTIALS_PATTERN_STRING);
-        if (pattern.matcher(clientId).find() && pattern.matcher(clientSecret).find()) {
+        if (pattern.matcher(clientId).matches() && pattern.matcher(clientSecret).matches()) {
             return true;
         }
         return false;
