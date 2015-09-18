@@ -48,7 +48,7 @@ public class AuthorizationServer {
 
     static final String BASIC = "Basic ";
     private static final String TOKEN_TYPE_BEARER = "Bearer";
-    Pattern CLIENT_CREDENTIALS_PATTERN = Pattern.compile(HttpRequestHandler.CLIENT_CREDENTIALS_PATTERN_STRING);
+    private static final Pattern CLIENT_CREDENTIALS_PATTERN = Pattern.compile(HttpRequestHandler.CLIENT_CREDENTIALS_PATTERN_STRING);
 
     protected static Logger log = LoggerFactory.getLogger(AuthorizationServer.class);
 
