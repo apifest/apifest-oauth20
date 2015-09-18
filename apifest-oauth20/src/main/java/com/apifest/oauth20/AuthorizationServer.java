@@ -48,6 +48,7 @@ public class AuthorizationServer {
 
     static final String BASIC = "Basic ";
     private static final String TOKEN_TYPE_BEARER = "Bearer";
+    Pattern CLIENT_CREDENTIALS_PATTERN = Pattern.compile(HttpRequestHandler.CLIENT_CREDENTIALS_PATTERN_STRING);
 
     protected static Logger log = LoggerFactory.getLogger(AuthorizationServer.class);
 
@@ -109,8 +110,7 @@ public class AuthorizationServer {
     }
 
     private boolean areClientCredentialsValid(String clientId, String clientSecret) {
-        Pattern pattern = Pattern.compile(HttpRequestHandler.CLIENT_CREDENTIALS_PATTERN_STRING);
-        if (pattern.matcher(clientId).matches() && pattern.matcher(clientSecret).matches()) {
+        if (CLIENT_CREDENTIALS_PATTERN.matcher(clientId).matches() && CLIENT_CREDENTIALS_PATTERN.matcher(clientSecret).matches()) {
             return true;
         }
         return false;

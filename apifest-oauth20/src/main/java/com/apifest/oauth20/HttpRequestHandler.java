@@ -64,7 +64,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected static final String OAUTH_CLIENT_SCOPE_URI = "/oauth20/scopes";
 
     protected static final String CLIENT_CREDENTIALS_PATTERN_STRING = "[a-f[0-9]]+";
-    protected static final Pattern APPLICATION_PATTERN = Pattern.compile("/oauth20/applications/("+CLIENT_CREDENTIALS_PATTERN_STRING+")$");
+    protected static final Pattern APPLICATION_PATTERN = Pattern.compile("/oauth20/applications/(" + CLIENT_CREDENTIALS_PATTERN_STRING + ")$");
     protected static final Pattern OAUTH_CLIENT_SCOPE_PATTERN = Pattern.compile("/oauth20/scopes/((\\p{Alnum}+-?_?)+$)");
 
     protected Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);

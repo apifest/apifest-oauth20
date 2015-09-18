@@ -552,7 +552,7 @@ public class AuthorizationServerTest {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
         String content = "{\"name\":\"name\",\"scope\":\"basic extended\",\"redirect_uri\":\"http://example.com\","
-                + "\"client_id\":\"notHashedString\",\"client_secret\":\""+clientSecret+"\"}";
+                + "\"client_id\":\"notHashedString\",\"client_secret\":\"" + clientSecret + "\"}";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
         HttpHeaders headers = mock(HttpHeaders.class);
@@ -579,7 +579,7 @@ public class AuthorizationServerTest {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
         String content = "{\"name\":\"name\",\"scope\":\"basic extended\",\"redirect_uri\":\"http://example.com\","
-                + "\"client_id\":\""+clientId+"\",\"client_secret\":\"notHashedString\"}";
+                + "\"client_id\":\"" + clientId + "\",\"client_secret\":\"notHashedString\"}";
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         willReturn(buf).given(req).getContent();
         HttpHeaders headers = mock(HttpHeaders.class);
