@@ -260,7 +260,7 @@ public final class OAuthServer {
             } catch (FileNotFoundException e) {
                 log.info("Cannot find custom properties file");
             } catch (IOException e) {
-                log.error("Error loading customer properties file");
+                log.error("Error loading custom properties file");
             } finally {
                 if (in != null) {
                     try {
