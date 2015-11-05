@@ -167,6 +167,7 @@ public final class OAuthServer {
         if (customJar == null || customJar.isEmpty()) {
             log.warn("Set value for user_authenticate_jar in properties file, otherwise user authentication will always pass successfully");
         } else {
+            loadCustomProperties();
             if (userAuthClass != null && userAuthClass.length() > 0) {
                 try {
                     userAuthenticationClass = loadCustomUserAuthentication(userAuthClass);
@@ -246,6 +247,31 @@ public final class OAuthServer {
             log.error(e.getMessage());
         }
         return result;
+    }
+
+    protected static void loadCustomProperties() {
+        Properties properties = new Properties();
+        InputStream in = null;
+        File file = new File(customJar + ".properties");
+        if (file.exists()) {
+            try {
+                in = new FileInputStream(file);
+                properties.load(in);
+            } catch (FileNotFoundException e) {
+                log.info("Cannot find custom properties file");
+            } catch (IOException e) {
+                log.error("Error loading custom properties file");
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        log.error("Error closing input stream", e);
+                    }
+                }
+            }
+        }
+        new ResourceBundleImpl(properties).install();
     }
 
     private static URLClassLoader getJarClassLoader() throws MalformedURLException {
