@@ -17,9 +17,17 @@
 package com.apifest.oauth20;
 
 import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -890,5 +898,61 @@ public class ScopeServiceTest {
 
         // THEN
         assertTrue(scope.getRefreshExpiresIn() == 3600);
+    }
+
+
+    @Test
+    public void when_register_scope_invoke_input_validator() throws Exception {
+        // GIVEN
+        MockScopeValidator.install();
+        HttpRequest req = mock(HttpRequest.class);
+        int paramsCount = 4;
+        String scopeName = "test_scope";
+        String content = "{\"scope\":\"" + scopeName + "\",\"description\":\"test scope description\",\"cc_expires_in\":\"900\", \"pass_expires_in\":\"900\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        willReturn(buf).given(req).getContent();
+
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn(Response.APPLICATION_JSON).given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        willReturn(null).given(DBManagerFactory.dbManager).findScope(scopeName);
+        willReturn(true).given(DBManagerFactory.dbManager).storeScope(any(Scope.class));
+
+        // WHEN
+        service.registerScope(req);
+
+        // THEN
+        verify(ScopeValidator.getInstance(), times(paramsCount)).validate(anyString(), anyString());
+
+        MockScopeValidator.deinstall();
+    }
+
+    @Test
+    public void when_update_scope_invoke_input_validator() throws Exception {
+        // GIVEN
+        MockScopeValidator.install();
+        HttpRequest req = mock(HttpRequest.class);
+        String scopeName = "test_scope";
+        int paramsCount = 1;
+        String content = "{\"description\":\"new description\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        willReturn(buf).given(req).getContent();
+
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn(Response.APPLICATION_JSON).given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+
+        Scope scope = mock(Scope.class);
+        willReturn(scope).given(DBManagerFactory.dbManager).findScope(scopeName);
+        willReturn(true).given(DBManagerFactory.dbManager).storeScope(any(Scope.class));
+
+        // WHEN
+        service.updateScope(req, scopeName);
+
+        // THEN
+        verify(ScopeValidator.getInstance(), times(paramsCount)).validate(anyString(), anyString());
+
+        MockScopeValidator.deinstall();
     }
 }

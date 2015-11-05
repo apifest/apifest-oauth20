@@ -1772,6 +1772,99 @@ public class AuthorizationServerTest {
         verify(authServer.db).removeAccessToken(accessToken.getToken());
     }
 
+
+    @Test
+    public void when_issue_client_credentials_invoke_validator() throws Exception {
+        // GIVEN
+        MockApplicationInfoValidator.install();
+        HttpRequest req = mock(HttpRequest.class);
+        int paramsCount = 3;
+        String content = "{\"name\":\"name\",\"redirect_uri\":\"http://example.com\", \"scope\":\"basic\"}";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        willReturn(buf).given(req).getContent();
+        HttpHeaders headers = mock(HttpHeaders.class);
+        willReturn("application/json").given(headers).get(HttpHeaders.Names.CONTENT_TYPE);
+        willReturn(headers).given(req).headers();
+        Scope scope = new Scope();
+        willReturn(scope).given(authServer.db).findScope("basic");
+
+        // WHEN
+        authServer.issueClientCredentials(req);
+
+        // THEN
+        verify(ApplicationInfoValidator.getInstance(), times(paramsCount)).validate(anyString(), anyString());
+
+        MockApplicationInfoValidator.deinstall();
+    }
+
+    @Test
+    public void when_update_client_app_invoke_validator() throws Exception {
+        // GIVEN
+        MockApplicationInfoValidator.install();
+        int paramsCount = 3;
+        String content = "{\"name\":\"name\",\"redirect_uri\":\"http://example.com\", \"scope\":\"basic\"}";
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, HttpRequestHandler.APPLICATION_URI + "/" + clientId);
+        req.headers().add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        req.setContent(ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
+        Scope scope = new Scope();
+        willReturn(scope).given(authServer.db).findScope("basic");
+        willReturn(true).given(authServer).isExistingClient(clientId);
+
+        // WHEN
+        authServer.updateClientApp(req, clientId);
+
+        // THEN
+        verify(ApplicationInfoValidator.getInstance(), times(paramsCount)).validate(anyString(), anyString());
+
+        MockApplicationInfoValidator.deinstall();
+    }
+
+    @Test
+    public void when_update_client_app_with_invalid_JSON_throw_OAuth_exception_with_invalid_JSON_error() throws Exception {
+        // GIVEN
+        String content = "{\"name\":\"name\",\"redirect_uri\":\"http://example.com\", \"scope\":\"basic\"";
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, HttpRequestHandler.APPLICATION_URI + "/" + clientId);
+        req.headers().add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        req.setContent(ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
+        Scope scope = new Scope();
+        willReturn(scope).given(authServer.db).findScope("basic");
+        willReturn(true).given(authServer).isExistingClient(clientId);
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            authServer.updateClientApp(req, clientId);
+        } catch (OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, Response.INVALID_JSON_ERROR);
+    }
+
+    @Test
+    public void when_update_client_app_with_invalid_status_value_throw_OAuth_exception_with_error() throws Exception {
+        // GIVEN
+        String content = "{\"status\":\"1a\"}";
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, HttpRequestHandler.APPLICATION_URI + "/" + clientId);
+        req.headers().add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        req.setContent(ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
+        Scope scope = new Scope();
+        willReturn(scope).given(authServer.db).findScope("basic");
+        willReturn(true).given(authServer).isExistingClient(clientId);
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            authServer.updateClientApp(req, clientId);
+        } catch (OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, String.format(Response.ERROR_NOT_INTEGER, ApplicationInfo.JSON_STATUS));
+    }
+
     private HttpHeaders getAuthorizationBasicHeader() {
         // clientId:clientSecret, 203598599234220:105ef93e7bb386da3a23c32e8563434fad005fd0a6a88315fcdf946aa761c838
         String basicHeader = "Basic MjAzNTk4NTk5MjM0MjIwOjEwNWVmOTNlN2JiMzg2ZGEzYTIzYzMyZTg1NjM0MzRmYWQwMDVmZDBhNmE4ODMxNWZjZGY5NDZhYTc2MWM4Mzg=";

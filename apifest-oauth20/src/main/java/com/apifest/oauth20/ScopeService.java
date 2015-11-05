@@ -69,9 +69,8 @@ public class ScopeService {
         String responseMsg = "";
         // check Content-Type
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
-            ObjectMapper mapper = new ObjectMapper();
             try {
-                Scope scope = mapper.readValue(content, Scope.class);
+                Scope scope = InputValidator.validate(content, Scope.class);
                 if (scope.valid()) {
                     if (!Scope.validScopeName(scope.getScope())) {
                         log.error("scope name is not valid");
@@ -94,12 +93,15 @@ public class ScopeService {
                     log.error("scope is not valid");
                     throw new OAuthException(MANDATORY_FIELDS_ERROR, HttpResponseStatus.BAD_REQUEST);
                 }
+            } catch(JsonValidationException e) {
+                log.error("cannot parse scope request", e);
+                throw new OAuthException(e.getMessage(), HttpResponseStatus.BAD_REQUEST);
             } catch (JsonParseException e) {
                 log.error("cannot parse scope request", e);
-                throw new OAuthException(e.getCause(), null, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(e, Response.INVALID_JSON_ERROR, HttpResponseStatus.BAD_REQUEST);
             } catch (JsonMappingException e) {
                 log.error("cannot map scope request", e);
-                throw new OAuthException(e, null, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(e, Response.INVALID_JSON_ERROR, HttpResponseStatus.BAD_REQUEST);
             } catch (IOException e) {
                 log.error("cannot handle scope request", e);
                 throw new OAuthException(e, null, HttpResponseStatus.BAD_REQUEST);
@@ -240,9 +242,8 @@ public class ScopeService {
         String responseMsg = "";
         // check Content-Type
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
-            ObjectMapper mapper = new ObjectMapper();
             try {
-                Scope scope = mapper.readValue(content, Scope.class);
+                Scope scope = InputValidator.validate(content, Scope.class);
                 if (scope.validForUpdate()) {
                     Scope foundScope = DBManagerFactory.getInstance().findScope(scopeName);
                     if (foundScope == null) {
@@ -261,12 +262,15 @@ public class ScopeService {
                     log.error("scope is not valid");
                     throw new OAuthException(MANDATORY_SCOPE_ERROR, HttpResponseStatus.BAD_REQUEST);
                 }
+            } catch(JsonValidationException e) {
+                log.error("cannot parse scope request", e);
+                throw new OAuthException(e.getMessage(), HttpResponseStatus.BAD_REQUEST);
             } catch (JsonParseException e) {
                 log.error("cannot parse scope request", e);
-                throw new OAuthException(e, null, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(e, Response.INVALID_JSON_ERROR, HttpResponseStatus.BAD_REQUEST);
             } catch (JsonMappingException e) {
                 log.error("cannot map scope request", e);
-                throw new OAuthException(e, null, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(e, Response.INVALID_JSON_ERROR, HttpResponseStatus.BAD_REQUEST);
             } catch (IOException e) {
                 log.error("cannot handle scope request", e);
                 throw new OAuthException(e, null, HttpResponseStatus.BAD_REQUEST);

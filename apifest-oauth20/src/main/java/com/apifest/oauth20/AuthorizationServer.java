@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
@@ -61,10 +60,9 @@ public class AuthorizationServer {
         String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
 
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
-            ObjectMapper mapper = new ObjectMapper();
             ApplicationInfo appInfo;
             try {
-                appInfo = mapper.readValue(content, ApplicationInfo.class);
+                appInfo = InputValidator.validate(content, ApplicationInfo.class);
                 if (appInfo.valid()) {
                     String[] scopeList = appInfo.getScope().split(" ");
                     for (String s : scopeList) {
@@ -96,10 +94,13 @@ public class AuthorizationServer {
                 } else {
                     throw new OAuthException(Response.NAME_OR_SCOPE_OR_URI_IS_NULL, HttpResponseStatus.BAD_REQUEST);
                 }
+            } catch(JsonValidationException e) {
+                log.error("cannot parse client application request", e);
+                throw new OAuthException(e.getMessage(), HttpResponseStatus.BAD_REQUEST);
             } catch (JsonParseException e) {
-                throw new OAuthException(e, Response.CANNOT_REGISTER_APP, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(e, Response.INVALID_JSON_ERROR, HttpResponseStatus.BAD_REQUEST);
             } catch (JsonMappingException e) {
-                throw new OAuthException(e, Response.CANNOT_REGISTER_APP, HttpResponseStatus.BAD_REQUEST);
+                throw new OAuthException(e, Response.INVALID_JSON_ERROR, HttpResponseStatus.BAD_REQUEST);
             } catch (IOException e) {
                 throw new OAuthException(e, Response.CANNOT_REGISTER_APP, HttpResponseStatus.BAD_REQUEST);
             }
@@ -442,10 +443,9 @@ public class AuthorizationServer {
             if (!isExistingClient(clientId)) {
                 throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
             }
-            ObjectMapper mapper = new ObjectMapper();
             ApplicationInfo appInfo;
             try {
-                appInfo = mapper.readValue(content, ApplicationInfo.class);
+                appInfo = InputValidator.validate(content, ApplicationInfo.class);
                 if (appInfo.validForUpdate()) {
                     if (appInfo.getScope() != null) {
                         String[] scopeList = appInfo.getScope().split(" ");
@@ -460,11 +460,17 @@ public class AuthorizationServer {
                 } else {
                     throw new OAuthException(Response.UPDATE_APP_MANDATORY_PARAM_MISSING, HttpResponseStatus.BAD_REQUEST);
                 }
+            } catch(JsonValidationException e) {
+                log.error("cannot parse client application request", e);
+                throw new OAuthException(e.getMessage(), HttpResponseStatus.BAD_REQUEST);
             } catch (JsonParseException e) {
-                throw new OAuthException(e, Response.CANNOT_UPDATE_APP, HttpResponseStatus.BAD_REQUEST);
+                log.error("cannot update client application", e);
+                throw new OAuthException(e, Response.INVALID_JSON_ERROR, HttpResponseStatus.BAD_REQUEST);
             } catch (JsonMappingException e) {
-                throw new OAuthException(e, Response.CANNOT_UPDATE_APP, HttpResponseStatus.BAD_REQUEST);
+                log.error("cannot update client application", e);
+                throw new OAuthException(e, Response.INVALID_JSON_ERROR, HttpResponseStatus.BAD_REQUEST);
             } catch (IOException e) {
+                log.error("cannot update client application", e);
                 throw new OAuthException(e, Response.CANNOT_UPDATE_APP, HttpResponseStatus.BAD_REQUEST);
             }
         } else {

@@ -41,6 +41,8 @@ public class ApplicationInfo implements Serializable {
 
     protected static Logger log = LoggerFactory.getLogger(ApplicationInfo.class);
 
+    public static final String JSON_STATUS = "status";
+
     private static final long serialVersionUID = 6017283924235608024L;
 
     @JsonProperty("redirect_uri")
