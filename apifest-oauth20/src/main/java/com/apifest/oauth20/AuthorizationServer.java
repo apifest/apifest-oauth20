@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
@@ -56,13 +57,12 @@ public class AuthorizationServer {
 
     public ClientCredentials issueClientCredentials(HttpRequest req) throws OAuthException {
         ClientCredentials creds = null;
-        String content = req.getContent().toString(CharsetUtil.UTF_8);
         String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
 
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             ApplicationInfo appInfo;
             try {
-                appInfo = InputValidator.validate(content, ApplicationInfo.class);
+                appInfo = InputValidator.validate(new ChannelBufferInputStream(req.getContent()), ApplicationInfo.class);
                 if (appInfo.valid()) {
                     String[] scopeList = appInfo.getScope().split(" ");
                     for (String s : scopeList) {
@@ -433,7 +433,6 @@ public class AuthorizationServer {
     }
 
     public boolean updateClientApp(HttpRequest req, String clientId) throws OAuthException {
-        String content = req.getContent().toString(CharsetUtil.UTF_8);
         String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
 //            String clientId = getBasicAuthorizationClientId(req);
@@ -445,7 +444,7 @@ public class AuthorizationServer {
             }
             ApplicationInfo appInfo;
             try {
-                appInfo = InputValidator.validate(content, ApplicationInfo.class);
+                appInfo = InputValidator.validate(new ChannelBufferInputStream(req.getContent()), ApplicationInfo.class);
                 if (appInfo.validForUpdate()) {
                     if (appInfo.getScope() != null) {
                         String[] scopeList = appInfo.getScope().split(" ");

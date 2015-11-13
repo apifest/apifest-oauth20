@@ -19,6 +19,9 @@ import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 
+import java.io.ByteArrayInputStream;
+
+import org.jboss.netty.util.CharsetUtil;
 import org.testng.annotations.Test;
 
 /**
@@ -36,8 +39,10 @@ public class InputValidatorTest {
 
         String inputValue = "300";
 
+        String testString = "{\"" + Scope.JSON_CC_EXPIRES_IN + "\":\"" + inputValue + "\"}";
+
         // WHEN
-        InputValidator.validate("{\"" + Scope.JSON_CC_EXPIRES_IN + "\":\"" + inputValue + "\"}", Scope.class);
+        InputValidator.validate(new ByteArrayInputStream(testString.getBytes(CharsetUtil.UTF_8)), Scope.class);
 
         // THEN
         verify(ScopeValidator.getInstance()).validate(Scope.JSON_CC_EXPIRES_IN, inputValue);
@@ -53,7 +58,8 @@ public class InputValidatorTest {
         String inputValue = "1";
 
         // WHEN
-        InputValidator.validate("{\"" + ApplicationInfo.JSON_STATUS + "\":\"" + inputValue + "\"}", ApplicationInfo.class);
+        String testString = "{\"" + ApplicationInfo.JSON_STATUS + "\":\"" + inputValue + "\"}";
+        InputValidator.validate(new ByteArrayInputStream(testString.getBytes(CharsetUtil.UTF_8)), ApplicationInfo.class);
 
         // THEN
         verify(ApplicationInfoValidator.getInstance()).validate(ApplicationInfo.JSON_STATUS, inputValue);
@@ -64,6 +70,7 @@ public class InputValidatorTest {
     public void when_no_validator_do_not_throw_NPE() throws Exception {
 
         // WHEN
-        InputValidator.validate("{\"client_id\":\"123456\"}", ClientCredentials.class);
+        String testString = "{\"client_id\":\"123456\"}";
+        InputValidator.validate(new ByteArrayInputStream(testString.getBytes(CharsetUtil.UTF_8)), ClientCredentials.class);
     }
 }

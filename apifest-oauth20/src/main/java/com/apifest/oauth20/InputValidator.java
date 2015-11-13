@@ -16,6 +16,7 @@
 package com.apifest.oauth20;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParseException;
@@ -31,6 +32,8 @@ import org.codehaus.jackson.util.JsonParserDelegate;
  */
 public class InputValidator {
 
+    private static ObjectMapper mapper = new ObjectMapper();
+
     /**
      * Validates an input and returns an instance of a given class constructed from the input.
      * @param input the input to be validated
@@ -39,14 +42,14 @@ public class InputValidator {
      * @throws JsonParseException
      * @throws IOException
      */
-    public static <T> T validate(String input, final Class<T> clazz) throws JsonParseException, IOException {
-        ObjectMapper mapper = new ObjectMapper();
+    public static <T> T validate(InputStream input, final Class<T> clazz) throws JsonParseException, IOException {
         JsonFactory factory = mapper.getJsonFactory();
         JsonParser parser = null;
         T obj = null;
         parser = factory.createJsonParser(input);
         JsonParser parserWrapper = new JsonParserDelegate(parser) {
 
+            @Override
             public String getText() throws IOException, JsonParseException {
                 String str = delegate.getText();
                 try {
