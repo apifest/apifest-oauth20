@@ -26,11 +26,11 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
-import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,13 +64,12 @@ public class ScopeService {
      * @return String message that will be returned in the response
      */
     public String registerScope(HttpRequest req) throws OAuthException {
-        String content = req.getContent().toString(CharsetUtil.UTF_8);
         String contentType = (req.headers() != null) ? req.headers().get(HttpHeaders.Names.CONTENT_TYPE) : null;
         String responseMsg = "";
         // check Content-Type
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             try {
-                Scope scope = InputValidator.validate(content, Scope.class);
+                Scope scope = InputValidator.validate(new ChannelBufferInputStream(req.getContent()), Scope.class);
                 if (scope.valid()) {
                     if (!Scope.validScopeName(scope.getScope())) {
                         log.error("scope name is not valid");
@@ -237,13 +236,12 @@ public class ScopeService {
      * @return String message that will be returned in the response
      */
     public String updateScope(HttpRequest req, String scopeName) throws OAuthException {
-        String content = req.getContent().toString(CharsetUtil.UTF_8);
         String contentType = (req.headers() != null) ? req.headers().get(HttpHeaders.Names.CONTENT_TYPE) : null;
         String responseMsg = "";
         // check Content-Type
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             try {
-                Scope scope = InputValidator.validate(content, Scope.class);
+                Scope scope = InputValidator.validate(new ChannelBufferInputStream(req.getContent()), Scope.class);
                 if (scope.validForUpdate()) {
                     Scope foundScope = DBManagerFactory.getInstance().findScope(scopeName);
                     if (foundScope == null) {
