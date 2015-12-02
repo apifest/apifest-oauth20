@@ -27,12 +27,15 @@ import java.util.Map;
 import java.util.Set;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 
 public class RedisDBManager implements DBManager {
 
+    private static final int MAX_CONNECTIONS = 30;
     private static final String ACCESS_TOKEN_BY_USER_ID_PREFIX_NAME = "atuid:";
     private static final String ACCESS_TOKEN_PREFIX_NAME = "at:";
+    public static final byte WHEN_EXHAUSTED_FAIL = 0;
 
     private static Set<String> sentinels;
     private static JedisSentinelPool pool;
@@ -42,10 +45,13 @@ public class RedisDBManager implements DBManager {
     static {
         sentinels = new HashSet<String>();
         String[] sentinelsList = OAuthServer.getRedisSentinels().split(",");
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxActive(MAX_CONNECTIONS);
+        poolConfig.setWhenExhaustedAction(WHEN_EXHAUSTED_FAIL);
         for (String sentinel : sentinelsList) {
             sentinels.add(sentinel);
         }
-        pool = new JedisSentinelPool(OAuthServer.getRedisMaster(), sentinels);
+        pool = new JedisSentinelPool(OAuthServer.getRedisMaster(), sentinels, poolConfig);
     }
 
     public void setupDBManager() {
@@ -245,6 +251,7 @@ public class RedisDBManager implements DBManager {
         scopeMap.put(Scope.REFRESH_EXPIRES_IN_FIELD, String.valueOf(scope.getRefreshExpiresIn()));
         Jedis jedis = pool.getResource();
         jedis.hmset("sc:" + scope.getScope(), scopeMap);
+        pool.returnResource(jedis);
         return true;
     }
 
@@ -302,6 +309,7 @@ public class RedisDBManager implements DBManager {
             clientApp.put("details", JSONUtils.convertMapToJSON(applicationDetails));
         }
         jedis.hmset("cc:" + clientId, clientApp);
+        pool.returnResource(jedis);
         return true;
     }
 
