@@ -32,6 +32,7 @@ import redis.clients.jedis.JedisSentinelPool;
 
 public class RedisDBManager implements DBManager {
 
+    private static final int MAX_CONNECTIONS = 30;
     private static final String ACCESS_TOKEN_BY_USER_ID_PREFIX_NAME = "atuid:";
     private static final String ACCESS_TOKEN_PREFIX_NAME = "at:";
     public static final byte WHEN_EXHAUSTED_FAIL = 0;
@@ -45,7 +46,7 @@ public class RedisDBManager implements DBManager {
         sentinels = new HashSet<String>();
         String[] sentinelsList = OAuthServer.getRedisSentinels().split(",");
         JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMaxActive(30);
+        poolConfig.setMaxActive(MAX_CONNECTIONS);
         poolConfig.setWhenExhaustedAction(WHEN_EXHAUSTED_FAIL);
         for (String sentinel : sentinelsList) {
             sentinels.add(sentinel);
