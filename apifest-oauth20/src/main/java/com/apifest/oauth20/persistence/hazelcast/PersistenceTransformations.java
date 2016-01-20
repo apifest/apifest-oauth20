@@ -22,7 +22,7 @@ import com.apifest.oauth20.AccessToken;
 import com.apifest.oauth20.ApplicationInfo;
 import com.apifest.oauth20.AuthCode;
 import com.apifest.oauth20.ClientCredentials;
-import com.apifest.oauth20.JSONUtils;
+import com.apifest.oauth20.JsonUtils;
 import com.apifest.oauth20.Scope;
 
 /**
@@ -137,7 +137,7 @@ public class PersistenceTransformations {
         persistentAccessToken.setType(accessToken.getType());
         persistentAccessToken.setUserId(accessToken.getUserId());
         persistentAccessToken.setValid(accessToken.isValid());
-        persistentAccessToken.setDetails(JSONUtils.convertMapToJSON(accessToken.getDetails()));
+        persistentAccessToken.setDetails(JsonUtils.convertMapToJSON(accessToken.getDetails()));
         String refreshExpiresIn = (accessToken.getRefreshExpiresIn() != null && !accessToken.getRefreshExpiresIn().isEmpty()) ?
                 accessToken.getRefreshExpiresIn() : accessToken.getExpiresIn();
         persistentAccessToken.setRefreshExpiresIn(refreshExpiresIn);
@@ -158,7 +158,7 @@ public class PersistenceTransformations {
             accessToken.setType(persistentAccessToken.getType());
             accessToken.setUserId(persistentAccessToken.getUserId());
             accessToken.setValid(persistentAccessToken.isValid());
-            accessToken.setDetails(JSONUtils.convertStringToMap(persistentAccessToken.getDetails()));
+            accessToken.setDetails(JsonUtils.convertStringToMap(persistentAccessToken.getDetails()));
             String refreshExpiresIn = (persistentAccessToken.getRefreshExpiresIn() != null && !persistentAccessToken.getRefreshExpiresIn().isEmpty()) ?
                     persistentAccessToken .getRefreshExpiresIn() : persistentAccessToken.getExpiresIn();
             accessToken.setRefreshExpiresIn(refreshExpiresIn);

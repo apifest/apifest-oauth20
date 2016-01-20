@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Rossitsa Borissova
  */
-public final class JSONUtils {
+public final class JsonUtils {
 
-    private static Logger log = LoggerFactory.getLogger(JSONUtils.class);
+    private static Logger log = LoggerFactory.getLogger(JsonUtils.class);
 
     public static String convertMapToJSON(Map<String, String> list) {
         String result = null;

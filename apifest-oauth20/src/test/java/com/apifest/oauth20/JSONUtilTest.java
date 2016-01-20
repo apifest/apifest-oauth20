@@ -34,7 +34,7 @@ public class JSONUtilTest {
         String json = "{\"key1\":\"value1\", \"key2\":\"value2\"}";
 
         // WHEN
-        Map<String, String> map = JSONUtils.convertStringToMap(json);
+        Map<String, String> map = JsonUtils.convertStringToMap(json);
 
         // THEN
         assertNotNull(map.get("key1"));
@@ -48,7 +48,7 @@ public class JSONUtilTest {
         details.put("key2", "value2");
 
         // WHEN
-        String json = JSONUtils.convertMapToJSON(details);
+        String json = JsonUtils.convertMapToJSON(details);
 
         // THEN
         assertTrue(json.toString().contains("\"key1\":\"value1\""));

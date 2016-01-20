@@ -183,7 +183,7 @@ public class ApplicationInfo implements Serializable {
         appInfo.registered = new Date((Long) map.get("created"));
         appInfo.scope = (String) map.get("scope");
         if (map.get("applicationDetails") != null) {
-            appInfo.applicationDetails = JSONUtils.convertStringToMap(map.get("applicationDetails").toString());
+            appInfo.applicationDetails = JsonUtils.convertStringToMap(map.get("applicationDetails").toString());
         }
         return appInfo;
     }
@@ -199,7 +199,7 @@ public class ApplicationInfo implements Serializable {
         appInfo.status = Integer.valueOf(map.get("status"));
         appInfo.registered = new Date(Long.valueOf(map.get("created")));
         appInfo.scope = map.get("scope");
-        appInfo.applicationDetails = JSONUtils.convertStringToMap(map.get("details"));
+        appInfo.applicationDetails = JsonUtils.convertStringToMap(map.get("details"));
         return appInfo;
     }
 }

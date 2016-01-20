@@ -239,7 +239,7 @@ public class AccessToken implements Serializable {
         accessToken.codeId = (String) map.get("codeId");
         accessToken.userId = (String) map.get("userId");
         accessToken.created = (Long) map.get("created");
-        accessToken.details = JSONUtils.convertStringToMap((String) map.get("details"));
+        accessToken.details = JsonUtils.convertStringToMap((String) map.get("details"));
         accessToken.refreshExpiresIn = (String) ((map.get("refreshExpiresIn") != null ? map.get("refreshExpiresIn") : accessToken.expiresIn));
         return accessToken;
     }
@@ -256,7 +256,7 @@ public class AccessToken implements Serializable {
         accessToken.codeId = map.get("codeId");
         accessToken.userId = map.get("userId");
         accessToken.created = Long.parseLong(map.get("created"));
-        accessToken.details = JSONUtils.convertStringToMap(map.get("details"));
+        accessToken.details = JsonUtils.convertStringToMap(map.get("details"));
         accessToken.refreshExpiresIn = map.get("refreshExpiresIn") != null ? map.get("refreshExpiresIn") : accessToken.expiresIn;
         return accessToken;
     }

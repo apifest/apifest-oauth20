@@ -91,7 +91,7 @@ public class RedisDBManager implements DBManager {
         credentials.put("status", String.valueOf(clientCreds.getStatus()));
         credentials.put("created", String.valueOf(clientCreds.getCreated()));
         credentials.put("scope", String.valueOf(clientCreds.getScope()));
-        credentials.put("details", JSONUtils.convertMapToJSON(clientCreds.getApplicationDetails()));
+        credentials.put("details", JsonUtils.convertMapToJSON(clientCreds.getApplicationDetails()));
         jedis.hmset("cc:" + clientCreds.getId(), credentials);
         pool.returnResource(jedis);
     }
@@ -149,7 +149,7 @@ public class RedisDBManager implements DBManager {
         accessTokenMap.put("codeId", accessToken.getCodeId());
         accessTokenMap.put("userId", accessToken.getUserId());
         accessTokenMap.put("created", String.valueOf(accessToken.getCreated()));
-        accessTokenMap.put("details", JSONUtils.convertMapToJSON(accessToken.getDetails()));
+        accessTokenMap.put("details", JsonUtils.convertMapToJSON(accessToken.getDetails()));
         accessTokenMap.put("refreshExpiresIn", accessToken.getRefreshExpiresIn());
         Jedis jedis = pool.getResource();
         jedis.hmset("at:" + accessToken.getToken(), accessTokenMap);
@@ -306,7 +306,7 @@ public class RedisDBManager implements DBManager {
             clientApp.put("status", String.valueOf(status));
         }
         if(applicationDetails != null) {
-            clientApp.put("details", JSONUtils.convertMapToJSON(applicationDetails));
+            clientApp.put("details", JsonUtils.convertMapToJSON(applicationDetails));
         }
         jedis.hmset("cc:" + clientId, clientApp);
         pool.returnResource(jedis);
