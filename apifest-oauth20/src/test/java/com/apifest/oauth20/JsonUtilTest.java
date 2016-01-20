@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 /**
  * @author Rossitsa Borissova
  */
-public class JSONUtilTest {
+public class JsonUtilTest {
 
     @Test
     public void when_json_string_convert_to_list() throws Exception {
