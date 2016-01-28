@@ -202,4 +202,21 @@ public class ApplicationInfo implements Serializable {
         appInfo.applicationDetails = JsonUtils.convertStringToMap(map.get("details"));
         return appInfo;
     }
+
+    public static ApplicationInfo loadFromClientCredentials(ClientCredentials creds) {
+        ApplicationInfo appInfo = null;
+        if (creds != null) {
+            appInfo = new ApplicationInfo();
+            appInfo.setName(creds.getName());
+            appInfo.setDescription(creds.getDescr());
+            appInfo.setId(creds.getId());
+            appInfo.setSecret(creds.getSecret());
+            appInfo.setScope(creds.getScope());
+            appInfo.setRedirectUri(creds.getUri());
+            appInfo.setRegistered(new Date(creds.getCreated()));
+            appInfo.setStatus(creds.getStatus());
+            appInfo.setApplicationDetails(creds.getApplicationDetails());
+        }
+        return appInfo;
+    }
 }

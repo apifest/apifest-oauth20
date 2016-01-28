@@ -18,6 +18,7 @@ package com.apifest.oauth20;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -258,6 +259,23 @@ public class AccessToken implements Serializable {
         accessToken.created = Long.parseLong(map.get("created"));
         accessToken.details = JsonUtils.convertStringToMap(map.get("details"));
         accessToken.refreshExpiresIn = map.get("refreshExpiresIn") != null ? map.get("refreshExpiresIn") : accessToken.expiresIn;
+        return accessToken;
+    }
+
+    public static AccessToken loadFromStringList(List<String> list) {
+        AccessToken accessToken = new AccessToken();
+        accessToken.token = list.get(0);
+        accessToken.refreshToken = list.get(1);;
+        accessToken.expiresIn = list.get(2);
+        accessToken.type = list.get(3);
+        accessToken.scope = list.get(4);
+        accessToken.valid = Boolean.parseBoolean(list.get(5));
+        accessToken.clientId = list.get(6);
+        accessToken.codeId = list.get(7);
+        accessToken.userId = list.get(8);
+        accessToken.created = Long.parseLong(list.get(9));
+        accessToken.details = JsonUtils.convertStringToMap(list.get(10));
+        accessToken.refreshExpiresIn = list.get(11) != null ? list.get(11) : accessToken.expiresIn;
         return accessToken;
     }
 

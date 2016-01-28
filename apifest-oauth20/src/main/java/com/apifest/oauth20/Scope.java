@@ -16,6 +16,7 @@
 
 package com.apifest.oauth20;
 
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,17 +32,17 @@ import org.codehaus.jackson.annotate.JsonPropertyOrder;
 @JsonPropertyOrder({ "scope", "description", "cc_expires_in", "pass_expires_in", "refresh_expires_in" })
 public class Scope {
 
-    static final String SCOPE_FIELD = "scope";
-    static final String DESCRIPTION_FIELD = "description";
-    static final String CC_EXPIRES_IN_FIELD = "ccExpiresIn";
-    static final String PASS_EXPIRES_IN_FIELD = "passExpiresIn";
-    static final String REFRESH_EXPIRES_IN_FIELD = "refreshExpiresIn";
+    public static final String SCOPE_FIELD = "scope";
+    public static final String DESCRIPTION_FIELD = "description";
+    public static final String CC_EXPIRES_IN_FIELD = "ccExpiresIn";
+    public static final String PASS_EXPIRES_IN_FIELD = "passExpiresIn";
+    public static final String REFRESH_EXPIRES_IN_FIELD = "refreshExpiresIn";
 
-    static final String JSON_CC_EXPIRES_IN = "cc_expires_in";
-    static final String JSON_PASS_EXPIRES_IN = "pass_expires_in";
-    static final String JSON_REFRESH_EXPIRES_IN = "refresh_expires_in";
+    public static final String JSON_CC_EXPIRES_IN = "cc_expires_in";
+    public static final String JSON_PASS_EXPIRES_IN = "pass_expires_in";
+    public static final String JSON_REFRESH_EXPIRES_IN = "refresh_expires_in";
 
-    static final Pattern SCOPE_PATTERN = Pattern.compile("^(\\p{Alnum}+-?_?)+$");
+    public static final Pattern SCOPE_PATTERN = Pattern.compile("^(\\p{Alnum}+-?_?)+$");
 
     @JsonProperty(SCOPE_FIELD)
     private String scope;
@@ -115,6 +116,17 @@ public class Scope {
         scope.ccExpiresIn = Integer.valueOf(map.get(CC_EXPIRES_IN_FIELD));
         scope.passExpiresIn = Integer.valueOf(map.get(PASS_EXPIRES_IN_FIELD));
         String refreshExpiresIn = (map.get(REFRESH_EXPIRES_IN_FIELD) != null && map.get(REFRESH_EXPIRES_IN_FIELD).length() > 0) ? map.get(REFRESH_EXPIRES_IN_FIELD) : map.get(PASS_EXPIRES_IN_FIELD);
+        scope.refreshExpiresIn = Integer.valueOf(refreshExpiresIn);
+        return scope;
+    }
+
+    public static Scope loadFromStringList(List<String> list) {
+        Scope scope = new Scope();
+        scope.scope = list.get(0);
+        scope.description = list.get(1);
+        scope.ccExpiresIn = Integer.valueOf(list.get(2));
+        scope.passExpiresIn = Integer.valueOf(list.get(3));
+        String refreshExpiresIn = (list.get(4) != null && list.get(4).length() > 0) ? list.get(4) : list.get(3);
         scope.refreshExpiresIn = Integer.valueOf(refreshExpiresIn);
         return scope;
     }
