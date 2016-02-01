@@ -123,7 +123,7 @@ public class LuaScripts {
             + "local userId = ARGV[9]; "
             + "local created = ARGV[10]; "
             + "redis.call('HMSET','acc:'..code,'_id',_id,'code',code,'clientId',clientId,'redirectUri',redirectUri,'state',state,'scope',scope,'type',type,'valid',valid,'userId',userId,'created',created); "
-            + "redis.call('EXPIRE', acc:'..code, 1800); "
+            + "redis.call('EXPIRE', 'acc:'..code, 1800); "
             + "redis.call('HSET', 'acuri:'..code..redirectUri, 'ac', code); "
             + "redis.call('EXPIRE', 'acuri:'..code..redirectUri, 1800); ";
 

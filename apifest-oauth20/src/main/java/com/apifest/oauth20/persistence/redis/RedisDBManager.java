@@ -285,8 +285,14 @@ public class RedisDBManager implements DBManager {
     public List<ApplicationInfo> getAllApplications() {
         List<ApplicationInfo> list = new ArrayList<ApplicationInfo>();
         List<String> allApps = (List<String>) LuaScripts.runScript(ScriptType.GET_ALL_APPS, Collections.<String>emptyList(), Collections.<String>emptyList());
+        if (allApps == null || allApps.isEmpty()) {
+            return list;
+        }
         for (String app : allApps) {
                 ApplicationInfo creds = ApplicationInfo.loadFromClientCredentials(findClientCredentials(app));
+                if (creds == null) {
+                    continue;
+                }
                 list.add(creds);
         }
         return list;
