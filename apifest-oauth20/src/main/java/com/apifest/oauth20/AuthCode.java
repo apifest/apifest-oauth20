@@ -17,6 +17,7 @@
 package com.apifest.oauth20;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
@@ -189,6 +190,21 @@ public class AuthCode {
         authCode.userId = map.get("userId");
         authCode.created = Long.valueOf(map.get("created"));
         authCode.id = map.get("_id");
+        return authCode;
+    }
+
+    public static AuthCode loadFromStringList(List<String> list) {
+        AuthCode authCode = new AuthCode();
+        authCode.id = list.get(0);
+        authCode.code = list.get(1);
+        authCode.clientId = list.get(2);
+        authCode.redirectUri = list.get(3);
+        authCode.state = list.get(4);
+        authCode.scope = list.get(5);
+        authCode.type = list.get(6);
+        authCode.valid = Boolean.valueOf(list.get(7));
+        authCode.userId = list.get(8);
+        authCode.created = Long.valueOf(list.get(9));
         return authCode;
     }
 }

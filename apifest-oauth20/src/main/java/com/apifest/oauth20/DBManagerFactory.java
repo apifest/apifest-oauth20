@@ -20,6 +20,7 @@
 package com.apifest.oauth20;
 
 import com.apifest.oauth20.persistence.hazelcast.HazelcastDBManager;
+import com.apifest.oauth20.persistence.redis.RedisDBManager;
 
 public class DBManagerFactory {
 
@@ -34,7 +35,6 @@ public class DBManagerFactory {
         if (dbManager == null) {
             if (REDIS_DB.equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new RedisDBManager();
-                ((RedisDBManager) dbManager).setupDBManager();
             } else if (MONGO_DB.equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new MongoDBManager();
             } else {

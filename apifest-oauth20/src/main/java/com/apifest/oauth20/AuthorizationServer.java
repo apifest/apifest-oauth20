@@ -349,16 +349,7 @@ public class AuthorizationServer {
         ApplicationInfo appInfo = null;
         ClientCredentials creds = db.findClientCredentials(clientId);
         if (creds != null) {
-            appInfo = new ApplicationInfo();
-            appInfo.setName(creds.getName());
-            appInfo.setDescription(creds.getDescr());
-            appInfo.setId(clientId);
-            appInfo.setSecret(creds.getSecret());
-            appInfo.setScope(creds.getScope());
-            appInfo.setRedirectUri(creds.getUri());
-            appInfo.setRegistered(new Date(creds.getCreated()));
-            appInfo.setStatus(creds.getStatus());
-            appInfo.setApplicationDetails(creds.getApplicationDetails());
+            appInfo = ApplicationInfo.loadFromClientCredentials(creds);
         }
         return appInfo;
     }

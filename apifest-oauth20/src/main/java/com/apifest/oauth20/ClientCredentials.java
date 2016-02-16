@@ -18,6 +18,7 @@ package com.apifest.oauth20;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -224,6 +225,22 @@ public class ClientCredentials implements Serializable {
         creds.scope = map.get("scope");
         // TODO: check whether details is the name of the field
         creds.applicationDetails = JsonUtils.convertStringToMap(map.get("details"));
+        return creds;
+    }
+
+    public static ClientCredentials loadFromStringList(List<String> list) {
+        ClientCredentials creds = new ClientCredentials();
+        creds.id = list.get(0);
+        creds.secret = list.get(1);
+        creds.name = list.get(2);;
+        creds.uri = list.get(3);
+        creds.descr = list.get(4);
+        creds.type = Integer.valueOf(list.get(5));
+        creds.status = Integer.valueOf(list.get(6));
+        creds.created = Long.valueOf(list.get(7));
+        creds.scope = list.get(8);
+        // TODO: check whether details is the name of the field
+        creds.applicationDetails = JsonUtils.convertStringToMap(list.get(9));
         return creds;
     }
 
