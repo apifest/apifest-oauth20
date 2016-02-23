@@ -28,6 +28,7 @@ public class DBManagerFactory {
 
     public static final String REDIS_DB = "redis";
     public static final String MONGO_DB = "mongodb";
+    public static final String CASSANDRA_DB = "cassandra";
     public static final String DEFAULT_DB = "hazelcast";
 
 
@@ -36,6 +37,8 @@ public class DBManagerFactory {
             if (REDIS_DB.equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new RedisDBManager();
             } else if (MONGO_DB.equalsIgnoreCase(OAuthServer.getDatabase())) {
+                dbManager = new MongoDBManager();
+            } else if (CASSANDRA_DB.equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new MongoDBManager();
             } else {
                 dbManager = new HazelcastDBManager();
