@@ -19,6 +19,7 @@
  */
 package com.apifest.oauth20;
 
+import com.apifest.oauth20.persistence.cassandra.CassandraDBManager;
 import com.apifest.oauth20.persistence.hazelcast.HazelcastDBManager;
 import com.apifest.oauth20.persistence.redis.RedisDBManager;
 
@@ -41,7 +42,8 @@ public class DBManagerFactory {
             } else if (CASSANDRA_DB.equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new MongoDBManager();
             } else {
-                dbManager = new HazelcastDBManager();
+//                dbManager = new HazelcastDBManager();
+                dbManager = new CassandraDBManager();
             }
         }
         return dbManager;
