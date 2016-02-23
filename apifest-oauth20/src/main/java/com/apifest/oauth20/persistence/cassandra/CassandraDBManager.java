@@ -19,10 +19,10 @@ public class CassandraDBManager implements DBManager {
     protected static Logger log = LoggerFactory.getLogger(DBManager.class);
 
     protected static final String KEYSPACE_NAME = "apifest";
+    protected static final String SCOPE_TABLE_NAME = "scopes";
     protected static final String CLIENTS_TABLE_NAME = "clients";
     protected static final String AUTH_CODE_TABLE_NAME = "auth_codes";
     protected static final String ACCESS_TOKEN_TABLE_NAME = "access_tokens";
-    protected static final String SCOPE_TABLE_NAME = "scopes";
 
 
     protected static final String SCOPE_TABLE_CQL =
@@ -50,6 +50,36 @@ public class CassandraDBManager implements DBManager {
             " PRIMARY KEY (client_id)" +
             ");";
 
+    protected static final String AUTH_CODE_TABLE_CQL =
+            "CREATE TABLE IF NOT EXISTS "+KEYSPACE_NAME+"."+AUTH_CODE_TABLE_NAME+" (" +
+            " code text," +
+            " client_id text," +
+            " redirect_uri text," +
+            " state text," +
+            " scope text," +
+            " type text," +
+            " valid boolean," +
+            " user_id text," +
+            " created timestamp," +
+            " PRIMARY KEY (code)" +
+            ");";
+
+    protected static final String ACCESS_TOKEN_TABLE_CQL =
+            "CREATE TABLE IF NOT EXISTS "+KEYSPACE_NAME+"."+ACCESS_TOKEN_TABLE_NAME+" (" +
+                    " access_token text," +
+                    " refresh_token text," +
+                    " expires_in text," +
+                    " scope text," +
+                    " type text," +
+                    " valid boolean," +
+                    " client_id text," +
+                    " code_id text," +
+                    " user_id text," +
+                    " details MAP<text, text>," +
+                    " created timestamp," +
+                    " refresh_expires_in text," +
+                    " PRIMARY KEY (access_token)" +
+                    ");";
 
     private Cluster cluster;
     private Session session;
@@ -68,8 +98,15 @@ public class CassandraDBManager implements DBManager {
     public CassandraDBManager() {
         connect("172.16.11.100");
         session = cluster.connect(KEYSPACE_NAME);
+
+        // create tables (if not exists)
         session.execute(SCOPE_TABLE_CQL);
         session.execute(CLIENTS_TABLE_CQL);
+        session.execute(AUTH_CODE_TABLE_CQL);
+        session.execute(ACCESS_TOKEN_TABLE_CQL);
+
+        // create sec. indexes (if not exists)
+        session.execute("CREATE INDEX IF NOT EXISTS redirect_uri_idx ON "+KEYSPACE_NAME+"."+AUTH_CODE_TABLE_NAME+" (redirect_uri);");
     }
 
 
@@ -83,37 +120,129 @@ public class CassandraDBManager implements DBManager {
 
     @Override
     public void storeAccessToken(AccessToken accessToken) {
-        //TODO: persist accessToken obj into ACCESS_TOKEN_TABLE_NAME
-        // N.B. accessToken.token is the key... byt "findAccessTokenByRefreshToken" need to lookup by refreshToken and clientId
-    }
-
-    @Override
-    public AccessToken findAccessTokenByRefreshToken(String refreshToken, String clientId) {
-        // MongoDB performa a lookup into ACCESS_TOKEN_TABLE_NAME
-        // using refreshToken and clientId as lookup key
-        return null;
+        try {
+            Insert stmt = QueryBuilder.insertInto(KEYSPACE_NAME, ACCESS_TOKEN_TABLE_NAME)
+                .value("access_token", accessToken.getToken())
+                .value("refresh_token", accessToken.getRefreshToken())
+                .value("expires_in", accessToken.getExpiresIn())
+                .value("scope", accessToken.getScope())
+                .value("type", accessToken.getType())
+                .value("valid", accessToken.isValid())
+                .value("client_id", accessToken.getClientId())
+                .value("code_id", accessToken.getCodeId())
+                .value("user_id", accessToken.getUserId())
+                .value("details", accessToken.getDetails())
+                .value("created", accessToken.getCreated())
+                .value("refresh_expires_in", accessToken.getRefreshExpiresIn())
+            ;
+            session.execute(stmt);
+        } catch(Throwable e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
     public void updateAccessTokenValidStatus(String accessToken, boolean valid) {
-        // ACCESS_TOKEN_TABLE_NAME
+        try {
+            Update.Where stmt = QueryBuilder.update(KEYSPACE_NAME, ACCESS_TOKEN_TABLE_NAME)
+                    .with(QueryBuilder.set("valid", valid))
+                    .where(QueryBuilder.eq("access_token", accessToken))
+                    ;
+            session.execute(stmt);
+        } catch(Throwable e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
     public AccessToken findAccessToken(String accessToken) {
-        // ACCESS_TOKEN_TABLE_NAME
+        try {
+            Select.Where stmt = QueryBuilder.select().from(KEYSPACE_NAME, ACCESS_TOKEN_TABLE_NAME)
+                    .where(QueryBuilder.eq("access_token", accessToken));
+            ResultSet rs = session.execute(stmt);
+            Iterator<Row> iter = rs.iterator();
+            if(iter.hasNext()) {
+                AccessToken atoken = new AccessToken();
+                Row row = iter.next();
+                mapRowToAccessToken(row, atoken);
+                return atoken;
+            }
+        } catch(Throwable e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
         return null;
+    }
+    private void mapRowToAccessToken(Row row, AccessToken atoken) {
+        atoken.setToken(row.getString("access_token"));
+        atoken.setRefreshToken(row.getString("refresh_token"));
+        atoken.setExpiresIn(row.getString("expires_in"));
+        atoken.setScope(row.getString("scope"));
+        atoken.setType(row.getString("type"));
+        atoken.setValid(row.getBool("valid"));
+        atoken.setClientId(row.getString("client_id"));
+        atoken.setCodeId(row.getString("code_id"));
+        atoken.setUserId(row.getString("user_id"));
+        atoken.setDetails(row.getMap("details", String.class, String.class));
+        atoken.setCreated(row.getTimestamp("created").getTime());
+        atoken.setRefreshExpiresIn(row.getString("refresh_expires_in"));
     }
 
     @Override
     public void removeAccessToken(String accessToken) {
-        // delete from ACCESS_TOKEN_TABLE_NAME using accessToken as key
+        try {
+            Delete.Where stmt = QueryBuilder.delete().from(KEYSPACE_NAME, SCOPE_TABLE_NAME)
+                    .where(QueryBuilder.eq("access_token", accessToken));
+            session.execute(stmt);
+        } catch(Throwable e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public AccessToken findAccessTokenByRefreshToken(String refreshToken, String clientId) {
+        // TODO: build a materialized view with refreshToken + clientId key
+        try {
+            Select.Where stmt = QueryBuilder.select().from(KEYSPACE_NAME, ACCESS_TOKEN_TABLE_NAME)
+                .where()
+                        .and(QueryBuilder.eq("refresh_token", refreshToken))
+                        .and(QueryBuilder.eq("client_id", clientId))
+            ;
+            ResultSet rs = session.execute(stmt);
+            Iterator<Row> iter = rs.iterator();
+            if(iter.hasNext()) {
+                AccessToken atoken = new AccessToken();
+                Row row = iter.next();
+                mapRowToAccessToken(row, atoken);
+                return atoken;
+            }
+        } catch(Throwable e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+        return null;
     }
 
     @Override
     public List<AccessToken> getAccessTokenByUserIdAndClientApp(String userId, String clientId) {
-        // ACCESS_TOKEN_TABLE_NAME
-        return null;
+        // TODO: build a materialized view with userId + clientId key
+        List<AccessToken> list = new ArrayList<AccessToken>();
+        try {
+            Select.Where stmt = QueryBuilder.select().from(KEYSPACE_NAME, ACCESS_TOKEN_TABLE_NAME)
+                .where()
+                    .and(QueryBuilder.eq("user_id", userId))
+                    .and(QueryBuilder.eq("client_id", clientId))
+            ;
+            ResultSet rs = session.execute(stmt);
+            for (Row r : rs) {
+                AccessToken atoken = new AccessToken();
+                Row row = r;
+                mapRowToAccessToken(row, atoken);
+            }
+        } catch(Throwable e) {
+            log.error(e.getMessage(), e);
+        }
+        return list;
     }
 
 
@@ -122,23 +251,69 @@ public class CassandraDBManager implements DBManager {
 
     @Override
     public void storeAuthCode(AuthCode authCode) {
-        //TODO: persist authCode obj into AUTH_CODE_TABLE_NAME
+        try {
+            Insert stmt = QueryBuilder.insertInto(KEYSPACE_NAME, AUTH_CODE_TABLE_NAME)
+                //.value("id", authCode.getId())
+                .value("code", authCode.getCode())
+                .value("client_id", authCode.getClientId())
+                .value("redirect_uri", authCode.getRedirectUri())
+                .value("state", authCode.getState())
+                .value("scope", authCode.getScope())
+                .value("type", authCode.getType())
+                .value("valid", authCode.isValid())
+                .value("user_id", authCode.getUserId())
+                .value("created", authCode.getCreated())
+            ;
+            session.execute(stmt);
+        } catch(Throwable e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
     public void updateAuthCodeValidStatus(String authCode, boolean valid) {
-        //TODO: update valid flag by authCode key into AUTH_CODE_TABLE_NAME
         // 1. find 1 record by authCode
         // 2. update valid flag
+        try {
+            Update.Where stmt = QueryBuilder.update(KEYSPACE_NAME, AUTH_CODE_TABLE_NAME)
+                .with(QueryBuilder.set("valid", valid))
+                .where(QueryBuilder.eq("code", authCode))
+            ;
+            session.execute(stmt);
+        } catch(Throwable e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
     public AuthCode findAuthCode(String authCode, String redirectUri) {
-        // AUTH_CODE_TABLE_NAME
+        try {
+            Select.Where stmt = QueryBuilder.select().from(KEYSPACE_NAME, AUTH_CODE_TABLE_NAME)
+                    .where(QueryBuilder.eq("code", authCode))
+                    .and(QueryBuilder.eq("redirect_url", redirectUri));
+            ResultSet rs = session.execute(stmt);
+            Iterator<Row> iter = rs.iterator();
+            if(iter.hasNext()) {
+                Row row = iter.next();
+                AuthCode ret = new AuthCode();
+                //ret.setId(row.getString("id"));
+                ret.setCode(row.getString("code"));
+                ret.setClientId(row.getString("client_id"));
+                ret.setRedirectUri(row.getString("redirect_uri"));
+                ret.setState(row.getString("state"));
+                ret.setScope(row.getString("scope"));
+                ret.setType(row.getString("type"));
+                ret.setValid(row.getBool("valid"));
+                ret.setUserId(row.getString("user_id"));
+                ret.setCreated(row.getTimestamp("created").getTime());
+                return ret;
+            }
+        } catch(Throwable e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
         return null;
     }
-
-
 
 
 
@@ -267,17 +442,17 @@ public class CassandraDBManager implements DBManager {
     public void storeClientCredentials(ClientCredentials clientCreds) {
         try {
             Insert stmt = QueryBuilder.insertInto(KEYSPACE_NAME, CLIENTS_TABLE_NAME)
-                    .value("client_id", clientCreds.getId())
-                    .value("client_secret", clientCreds.getSecret())
-                    .value("scope", clientCreds.getScope())
-                    .value("name", clientCreds.getName())
-                    .value("created", clientCreds.getCreated())
-                    .value("uri", clientCreds.getUri())
-                    .value("descr", clientCreds.getDescr())
-                    .value("type", clientCreds.getType())
-                    .value("status", clientCreds.getStatus())
-                    .value("details", clientCreds.getApplicationDetails())
-                    ;
+                .value("client_id", clientCreds.getId())
+                .value("client_secret", clientCreds.getSecret())
+                .value("scope", clientCreds.getScope())
+                .value("name", clientCreds.getName())
+                .value("created", clientCreds.getCreated())
+                .value("uri", clientCreds.getUri())
+                .value("descr", clientCreds.getDescr())
+                .value("type", clientCreds.getType())
+                .value("status", clientCreds.getStatus())
+                .value("details", clientCreds.getApplicationDetails())
+            ;
             session.execute(stmt);
         } catch(Throwable e) {
             log.error(e.getMessage(), e);
@@ -287,7 +462,6 @@ public class CassandraDBManager implements DBManager {
 
     @Override
     public boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails) {
-        // update CLIENTS_TABLE_NAME using clientId as key
         try {
             Update update = QueryBuilder.update(KEYSPACE_NAME, CLIENTS_TABLE_NAME);
             Update.Assignments assignments = update.with();
@@ -317,7 +491,6 @@ public class CassandraDBManager implements DBManager {
 
     @Override
     public List<ApplicationInfo> getAllApplications() {
-        // CLIENTS_TABLE_NAME
         List<ApplicationInfo> list = new ArrayList<ApplicationInfo>();
         Select stmt = QueryBuilder.select().from(KEYSPACE_NAME, CLIENTS_TABLE_NAME);
         ResultSet rs = session.execute(stmt);
