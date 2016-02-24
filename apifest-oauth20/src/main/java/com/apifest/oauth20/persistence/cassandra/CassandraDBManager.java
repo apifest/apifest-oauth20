@@ -81,22 +81,11 @@ public class CassandraDBManager implements DBManager {
                     " PRIMARY KEY (access_token)" +
                     ");";
 
-    private Cluster cluster;
+//    private Cluster cluster;
     private Session session;
-    private void connect(String node) {
-        cluster = Cluster.builder()
-                .addContactPoint(node)
-                .build();
-        Metadata metadata = cluster.getMetadata();
-        System.out.printf("Connected to cluster: %s\n",
-                metadata.getClusterName());
-        for ( Host host : metadata.getAllHosts() ) {
-            System.out.printf("Datacenter: %s; Host: %s; Rack: %s\n",
-                    host.getDatacenter(), host.getAddress(), host.getRack());
-        }
-    }
+
     public CassandraDBManager() {
-        connect("172.16.11.100");
+        Cluster cluster = CassandraConnector.connect();
         session = cluster.connect(KEYSPACE_NAME);
 
         // create tables (if not exists)
@@ -109,14 +98,10 @@ public class CassandraDBManager implements DBManager {
         session.execute("CREATE INDEX IF NOT EXISTS redirect_uri_idx ON "+KEYSPACE_NAME+"."+AUTH_CODE_TABLE_NAME+" (redirect_uri);");
     }
 
-
-
-
-
-
-
-
-
+    @Override
+    protected void finalize() throws Throwable {
+        CassandraConnector.close();
+    }
 
     @Override
     public void storeAccessToken(AccessToken accessToken) {
@@ -443,16 +428,15 @@ public class CassandraDBManager implements DBManager {
         try {
             Insert stmt = QueryBuilder.insertInto(KEYSPACE_NAME, CLIENTS_TABLE_NAME)
                 .value("client_id", clientCreds.getId())
-                .value("client_secret", clientCreds.getSecret())
-                .value("scope", clientCreds.getScope())
-                .value("name", clientCreds.getName())
-                .value("created", clientCreds.getCreated())
-                .value("uri", clientCreds.getUri())
-                .value("descr", clientCreds.getDescr())
-                .value("type", clientCreds.getType())
-                .value("status", clientCreds.getStatus())
-                .value("details", clientCreds.getApplicationDetails())
-            ;
+                    .value("client_secret", clientCreds.getSecret())
+                    .value("scope", clientCreds.getScope())
+                    .value("name", clientCreds.getName())
+                    .value("created", clientCreds.getCreated())
+                    .value("uri", clientCreds.getUri())
+                    .value("descr", clientCreds.getDescr())
+                    .value("type", clientCreds.getType())
+                    .value("status", clientCreds.getStatus())
+                    .value("details", clientCreds.getApplicationDetails());
             session.execute(stmt);
         } catch(Throwable e) {
             log.error(e.getMessage(), e);
