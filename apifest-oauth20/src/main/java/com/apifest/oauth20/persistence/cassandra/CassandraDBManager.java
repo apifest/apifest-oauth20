@@ -84,8 +84,8 @@ public class CassandraDBManager implements DBManager {
 //    private Cluster cluster;
     private Session session;
 
-    public CassandraDBManager() {
-        Cluster cluster = CassandraConnector.connect();
+    public CassandraDBManager(String cassandraContactPoints) {
+        Cluster cluster = CassandraConnector.connect(cassandraContactPoints);
         session = cluster.connect(KEYSPACE_NAME);
 
         // create tables (if not exists)
@@ -106,6 +106,7 @@ public class CassandraDBManager implements DBManager {
     @Override
     public void storeAccessToken(AccessToken accessToken) {
         try {
+            // TODO: put tokenExpiration as TTL
             Insert stmt = QueryBuilder.insertInto(KEYSPACE_NAME, ACCESS_TOKEN_TABLE_NAME)
                 .value("access_token", accessToken.getToken())
                 .value("refresh_token", accessToken.getRefreshToken())
@@ -120,6 +121,11 @@ public class CassandraDBManager implements DBManager {
                 .value("created", accessToken.getCreated())
                 .value("refresh_expires_in", accessToken.getRefreshExpiresIn())
             ;
+            // TTL
+            Long tokenExpiration = (accessToken.getRefreshExpiresIn() != null && !accessToken.getRefreshExpiresIn().isEmpty()) ? Long.valueOf(accessToken.getRefreshExpiresIn()) : Long.valueOf(accessToken.getExpiresIn());
+            int ttl = tokenExpiration.intValue();
+            stmt.using(QueryBuilder.ttl(ttl));
+
             session.execute(stmt);
         } catch(Throwable e) {
             log.error(e.getMessage(), e);
@@ -176,7 +182,7 @@ public class CassandraDBManager implements DBManager {
     @Override
     public void removeAccessToken(String accessToken) {
         try {
-            Delete.Where stmt = QueryBuilder.delete().from(KEYSPACE_NAME, SCOPE_TABLE_NAME)
+            Delete.Where stmt = QueryBuilder.delete().from(KEYSPACE_NAME, ACCESS_TOKEN_TABLE_NAME)
                     .where(QueryBuilder.eq("access_token", accessToken));
             session.execute(stmt);
         } catch(Throwable e) {
@@ -186,10 +192,10 @@ public class CassandraDBManager implements DBManager {
 
     @Override
     public AccessToken findAccessTokenByRefreshToken(String refreshToken, String clientId) {
-        // TODO: build a materialized view with refreshToken + clientId key
         try {
             Select.Where stmt = QueryBuilder.select().from(KEYSPACE_NAME, ACCESS_TOKEN_TABLE_NAME)
-                .where()
+                    .allowFiltering() // TODO: build a materialized view with refreshToken + clientId key
+                    .where()
                         .and(QueryBuilder.eq("refresh_token", refreshToken))
                         .and(QueryBuilder.eq("client_id", clientId))
             ;
@@ -199,6 +205,7 @@ public class CassandraDBManager implements DBManager {
                 AccessToken atoken = new AccessToken();
                 Row row = iter.next();
                 mapRowToAccessToken(row, atoken);
+                log.debug(atoken.getToken());
                 return atoken;
             }
         } catch(Throwable e) {
@@ -214,7 +221,8 @@ public class CassandraDBManager implements DBManager {
         List<AccessToken> list = new ArrayList<AccessToken>();
         try {
             Select.Where stmt = QueryBuilder.select().from(KEYSPACE_NAME, ACCESS_TOKEN_TABLE_NAME)
-                .where()
+                    .allowFiltering()
+                    .where()
                     .and(QueryBuilder.eq("user_id", userId))
                     .and(QueryBuilder.eq("client_id", clientId))
             ;
@@ -275,7 +283,8 @@ public class CassandraDBManager implements DBManager {
         try {
             Select.Where stmt = QueryBuilder.select().from(KEYSPACE_NAME, AUTH_CODE_TABLE_NAME)
                     .where(QueryBuilder.eq("code", authCode))
-                    .and(QueryBuilder.eq("redirect_url", redirectUri));
+                    .and(QueryBuilder.eq("redirect_uri", redirectUri));
+            //TODO: add valid = true condition
             ResultSet rs = session.execute(stmt);
             Iterator<Row> iter = rs.iterator();
             if(iter.hasNext()) {
@@ -291,7 +300,10 @@ public class CassandraDBManager implements DBManager {
                 ret.setValid(row.getBool("valid"));
                 ret.setUserId(row.getString("user_id"));
                 ret.setCreated(row.getTimestamp("created").getTime());
-                return ret;
+                if(ret.isValid())
+                    return ret;
+                else
+                    return null;
             }
         } catch(Throwable e) {
             log.error(e.getMessage(), e);

@@ -18,10 +18,10 @@ public final class CassandraConnector {
 
     private static Cluster cluster;
 
-    public static Cluster connect() {
+    public static Cluster connect(String cassandraContactPoints) {
         if(cluster == null) {
             cluster = Cluster.builder()
-                    .addContactPoint("172.16.11.100")
+                    .addContactPoint(cassandraContactPoints)
                     .build();
             Metadata metadata = cluster.getMetadata();
             log.info("Connected to cluster: %s\n",

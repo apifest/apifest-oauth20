@@ -40,10 +40,10 @@ public class DBManagerFactory {
             } else if (MONGO_DB.equalsIgnoreCase(OAuthServer.getDatabase())) {
                 dbManager = new MongoDBManager();
             } else if (CASSANDRA_DB.equalsIgnoreCase(OAuthServer.getDatabase())) {
-                dbManager = new MongoDBManager();
+                dbManager = new CassandraDBManager(OAuthServer.getCassandraContactPoints());
             } else {
-//                dbManager = new HazelcastDBManager();
-                dbManager = new CassandraDBManager();
+                dbManager = new HazelcastDBManager();
+//                dbManager = new CassandraDBManager();
             }
         }
         return dbManager;
