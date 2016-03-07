@@ -10,3 +10,4 @@ user.authenticate.class=
 custom.grant_type=
 custom.grant_type.class=
 hazelcast.password=
+cassandra.contanctPoints=
