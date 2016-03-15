@@ -289,7 +289,7 @@ public class RedisDBManager implements DBManager {
             return list;
         }
         for (String app : allApps) {
-                ApplicationInfo creds = ApplicationInfo.loadFromClientCredentials(findClientCredentials(app));
+                ApplicationInfo creds = ApplicationInfo.loadFromClientCredentials(findClientCredentials(app.split(":")[1]));
                 if (creds == null) {
                     continue;
                 }
