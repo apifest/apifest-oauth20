@@ -10,9 +10,3 @@ target/*
 *.log
 
 /target
-
-.idea
-*.iml
-
-# Local configuration
-apifest*.properties
