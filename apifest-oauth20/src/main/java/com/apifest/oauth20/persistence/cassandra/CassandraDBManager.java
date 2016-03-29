@@ -296,21 +296,22 @@ public class CassandraDBManager implements DBManager {
             Iterator<Row> iter = rs.iterator();
             if(iter.hasNext()) {
                 Row row = iter.next();
-                AuthCode ret = new AuthCode();
-                //ret.setId(row.getString("id"));
-                ret.setCode(row.getString("code"));
-                ret.setClientId(row.getString("client_id"));
-                ret.setRedirectUri(row.getString("redirect_uri"));
-                ret.setState(row.getString("state"));
-                ret.setScope(row.getString("scope"));
-                ret.setType(row.getString("type"));
-                ret.setValid(row.getBool("valid"));
-                ret.setUserId(row.getString("user_id"));
-                ret.setCreated(row.getTimestamp("created").getTime());
-                if(ret.isValid())
+                boolean valid = row.getBool("valid");
+                if(valid) {
+                    AuthCode ret = new AuthCode();
+                    ret.setCode(row.getString("code"));
+                    ret.setClientId(row.getString("client_id"));
+                    ret.setRedirectUri(row.getString("redirect_uri"));
+                    ret.setState(row.getString("state"));
+                    ret.setScope(row.getString("scope"));
+                    ret.setType(row.getString("type"));
+                    ret.setValid(row.getBool("valid"));
+                    ret.setUserId(row.getString("user_id"));
+                    ret.setCreated(row.getTimestamp("created").getTime());
                     return ret;
-                else
+                } else {
                     return null;
+                }
             }
         } catch(Throwable e) {
             log.error(e.getMessage(), e);
