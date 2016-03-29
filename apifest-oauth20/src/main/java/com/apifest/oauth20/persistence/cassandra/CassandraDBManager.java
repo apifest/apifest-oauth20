@@ -1,7 +1,15 @@
 package com.apifest.oauth20.persistence.cassandra;
 
-import com.apifest.oauth20.*;
-import com.datastax.driver.core.*;
+import com.apifest.oauth20.DBManager;
+import com.apifest.oauth20.AccessToken;
+import com.apifest.oauth20.AuthCode;
+import com.apifest.oauth20.ClientCredentials;
+import com.apifest.oauth20.Scope;
+import com.apifest.oauth20.ApplicationInfo;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.querybuilder.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

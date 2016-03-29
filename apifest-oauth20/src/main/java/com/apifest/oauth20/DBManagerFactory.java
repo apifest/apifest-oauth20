@@ -43,7 +43,6 @@ public class DBManagerFactory {
                 dbManager = new CassandraDBManager(OAuthServer.getCassandraContactPoints());
             } else {
                 dbManager = new HazelcastDBManager();
-//                dbManager = new CassandraDBManager();
             }
         }
         return dbManager;
