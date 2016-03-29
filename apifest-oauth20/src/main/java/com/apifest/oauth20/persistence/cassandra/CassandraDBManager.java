@@ -26,7 +26,7 @@ public class CassandraDBManager implements DBManager {
 
 
     protected static final String SCOPE_TABLE_CQL =
-            "CREATE TABLE IF NOT EXISTS "+KEYSPACE_NAME+"."+SCOPE_TABLE_NAME+" (" +
+            "CREATE TABLE IF NOT EXISTS " + KEYSPACE_NAME + "." + SCOPE_TABLE_NAME + " (" +
             " scope text," +
             " description text," +
             " cc_expires_in int," +
@@ -36,7 +36,7 @@ public class CassandraDBManager implements DBManager {
             ");";
 
     protected static final String CLIENTS_TABLE_CQL =
-            "CREATE TABLE IF NOT EXISTS "+KEYSPACE_NAME+"."+CLIENTS_TABLE_NAME+" (" +
+            "CREATE TABLE IF NOT EXISTS " + KEYSPACE_NAME + "." + CLIENTS_TABLE_NAME + " (" +
             " client_id text," +
             " client_secret text," +
             " scope text," +
@@ -51,7 +51,7 @@ public class CassandraDBManager implements DBManager {
             ");";
 
     protected static final String AUTH_CODE_TABLE_CQL =
-            "CREATE TABLE IF NOT EXISTS "+KEYSPACE_NAME+"."+AUTH_CODE_TABLE_NAME+" (" +
+            "CREATE TABLE IF NOT EXISTS " + KEYSPACE_NAME + "." + AUTH_CODE_TABLE_NAME + " (" +
             " code text," +
             " client_id text," +
             " redirect_uri text," +
@@ -65,7 +65,7 @@ public class CassandraDBManager implements DBManager {
             ");";
 
     protected static final String ACCESS_TOKEN_TABLE_CQL =
-            "CREATE TABLE IF NOT EXISTS "+KEYSPACE_NAME+"."+ACCESS_TOKEN_TABLE_NAME+" (" +
+            "CREATE TABLE IF NOT EXISTS " + KEYSPACE_NAME + "." + ACCESS_TOKEN_TABLE_NAME + " (" +
                     " access_token text," +
                     " refresh_token text," +
                     " expires_in text," +
@@ -95,7 +95,7 @@ public class CassandraDBManager implements DBManager {
         session.execute(ACCESS_TOKEN_TABLE_CQL);
 
         // create sec. indexes (if not exists)
-        session.execute("CREATE INDEX IF NOT EXISTS redirect_uri_idx ON "+KEYSPACE_NAME+"."+AUTH_CODE_TABLE_NAME+" (redirect_uri);");
+        session.execute("CREATE INDEX IF NOT EXISTS redirect_uri_idx ON " + KEYSPACE_NAME + "." + AUTH_CODE_TABLE_NAME + " (redirect_uri);");
     }
 
     @Override
@@ -153,9 +153,8 @@ public class CassandraDBManager implements DBManager {
             ResultSet rs = session.execute(stmt);
             Iterator<Row> iter = rs.iterator();
             if(iter.hasNext()) {
-                AccessToken atoken = new AccessToken();
                 Row row = iter.next();
-                mapRowToAccessToken(row, atoken);
+                AccessToken atoken = mapRowToAccessToken(row);
                 return atoken;
             }
         } catch(Throwable e) {
@@ -164,7 +163,8 @@ public class CassandraDBManager implements DBManager {
         }
         return null;
     }
-    private void mapRowToAccessToken(Row row, AccessToken atoken) {
+    private AccessToken mapRowToAccessToken(Row row) {
+        AccessToken atoken = new AccessToken();
         atoken.setToken(row.getString("access_token"));
         atoken.setRefreshToken(row.getString("refresh_token"));
         atoken.setExpiresIn(row.getString("expires_in"));
@@ -177,6 +177,7 @@ public class CassandraDBManager implements DBManager {
         atoken.setDetails(row.getMap("details", String.class, String.class));
         atoken.setCreated(row.getTimestamp("created").getTime());
         atoken.setRefreshExpiresIn(row.getString("refresh_expires_in"));
+        return atoken;
     }
 
     @Override
@@ -202,9 +203,8 @@ public class CassandraDBManager implements DBManager {
             ResultSet rs = session.execute(stmt);
             Iterator<Row> iter = rs.iterator();
             if(iter.hasNext()) {
-                AccessToken atoken = new AccessToken();
                 Row row = iter.next();
-                mapRowToAccessToken(row, atoken);
+                AccessToken atoken = mapRowToAccessToken(row);
                 log.debug(atoken.getToken());
                 return atoken;
             }
@@ -227,10 +227,9 @@ public class CassandraDBManager implements DBManager {
                     .and(QueryBuilder.eq("client_id", clientId))
             ;
             ResultSet rs = session.execute(stmt);
-            for (Row r : rs) {
-                AccessToken atoken = new AccessToken();
-                Row row = r;
-                mapRowToAccessToken(row, atoken);
+            for (Row row : rs) {
+                AccessToken atoken = mapRowToAccessToken(row);
+                list.add(atoken);
             }
         } catch(Throwable e) {
             log.error(e.getMessage(), e);
