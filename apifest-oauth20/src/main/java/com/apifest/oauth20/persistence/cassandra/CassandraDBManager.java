@@ -116,7 +116,6 @@ public class CassandraDBManager implements DBManager {
 
     @Override
     public void storeAccessToken(AccessToken accessToken) {
-        // TODO: put tokenExpiration as TTL
         Insert stmt = QueryBuilder.insertInto(KEYSPACE_NAME, ACCESS_TOKEN_TABLE_NAME)
             .value("access_token", accessToken.getToken())
             .value("refresh_token", accessToken.getRefreshToken())
