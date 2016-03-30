@@ -10,6 +10,9 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
+import com.datastax.driver.core.exceptions.QueryExecutionException;
+import com.datastax.driver.core.exceptions.QueryValidationException;
 import com.datastax.driver.core.querybuilder.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,19 +147,45 @@ public class CassandraDBManager implements DBManager {
                 .with(QueryBuilder.set("valid", valid))
                 .where(QueryBuilder.eq("access_token", accessToken))
                 ;
-        session.execute(stmt);
+        try {
+            session.execute(stmt);
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
+        }
     }
 
     @Override
     public AccessToken findAccessToken(String accessToken) {
         Select.Where stmt = QueryBuilder.select().from(KEYSPACE_NAME, ACCESS_TOKEN_TABLE_NAME)
                 .where(QueryBuilder.eq("access_token", accessToken));
-        ResultSet rs = session.execute(stmt);
-        Iterator<Row> iter = rs.iterator();
-        if(iter.hasNext()) {
-            Row row = iter.next();
-            AccessToken atoken = mapRowToAccessToken(row);
-            return atoken;
+        try {
+            ResultSet rs = session.execute(stmt);
+            Iterator<Row> iter = rs.iterator();
+            if(iter.hasNext()) {
+                Row row = iter.next();
+                AccessToken atoken = mapRowToAccessToken(row);
+                return atoken;
+            }
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
         }
         return null;
     }
@@ -181,7 +210,20 @@ public class CassandraDBManager implements DBManager {
     public void removeAccessToken(String accessToken) {
         Delete.Where stmt = QueryBuilder.delete().from(KEYSPACE_NAME, ACCESS_TOKEN_TABLE_NAME)
                 .where(QueryBuilder.eq("access_token", accessToken));
-        session.execute(stmt);
+        try {
+            session.execute(stmt);
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
+        }
     }
 
     @Override
@@ -192,13 +234,26 @@ public class CassandraDBManager implements DBManager {
                     .and(QueryBuilder.eq("refresh_token", refreshToken))
                     .and(QueryBuilder.eq("client_id", clientId))
         ;
-        ResultSet rs = session.execute(stmt);
-        Iterator<Row> iter = rs.iterator();
-        if(iter.hasNext()) {
-            Row row = iter.next();
-            AccessToken atoken = mapRowToAccessToken(row);
-            log.debug(atoken.getToken());
-            return atoken;
+        try {
+            ResultSet rs = session.execute(stmt);
+            Iterator<Row> iter = rs.iterator();
+            if(iter.hasNext()) {
+                Row row = iter.next();
+                AccessToken atoken = mapRowToAccessToken(row);
+                log.debug(atoken.getToken());
+                return atoken;
+            }
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
         }
         return null;
     }
@@ -213,10 +268,23 @@ public class CassandraDBManager implements DBManager {
                 .and(QueryBuilder.eq("user_id", userId))
                 .and(QueryBuilder.eq("client_id", clientId))
         ;
-        ResultSet rs = session.execute(stmt);
-        for (Row row : rs) {
-            AccessToken atoken = mapRowToAccessToken(row);
-            list.add(atoken);
+        try {
+            ResultSet rs = session.execute(stmt);
+            for (Row row : rs) {
+                AccessToken atoken = mapRowToAccessToken(row);
+                list.add(atoken);
+            }
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
         }
         return list;
     }
@@ -238,7 +306,20 @@ public class CassandraDBManager implements DBManager {
             .value("user_id", authCode.getUserId())
             .value("created", authCode.getCreated())
         ;
-        session.execute(stmt);
+        try {
+            session.execute(stmt);
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
+        }
     }
 
     @Override
@@ -247,7 +328,20 @@ public class CassandraDBManager implements DBManager {
             .with(QueryBuilder.set("valid", valid))
             .where(QueryBuilder.eq("code", authCode))
         ;
-        session.execute(stmt);
+        try {
+            session.execute(stmt);
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
+        }
     }
 
     @Override
@@ -255,24 +349,37 @@ public class CassandraDBManager implements DBManager {
         Select.Where stmt = QueryBuilder.select().from(KEYSPACE_NAME, AUTH_CODE_TABLE_NAME)
                 .where(QueryBuilder.eq("code", authCode))
                 .and(QueryBuilder.eq("redirect_uri", redirectUri));
-        ResultSet rs = session.execute(stmt);
-        Iterator<Row> iter = rs.iterator();
-        if(iter.hasNext()) {
-            Row row = iter.next();
-            boolean valid = row.getBool("valid");
-            if(valid) {
-                AuthCode ret = new AuthCode();
-                ret.setCode(row.getString("code"));
-                ret.setClientId(row.getString("client_id"));
-                ret.setRedirectUri(row.getString("redirect_uri"));
-                ret.setState(row.getString("state"));
-                ret.setScope(row.getString("scope"));
-                ret.setType(row.getString("type"));
-                ret.setValid(row.getBool("valid"));
-                ret.setUserId(row.getString("user_id"));
-                ret.setCreated(row.getTimestamp("created").getTime());
-                return ret;
+        try {
+            ResultSet rs = session.execute(stmt);
+            Iterator<Row> iter = rs.iterator();
+            if(iter.hasNext()) {
+                Row row = iter.next();
+                boolean valid = row.getBool("valid");
+                if(valid) {
+                    AuthCode ret = new AuthCode();
+                    ret.setCode(row.getString("code"));
+                    ret.setClientId(row.getString("client_id"));
+                    ret.setRedirectUri(row.getString("redirect_uri"));
+                    ret.setState(row.getString("state"));
+                    ret.setScope(row.getString("scope"));
+                    ret.setType(row.getString("type"));
+                    ret.setValid(row.getBool("valid"));
+                    ret.setUserId(row.getString("user_id"));
+                    ret.setCreated(row.getTimestamp("created").getTime());
+                    return ret;
+                }
             }
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
         }
         return null;
     }
@@ -288,23 +395,49 @@ public class CassandraDBManager implements DBManager {
                 .value("pass_expires_in", scope.getPassExpiresIn())
                 .value("refresh_expires_in", scope.getRefreshExpiresIn())
                 ;
-        session.execute(stmt);
+        try {
+            session.execute(stmt);
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
+        }
         return true;
     }
 
     @Override
     public List<Scope> getAllScopes() {
-        Select stmt = QueryBuilder.select().from(KEYSPACE_NAME, SCOPE_TABLE_NAME);
-        ResultSet rs = session.execute(stmt);
         List<Scope> list = new ArrayList<Scope>();
-        for (Row row : rs) {
-            Scope scope = new Scope();
-            scope.setScope(row.getString("scope"));
-            scope.setDescription(row.getString("description"));
-            scope.setCcExpiresIn(row.getInt("cc_expires_in"));
-            scope.setPassExpiresIn(row.getInt("pass_expires_in"));
-            scope.setRefreshExpiresIn(row.getInt("refresh_expires_in"));
-            list.add(scope);
+        Select stmt = QueryBuilder.select().from(KEYSPACE_NAME, SCOPE_TABLE_NAME);
+        try {
+            ResultSet rs = session.execute(stmt);
+            for (Row row : rs) {
+                Scope scope = new Scope();
+                scope.setScope(row.getString("scope"));
+                scope.setDescription(row.getString("description"));
+                scope.setCcExpiresIn(row.getInt("cc_expires_in"));
+                scope.setPassExpiresIn(row.getInt("pass_expires_in"));
+                scope.setRefreshExpiresIn(row.getInt("refresh_expires_in"));
+                list.add(scope);
+            }
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
         }
         return list;
     }
@@ -313,28 +446,54 @@ public class CassandraDBManager implements DBManager {
     public Scope findScope(String scopeName) {
         Select.Where stmt = QueryBuilder.select().from(KEYSPACE_NAME, SCOPE_TABLE_NAME)
                 .where(QueryBuilder.eq("scope", scopeName));
-        ResultSet rs = session.execute(stmt);
-        Iterator<Row> iter = rs.iterator();
-        if(iter.hasNext()) {
-            Scope scope = new Scope();
-            Row row = iter.next();
-            scope.setScope(row.getString("scope"));
-            scope.setDescription(row.getString("description"));
-            scope.setCcExpiresIn(row.getInt("cc_expires_in"));
-            scope.setPassExpiresIn(row.getInt("pass_expires_in"));
-            scope.setRefreshExpiresIn(row.getInt("refresh_expires_in"));
-            return scope;
+        try {
+            ResultSet rs = session.execute(stmt);
+            Iterator<Row> iter = rs.iterator();
+            if(iter.hasNext()) {
+                Scope scope = new Scope();
+                Row row = iter.next();
+                scope.setScope(row.getString("scope"));
+                scope.setDescription(row.getString("description"));
+                scope.setCcExpiresIn(row.getInt("cc_expires_in"));
+                scope.setPassExpiresIn(row.getInt("pass_expires_in"));
+                scope.setRefreshExpiresIn(row.getInt("refresh_expires_in"));
+                return scope;
+            }
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
         }
         return null;
     }
 
     @Override
     public boolean deleteScope(String scopeName) {
+        Delete.Where stmt = QueryBuilder.delete().from(KEYSPACE_NAME, SCOPE_TABLE_NAME)
+                .where(QueryBuilder.eq("scope", scopeName));
         try {
-            Delete.Where stmt = QueryBuilder.delete().from(KEYSPACE_NAME, SCOPE_TABLE_NAME)
-                    .where(QueryBuilder.eq("scope", scopeName));
             session.execute(stmt);
-        } catch(Throwable e) {
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+            return false;
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+            return false;
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+            return false;
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
             return false;
         }
         return true;
@@ -347,13 +506,26 @@ public class CassandraDBManager implements DBManager {
         Select.Where stmt = QueryBuilder.select("client_id", "client_secret", "status")
                 .from(KEYSPACE_NAME, CLIENTS_TABLE_NAME)
                 .where(QueryBuilder.eq("client_id", clientId));
-        ResultSet rs = session.execute(stmt);
-        Iterator<Row> iter = rs.iterator();
-        if(iter.hasNext()) {
-            Row row = iter.next();
-            boolean ret = (row.getString("client_secret").equals(clientSecret)
-                    && String.valueOf(ClientCredentials.ACTIVE_STATUS).equals(row.getInt("status")));
-            return ret;
+        try {
+            ResultSet rs = session.execute(stmt);
+            Iterator<Row> iter = rs.iterator();
+            if(iter.hasNext()) {
+                Row row = iter.next();
+                boolean ret = (row.getString("client_secret").equals(clientSecret)
+                        && String.valueOf(ClientCredentials.ACTIVE_STATUS).equals(row.getInt("status")));
+                return ret;
+            }
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
         }
         return false;
     }
@@ -361,22 +533,35 @@ public class CassandraDBManager implements DBManager {
     public ClientCredentials findClientCredentials(String clientId) {
         Select.Where stmt = QueryBuilder.select().from(KEYSPACE_NAME, CLIENTS_TABLE_NAME)
                 .where(QueryBuilder.eq("client_id", clientId));
-        ResultSet rs = session.execute(stmt);
-        Iterator<Row> iter = rs.iterator();
-        if(iter.hasNext()) {
-            Row row = iter.next();
-            ClientCredentials app = new ClientCredentials();
-            app.setId(row.getString("client_id"));
-            app.setSecret(row.getString("client_secret"));
-            app.setScope(row.getString("scope"));
-            app.setName(row.getString("name"));
-            app.setCreated(row.getTimestamp("created").getTime());
-            app.setUri(row.getString("uri"));
-            app.setDescr(row.getString("descr"));
-            app.setType(row.getInt("type"));
-            app.setStatus(row.getInt("status"));
-            app.setApplicationDetails(row.getMap("details", String.class, String.class));
-            return app;
+        try {
+            ResultSet rs = session.execute(stmt);
+            Iterator<Row> iter = rs.iterator();
+            if(iter.hasNext()) {
+                Row row = iter.next();
+                ClientCredentials app = new ClientCredentials();
+                app.setId(row.getString("client_id"));
+                app.setSecret(row.getString("client_secret"));
+                app.setScope(row.getString("scope"));
+                app.setName(row.getString("name"));
+                app.setCreated(row.getTimestamp("created").getTime());
+                app.setUri(row.getString("uri"));
+                app.setDescr(row.getString("descr"));
+                app.setType(row.getInt("type"));
+                app.setStatus(row.getInt("status"));
+                app.setApplicationDetails(row.getMap("details", String.class, String.class));
+                return app;
+            }
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
         }
         return null;
     }
@@ -394,33 +579,54 @@ public class CassandraDBManager implements DBManager {
                 .value("type", clientCreds.getType())
                 .value("status", clientCreds.getStatus())
                 .value("details", clientCreds.getApplicationDetails());
-        session.execute(stmt);
+        try {
+            session.execute(stmt);
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
+        }
     }
 
 
     @Override
     public boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails) {
+        Update update = QueryBuilder.update(KEYSPACE_NAME, CLIENTS_TABLE_NAME);
+        Update.Assignments assignments = update.with();
+        if (scope != null && scope.length() > 0) {
+            assignments.and(QueryBuilder.set("scope", scope));
+        }
+        if (description != null && description.length() > 0) {
+            assignments.and(QueryBuilder.set("descr", description));
+        }
+        if (status != null) {
+            assignments.and(QueryBuilder.set("status", status));
+        }
+        if (applicationDetails != null && applicationDetails.size() > 0) {
+            assignments.and(QueryBuilder.set("details", applicationDetails));
+        }
+        Update.Where stmt = assignments.where(QueryBuilder.eq("client_id", clientId));
         try {
-            Update update = QueryBuilder.update(KEYSPACE_NAME, CLIENTS_TABLE_NAME);
-            Update.Assignments assignments = update.with();
-            if (scope != null && scope.length() > 0) {
-                assignments.and(QueryBuilder.set("scope", scope));
-            }
-            if (description != null && description.length() > 0) {
-                assignments.and(QueryBuilder.set("descr", description));
-            }
-            if (status != null) {
-                assignments.and(QueryBuilder.set("status", status));
-            }
-            if (applicationDetails != null && applicationDetails.size() > 0) {
-                assignments.and(QueryBuilder.set("details", applicationDetails));
-            }
-            Update.Where stmt = assignments.where(QueryBuilder.eq("client_id", clientId));
-
             session.execute(stmt);
             return true;
-        } catch(Throwable e) {
-            log.error(e.getMessage(), e);
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
         }
         return false;
     }
@@ -431,19 +637,32 @@ public class CassandraDBManager implements DBManager {
     public List<ApplicationInfo> getAllApplications() {
         List<ApplicationInfo> list = new ArrayList<ApplicationInfo>();
         Select stmt = QueryBuilder.select().from(KEYSPACE_NAME, CLIENTS_TABLE_NAME);
-        ResultSet rs = session.execute(stmt);
-        for (Row row : rs) {
-            ApplicationInfo app = new ApplicationInfo();
-            app.setId(row.getString("client_id"));
-            app.setSecret(row.getString("client_secret"));
-            app.setScope(row.getString("scope"));
-            app.setName(row.getString("name"));
-            app.setRegistered(row.getTimestamp("created"));
-            app.setRedirectUri(row.getString("uri"));
-            app.setDescription(row.getString("descr"));
-            app.setStatus(row.getInt("status"));
-            app.setApplicationDetails(row.getMap("details", String.class, String.class));
-            list.add(app);
+        try {
+            ResultSet rs = session.execute(stmt);
+            for (Row row : rs) {
+                ApplicationInfo app = new ApplicationInfo();
+                app.setId(row.getString("client_id"));
+                app.setSecret(row.getString("client_secret"));
+                app.setScope(row.getString("scope"));
+                app.setName(row.getString("name"));
+                app.setRegistered(row.getTimestamp("created"));
+                app.setRedirectUri(row.getString("uri"));
+                app.setDescription(row.getString("descr"));
+                app.setStatus(row.getInt("status"));
+                app.setApplicationDetails(row.getMap("details", String.class, String.class));
+                list.add(app);
+            }
+        } catch (NoHostAvailableException e) {
+            log.error("No host in the %s cluster can be contacted to execute the query.\n",
+                    session.getCluster());
+        } catch (QueryExecutionException e) {
+            log.error("An exception was thrown by Cassandra because it cannot " +
+                    "successfully execute the query with the specified consistency level.");
+        } catch (QueryValidationException e) {
+            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString());
+        } catch (IllegalStateException e) {
+            log.error("The BoundStatement is not ready.");
         }
         return list;
     }
