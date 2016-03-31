@@ -70,6 +70,8 @@ public final class OAuthServer {
     private static URLClassLoader jarClassLoader;
     private static String hazelcastPassword;
 
+    private static String cassandraContactPoints;
+
     // expires_in in sec for grant type password
     public static final int DEFAULT_PASSWORD_EXPIRES_IN = 900;
 
@@ -312,6 +314,8 @@ public final class OAuthServer {
 
             // dev-pass is the default password used in Hazelcast
             hazelcastPassword = props.getProperty("hazelcast.password", "dev-pass");
+
+            cassandraContactPoints = props.getProperty("cassandra.contanctPoints");
         } catch (IOException e) {
             log.error("Cannot load properties file", e);
         }
@@ -382,5 +386,9 @@ public final class OAuthServer {
 
     public static String getHazelcastPassword() {
         return hazelcastPassword;
+    }
+
+    public static String getCassandraContactPoints() {
+        return cassandraContactPoints;
     }
 }

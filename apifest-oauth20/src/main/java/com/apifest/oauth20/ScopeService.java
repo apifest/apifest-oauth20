@@ -335,7 +335,7 @@ public class ScopeService {
         List<ApplicationInfo> scopeApps = new ArrayList<ApplicationInfo>();
         List<ApplicationInfo> allApps = DBManagerFactory.getInstance().getAllApplications();
         for (ApplicationInfo app : allApps) {
-            if (app.getScope().contains(scopeName)) {
+            if (app.getScope()!=null && app.getScope().contains(scopeName)) {
                 scopeApps.add(app);
                 break;
             }
