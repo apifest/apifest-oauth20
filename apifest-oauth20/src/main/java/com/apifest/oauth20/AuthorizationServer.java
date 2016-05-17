@@ -18,7 +18,6 @@ package com.apifest.oauth20;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Date;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -216,11 +215,13 @@ public class AuthorizationServer {
             accessToken.setClientId(tokenRequest.getClientId());
             Map<String, String> applicationDetails = clientCredentials.getApplicationDetails();
             if ((applicationDetails != null) && (applicationDetails.size() > 0)) {
-                accessToken.setDetails(applicationDetails);
+                accessToken.setDetails(applicationDetails); // For backward compatibility
+                accessToken.setApplicationDetails(applicationDetails);
             }
             db.storeAccessToken(accessToken);
         } else if (TokenRequest.PASSWORD.equals(tokenRequest.getGrantType())) {
-            String scope = scopeService.getValidScope(tokenRequest.getScope(), tokenRequest.getClientId());
+            ClientCredentials clientCredentials = db.findClientCredentials(tokenRequest.getClientId());
+            String scope = scopeService.getValidScopeByScope(tokenRequest.getScope(), clientCredentials.getScope());
             if (scope == null) {
                 throw new OAuthException(Response.SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
             }
@@ -233,6 +234,7 @@ public class AuthorizationServer {
                     accessToken.setUserId(userDetails.getUserId());
                     accessToken.setDetails(userDetails.getDetails());
                     accessToken.setClientId(tokenRequest.getClientId());
+                    accessToken.setApplicationDetails(clientCredentials.getApplicationDetails());
                     db.storeAccessToken(accessToken);
                 } else {
                     throw new OAuthException(Response.INVALID_USERNAME_PASSWORD, HttpResponseStatus.UNAUTHORIZED);
