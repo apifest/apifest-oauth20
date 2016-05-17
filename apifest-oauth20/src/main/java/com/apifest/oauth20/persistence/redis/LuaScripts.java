@@ -95,9 +95,10 @@ public class LuaScripts {
             + "local created = ARGV[10]; "
             + "local details = ARGV[11]; "
             + "local refreshExpiresIn = ARGV[12]; "
-            + "local tokenExpiration = tonumber(ARGV[13]); "
-            + "local unique = ARGV[14]; "
-            + "redis.call('HMSET','at:'..token,'token',token,'refreshToken',refreshToken,'expiresIn',expiresIn,'type',type,'scope',scope,'valid',valid,'clientId',clientId,'codeId',codeId,'userId',userId,'created',created,'details',details,'refreshExpiresIn',refreshExpiresIn); "
+            + "local applicationDetails = ARGV[13]; "
+            + "local tokenExpiration = tonumber(ARGV[14]); "
+            + "local unique = ARGV[15]; "
+            + "redis.call('HMSET','at:'..token,'token',token,'refreshToken',refreshToken,'expiresIn',expiresIn,'type',type,'scope',scope,'valid',valid,'clientId',clientId,'codeId',codeId,'userId',userId,'created',created,'details',details,'refreshExpiresIn',refreshExpiresIn, 'applicationDetails', applicationDetails); "
             + "redis.call('EXPIRE', 'at:'..token, tokenExpiration); "
             + "redis.call('HSET', 'atr:'..refreshToken..clientId, 'access_token', token); "
             + "redis.call('EXPIRE', 'atr:'..refreshToken..clientId, tokenExpiration); "
@@ -142,7 +143,7 @@ public class LuaScripts {
             + "if redis.call('EXISTS','at:'..token) == 0 then "
             + "  return nil; "
             + "end "
-            + "return redis.call('HMGET','at:'..token,'token','refreshToken','expiresIn','type','scope','valid','clientId','codeId','userId','created','details','refreshExpiresIn'); ";
+            + "return redis.call('HMGET','at:'..token,'token','refreshToken','expiresIn','type','scope','valid','clientId','codeId','userId','created','details','refreshExpiresIn', 'applicationDetails'); ";
 
     private static final String UPDATE_ACCESS_TOKEN_STATUS_SCRIPT = ""
             + "local access_token = ARGV[1]; "
@@ -171,7 +172,7 @@ public class LuaScripts {
             + "local keys = redis.call('KEYS','atuid:'..user_id..':'..client_id..':*'); "
             + "for i,v in ipairs(keys) do "
             + "  local token_id = redis.call('HGET', v, 'access_token'); "
-            + "  local token = redis.call('HMGET','at:'..token_id,'token','refreshToken','expiresIn','type','scope','valid','clientId','codeId','userId','created','details','refreshExpiresIn'); "
+            + "  local token = redis.call('HMGET','at:'..token_id,'token','refreshToken','expiresIn','type','scope','valid','clientId','codeId','userId','created','details','refreshExpiresIn', 'applicationDetails'); "
             + "  result[i] = token;"
             + "end "
             + "return result;";

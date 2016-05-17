@@ -115,10 +115,10 @@ public class RedisDBManager implements DBManager {
         parameters.add(String.valueOf(accessToken.getCreated()));
         parameters.add(JsonUtils.convertMapToJSON(accessToken.getDetails()));
         parameters.add(accessToken.getRefreshExpiresIn());
+        parameters.add(JsonUtils.convertMapToJSON(accessToken.getApplicationDetails()));
         Integer tokenExpiration = Integer.valueOf((!accessToken.getRefreshExpiresIn().isEmpty()) ? accessToken.getRefreshExpiresIn() : accessToken.getExpiresIn());
         parameters.add(tokenExpiration.toString());
 
-        parameters.add(JsonUtils.convertMapToJSON(accessToken.getApplicationDetails()));
 
         Long uniqueId = System.currentTimeMillis();
         parameters.add(uniqueId.toString());
