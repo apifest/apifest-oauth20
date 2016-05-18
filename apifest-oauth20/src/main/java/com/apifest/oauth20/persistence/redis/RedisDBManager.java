@@ -20,13 +20,9 @@
 package com.apifest.oauth20.persistence.redis;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.apifest.oauth20.AccessToken;
 import com.apifest.oauth20.ApplicationInfo;
@@ -34,12 +30,7 @@ import com.apifest.oauth20.AuthCode;
 import com.apifest.oauth20.ClientCredentials;
 import com.apifest.oauth20.DBManager;
 import com.apifest.oauth20.JsonUtils;
-import com.apifest.oauth20.OAuthServer;
 import com.apifest.oauth20.Scope;
-
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisSentinelPool;
 
 public class RedisDBManager implements DBManager {
 
@@ -124,8 +115,10 @@ public class RedisDBManager implements DBManager {
         parameters.add(String.valueOf(accessToken.getCreated()));
         parameters.add(JsonUtils.convertMapToJSON(accessToken.getDetails()));
         parameters.add(accessToken.getRefreshExpiresIn());
+        parameters.add(JsonUtils.convertMapToJSON(accessToken.getApplicationDetails()));
         Integer tokenExpiration = Integer.valueOf((!accessToken.getRefreshExpiresIn().isEmpty()) ? accessToken.getRefreshExpiresIn() : accessToken.getExpiresIn());
         parameters.add(tokenExpiration.toString());
+
 
         Long uniqueId = System.currentTimeMillis();
         parameters.add(uniqueId.toString());

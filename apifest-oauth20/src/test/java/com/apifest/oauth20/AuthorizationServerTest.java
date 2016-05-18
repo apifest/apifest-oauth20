@@ -16,6 +16,25 @@
 
 package com.apifest.oauth20;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,11 +55,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.apifest.oauth20.api.UserDetails;
-
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.BDDMockito.*;
-import static org.testng.Assert.*;
 
 /**
  * @author Rossitsa Borissova
@@ -810,6 +824,17 @@ public class AuthorizationServerTest {
         willReturn(userDetails).given(authServer).authenticateUser("rossi", "test", req);
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
 
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        Map<String, String> applicationDetails = new HashMap<String, String>();
+        applicationDetails.put("my", "data");
+        clientCredentials.setApplicationDetails(applicationDetails);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
+
+        when(authServer.scopeService.getValidScopeByScope(anyString(), anyString())).thenCallRealMethod();
+        when(authServer.scopeService.scopeAllowed(anyString(), anyString())).thenCallRealMethod();
+
         // WHEN
         AccessToken result = authServer.issueAccessToken(req);
 
@@ -828,6 +853,17 @@ public class AuthorizationServerTest {
         willReturn(null).given(authServer).authenticateUser("rossi", "test", req);
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
         willReturn(true).given(authServer).isActiveClient(clientId, clientSecret);
+
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        Map<String, String> applicationDetails = new HashMap<String, String>();
+        applicationDetails.put("my", "data");
+        clientCredentials.setApplicationDetails(applicationDetails);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
+
+        when(authServer.scopeService.getValidScopeByScope(anyString(), anyString())).thenCallRealMethod();
+        when(authServer.scopeService.scopeAllowed(anyString(), anyString())).thenCallRealMethod();
 
         // WHEN
         String errorMsg = null;
@@ -854,6 +890,17 @@ public class AuthorizationServerTest {
         willReturn(userDetails).given(authServer).authenticateUser("rossi", "test", req);
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
 
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        Map<String, String> applicationDetails = new HashMap<String, String>();
+        applicationDetails.put("my", "data");
+        clientCredentials.setApplicationDetails(applicationDetails);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
+
+        when(authServer.scopeService.getValidScopeByScope(anyString(), anyString())).thenCallRealMethod();
+        when(authServer.scopeService.scopeAllowed(anyString(), anyString())).thenCallRealMethod();
+
         // WHEN
         authServer.issueAccessToken(req);
 
@@ -874,6 +921,17 @@ public class AuthorizationServerTest {
         UserDetails userDetails = new UserDetails("3232232122", null);
         willReturn(userDetails).given(authServer).authenticateUser("rossi", "test", req);
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        Map<String, String> applicationDetails = new HashMap<String, String>();
+        applicationDetails.put("my", "data");
+        clientCredentials.setApplicationDetails(applicationDetails);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
+
+        when(authServer.scopeService.getValidScopeByScope(anyString(), anyString())).thenCallRealMethod();
+        when(authServer.scopeService.scopeAllowed(anyString(), anyString())).thenCallRealMethod();
 
         // WHEN
         authServer.issueAccessToken(req);
@@ -1214,6 +1272,17 @@ public class AuthorizationServerTest {
         UserDetails userDetails = new UserDetails("23433366", null);
         willReturn(userDetails).given(authServer).authenticateUser(anyString(), anyString(), any(HttpRequest.class));
 
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        Map<String, String> applicationDetails = new HashMap<String, String>();
+        applicationDetails.put("my", "data");
+        clientCredentials.setApplicationDetails(applicationDetails);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
+
+        when(authServer.scopeService.getValidScopeByScope(anyString(), anyString())).thenCallRealMethod();
+        when(authServer.scopeService.scopeAllowed(anyString(), anyString())).thenCallRealMethod();
+
         // WHEN
         AccessToken accessToken = authServer.issueAccessToken(req);
 
@@ -1233,6 +1302,14 @@ public class AuthorizationServerTest {
         willReturn(getAuthorizationBasicHeader()).given(req).headers();
         willReturn(true).given(authServer).isActiveClient(clientId, clientSecret);
         willReturn(null).given(authServer.scopeService).getValidScope("ext", clientId);
+
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        Map<String, String> applicationDetails = new HashMap<String, String>();
+        applicationDetails.put("my", "data");
+        clientCredentials.setApplicationDetails(applicationDetails);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
 
         // WHEN
         String errorMsg = null;
@@ -1442,11 +1519,20 @@ public class AuthorizationServerTest {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
         given(req.getContent()).willReturn(buf);
 
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        Map<String, String> applicationDetails = new HashMap<String, String>();
+        applicationDetails.put("my", "data");
+        clientCredentials.setApplicationDetails(applicationDetails);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
+
         willReturn(true).given(authServer).isActiveClient(clientId, clientSecret);
         willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
         UserDetails userDetails = new UserDetails("123456", null);
         willReturn(userDetails).given(authServer).authenticateUser("rossi", "test", req);
-        willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+        when(authServer.scopeService.getValidScopeByScope(anyString(), anyString())).thenCallRealMethod();
+        when(authServer.scopeService.scopeAllowed(anyString(), anyString())).thenCallRealMethod();
 
         // WHEN
         AccessToken result = authServer.issueAccessToken(req);
@@ -1712,6 +1798,44 @@ public class AuthorizationServerTest {
         AccessToken accessToken = authServer.issueAccessToken(req);
 
         // THEN
+        assertTrue(accessToken.getApplicationDetails() != null);
+        assertTrue(accessToken.getDetails() != null); // For backward compatability
+    }
+
+    @Test
+    public void when_issuing_password_token_it_should_have_application_details() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        String clientId = "203598596438220";
+        String clientSecret = "f754cb0cd78c4c36fa3c1c0325ef72bb4a011373";
+        String content = "grant_type=" + TokenRequest.PASSWORD + "&username=rossi&password=test&client_id=" +
+                clientId + "&client_secret=" + clientSecret;
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        given(req.getContent()).willReturn(buf);
+
+        ClientCredentials clientCredentials = new ClientCredentials();
+        clientCredentials.setScope("basic");
+        clientCredentials.setId(clientId);
+        Map<String, String> applicationDetails = new HashMap<String, String>();
+        applicationDetails.put("my", "data");
+        clientCredentials.setApplicationDetails(applicationDetails);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(clientCredentials);
+
+        willReturn(true).given(authServer).isActiveClient(clientId, clientSecret);
+        willDoNothing().given(authServer.db).storeAccessToken(any(AccessToken.class));
+
+        Map<String, String> userDetailsMap = new HashMap<String, String>();
+        userDetailsMap.put("key", "value");
+        UserDetails userDetails = new UserDetails("123456", userDetailsMap );
+        willReturn(userDetails).given(authServer).authenticateUser("rossi", "test", req);
+        when(authServer.scopeService.getValidScopeByScope(anyString(), anyString())).thenCallRealMethod();
+        when(authServer.scopeService.scopeAllowed(anyString(), anyString())).thenCallRealMethod();
+
+        // WHEN
+        AccessToken accessToken = authServer.issueAccessToken(req);
+
+        // THEN
+        assertTrue(accessToken.getApplicationDetails() != null);
         assertTrue(accessToken.getDetails() != null);
     }
 

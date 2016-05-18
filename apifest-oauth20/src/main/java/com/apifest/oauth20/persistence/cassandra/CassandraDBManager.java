@@ -13,9 +13,13 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.QueryExecutionException;
 import com.datastax.driver.core.exceptions.QueryValidationException;
-import com.datastax.driver.core.querybuilder.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.datastax.driver.core.querybuilder.Delete;
+import com.datastax.driver.core.querybuilder.Insert;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
+import com.datastax.driver.core.querybuilder.Update;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -132,6 +136,7 @@ public class CassandraDBManager implements DBManager {
             .value("details", accessToken.getDetails())
             .value("created", accessToken.getCreated())
             .value("refresh_expires_in", accessToken.getRefreshExpiresIn())
+            .value("applicationDetails", accessToken.getApplicationDetails())
         ;
         // TTL
         Long tokenExpiration = (accessToken.getRefreshExpiresIn() != null && !accessToken.getRefreshExpiresIn().isEmpty()) ? Long.valueOf(accessToken.getRefreshExpiresIn()) : Long.valueOf(accessToken.getExpiresIn());
@@ -216,6 +221,7 @@ public class CassandraDBManager implements DBManager {
         atoken.setDetails(row.getMap("details", String.class, String.class));
         atoken.setCreated(row.getTimestamp("created").getTime());
         atoken.setRefreshExpiresIn(row.getString("refresh_expires_in"));
+        atoken.setApplicationDetails(row.getMap("applicationDetails", String.class, String.class));
         return atoken;
     }
 

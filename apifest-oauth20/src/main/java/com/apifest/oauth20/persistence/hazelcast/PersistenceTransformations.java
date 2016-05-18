@@ -138,6 +138,7 @@ public class PersistenceTransformations {
         persistentAccessToken.setUserId(accessToken.getUserId());
         persistentAccessToken.setValid(accessToken.isValid());
         persistentAccessToken.setDetails(JsonUtils.convertMapToJSON(accessToken.getDetails()));
+        persistentAccessToken.setApplicationDetails(JsonUtils.convertMapToJSON(accessToken.getApplicationDetails()));
         String refreshExpiresIn = (accessToken.getRefreshExpiresIn() != null && !accessToken.getRefreshExpiresIn().isEmpty()) ?
                 accessToken.getRefreshExpiresIn() : accessToken.getExpiresIn();
         persistentAccessToken.setRefreshExpiresIn(refreshExpiresIn);
@@ -159,6 +160,7 @@ public class PersistenceTransformations {
             accessToken.setUserId(persistentAccessToken.getUserId());
             accessToken.setValid(persistentAccessToken.isValid());
             accessToken.setDetails(JsonUtils.convertStringToMap(persistentAccessToken.getDetails()));
+            accessToken.setApplicationDetails(JsonUtils.convertStringToMap(persistentAccessToken.getApplicationDetails()));
             String refreshExpiresIn = (persistentAccessToken.getRefreshExpiresIn() != null && !persistentAccessToken.getRefreshExpiresIn().isEmpty()) ?
                     persistentAccessToken .getRefreshExpiresIn() : persistentAccessToken.getExpiresIn();
             accessToken.setRefreshExpiresIn(refreshExpiresIn);

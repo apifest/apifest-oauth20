@@ -69,6 +69,9 @@ public class AccessToken implements Serializable {
     private String userId = "";
 
     @JsonIgnore
+    private Map<String, String> applicationDetails = null;
+
+    @JsonIgnore
     private Map<String, String> details = null;
 
     @JsonIgnore
@@ -212,6 +215,14 @@ public class AccessToken implements Serializable {
         this.details = details;
     }
 
+    public Map<String, String> getApplicationDetails() {
+        return applicationDetails;
+    }
+
+    public void setApplicationDetails(Map<String, String> applicationDetails) {
+        this.applicationDetails = applicationDetails;
+    }
+
     public Long getCreated() {
         return created;
     }
@@ -241,6 +252,7 @@ public class AccessToken implements Serializable {
         accessToken.userId = (String) map.get("userId");
         accessToken.created = (Long) map.get("created");
         accessToken.details = JsonUtils.convertStringToMap((String) map.get("details"));
+        accessToken.applicationDetails = JsonUtils.convertStringToMap((String) map.get("applicationDetails"));
         accessToken.refreshExpiresIn = (String) ((map.get("refreshExpiresIn") != null ? map.get("refreshExpiresIn") : accessToken.expiresIn));
         return accessToken;
     }
@@ -258,6 +270,7 @@ public class AccessToken implements Serializable {
         accessToken.userId = map.get("userId");
         accessToken.created = Long.parseLong(map.get("created"));
         accessToken.details = JsonUtils.convertStringToMap(map.get("details"));
+        accessToken.applicationDetails = JsonUtils.convertStringToMap(map.get("applicationDetails"));
         accessToken.refreshExpiresIn = map.get("refreshExpiresIn") != null ? map.get("refreshExpiresIn") : accessToken.expiresIn;
         return accessToken;
     }
@@ -276,6 +289,7 @@ public class AccessToken implements Serializable {
         accessToken.created = Long.parseLong(list.get(9));
         accessToken.details = JsonUtils.convertStringToMap(list.get(10));
         accessToken.refreshExpiresIn = list.get(11) != null ? list.get(11) : accessToken.expiresIn;
+        accessToken.applicationDetails = JsonUtils.convertStringToMap(list.get(12));
         return accessToken;
     }
 
