@@ -110,7 +110,7 @@ public class LuaScripts {
             + "if redis.call('EXISTS','at:'..token) == 0 then "
             + "  return nil; "
             + "end "
-            + "return redis.call('HMGET','at:'..token,'token','refreshToken','expiresIn','type','scope','valid','clientId','codeId','userId','created','details','refreshExpiresIn'); ";
+            + "return redis.call('HMGET','at:'..token,'token','refreshToken','expiresIn','type','scope','valid','clientId','codeId','userId','created','details','refreshExpiresIn', 'applicationDetails'); ";
 
     private static final String STORE_AUTH_CODE_SCRIPT = ""
             + "local _id = ARGV[1]; "
