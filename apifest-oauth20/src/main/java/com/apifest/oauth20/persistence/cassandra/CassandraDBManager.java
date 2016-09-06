@@ -152,8 +152,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -174,8 +174,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -200,8 +200,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -238,8 +238,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -269,8 +269,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -300,8 +300,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -334,8 +334,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -356,8 +356,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -395,8 +395,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -423,8 +423,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -453,8 +453,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -485,8 +485,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -508,8 +508,8 @@ public class CassandraDBManager implements DBManager {
                     "successfully execute the query with the specified consistency level.");
             return false;
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
             return false;
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
@@ -541,8 +541,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -577,8 +577,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -607,8 +607,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -642,8 +642,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
@@ -678,8 +678,8 @@ public class CassandraDBManager implements DBManager {
             log.error("An exception was thrown by Cassandra because it cannot " +
                     "successfully execute the query with the specified consistency level.");
         } catch (QueryValidationException e) {
-            log.error("The query %s \nis not valid, for example, incorrect syntax.\n",
-                    stmt.getQueryString());
+            log.error(String.format("The query %s \nis not valid, for example, incorrect syntax.\n",
+                    stmt.getQueryString()));
         } catch (IllegalStateException e) {
             log.error("The BoundStatement is not ready.");
         }
