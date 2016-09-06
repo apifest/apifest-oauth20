@@ -4,6 +4,8 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Host;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.policies.ConstantReconnectionPolicy;
+import com.datastax.driver.core.policies.ReconnectionPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +24,7 @@ public final class CassandraConnector {
         if(cluster == null) {
             cluster = Cluster.builder()
                     .addContactPoint(cassandraContactPoints)
+                    .withReconnectionPolicy(new ConstantReconnectionPolicy(1000))
                     .build();
             Metadata metadata = cluster.getMetadata();
             log.info("Connected to cluster: %s\n",
