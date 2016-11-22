@@ -93,6 +93,7 @@ public class CassandraDBManager implements DBManager {
                     " details MAP<text, text>," +
                     " created timestamp," +
                     " refresh_expires_in text," +
+                    " application_details MAP<text, text>," +
                     " PRIMARY KEY (access_token)" +
                     ");";
 
@@ -136,7 +137,7 @@ public class CassandraDBManager implements DBManager {
             .value("details", accessToken.getDetails())
             .value("created", accessToken.getCreated())
             .value("refresh_expires_in", accessToken.getRefreshExpiresIn())
-            .value("applicationDetails", accessToken.getApplicationDetails())
+            .value("application_details", accessToken.getApplicationDetails())
         ;
         // TTL
         Long tokenExpiration = (accessToken.getRefreshExpiresIn() != null && !accessToken.getRefreshExpiresIn().isEmpty()) ? Long.valueOf(accessToken.getRefreshExpiresIn()) : Long.valueOf(accessToken.getExpiresIn());
@@ -221,7 +222,7 @@ public class CassandraDBManager implements DBManager {
         atoken.setDetails(row.getMap("details", String.class, String.class));
         atoken.setCreated(row.getTimestamp("created").getTime());
         atoken.setRefreshExpiresIn(row.getString("refresh_expires_in"));
-        atoken.setApplicationDetails(row.getMap("applicationDetails", String.class, String.class));
+        atoken.setApplicationDetails(row.getMap("application_details", String.class, String.class));
         return atoken;
     }
 
