@@ -69,9 +69,5 @@ public class RevokeTokenRequest {
             throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, ACCESS_TOKEN),
                     HttpResponseStatus.BAD_REQUEST);
         }
-        if (clientId == null || clientId.isEmpty()) {
-            throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CLIENT_ID),
-                    HttpResponseStatus.BAD_REQUEST);
-        }
     }
 }
