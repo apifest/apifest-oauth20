@@ -34,6 +34,8 @@ public class RevokeTokenRequest {
     protected static final String CLIENT_ID = "client_id";
 
     private String accessToken;
+
+    //TODO: remove it, not used anymore
     private String clientId;
 
     public RevokeTokenRequest(HttpRequest request) {
