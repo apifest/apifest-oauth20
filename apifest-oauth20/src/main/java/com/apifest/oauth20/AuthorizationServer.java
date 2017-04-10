@@ -400,11 +400,6 @@ public class AuthorizationServer {
     public boolean revokeToken(HttpRequest req) throws OAuthException {
         RevokeTokenRequest revokeRequest = new RevokeTokenRequest(req);
         revokeRequest.checkMandatoryParams();
-        String clientId = revokeRequest.getClientId();
-        // check valid client_id, status does not matter as token of inactive client app could be revoked too
-        if (!isExistingClient(clientId)) {
-            throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
-        }
         String token = revokeRequest.getAccessToken();
         AccessToken accessToken = db.findAccessToken(token);
         if (accessToken != null) {
@@ -412,14 +407,9 @@ public class AuthorizationServer {
                 log.debug("access token {} is expired", token);
                 return true;
             }
-            if (clientId.equals(accessToken.getClientId())) {
-                db.removeAccessToken(accessToken.getToken());
-                log.debug("access token {} set status invalid", token);
-                return true;
-            } else {
-                log.debug("access token {} is not obtained for that clientId {}", token, clientId);
-                return false;
-            }
+            db.removeAccessToken(accessToken.getToken());
+            log.debug("access token {} set status invalid", token);
+            return true;
         }
         log.debug("access token {} not found", token);
         return false;

@@ -158,7 +158,7 @@ public class HttpRequestHandlerTest {
         HttpResponse response = handler.handleTokenRevoke(req);
 
         // THEN
-        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "{\"revoked\":\"true\"}");
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "{\"revoked\":true}");
     }
 
     @Test
@@ -173,7 +173,7 @@ public class HttpRequestHandlerTest {
         HttpResponse response = handler.handleTokenRevoke(req);
 
         // THEN
-        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "{\"revoked\":\"false\"}");
+        assertEquals(response.getContent().toString(CharsetUtil.UTF_8), "{\"revoked\":false}");
     }
 
     @Test

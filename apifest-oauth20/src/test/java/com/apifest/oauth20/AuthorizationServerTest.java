@@ -1013,20 +1013,6 @@ public class AuthorizationServerTest {
         assertNull(result);
     }
 
-    @Test(expectedExceptions = OAuthException.class)
-    public void when_revoke_token_with_client_id_null_will_throw_exception() throws Exception {
-        // GIVEN
-        HttpRequest req = mock(HttpRequest.class);
-        String content = "{\"access_token\":\"9376e098e8190835a0b41d83355f92d66f425469\"," +
-                "\"client_secret\":\"bb635eb22c5b5ce3de06e31bb88be7ae\"}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
-        willReturn(buf).given(req).getContent();
-        //willReturn(null).given(authServer).getBasicAuthorizationClientId(req);
-
-        // WHEN
-        authServer.revokeToken(req);
-    }
-
     @Test
     public void when_revoke_token_get_access_token_null_return_false() throws Exception {
         // GIVEN
@@ -1047,7 +1033,6 @@ public class AuthorizationServerTest {
 
         // THEN
         assertFalse(revoked);
-        verify(authServer).isExistingClient(clientId);
     }
 
     @Test
@@ -1100,62 +1085,6 @@ public class AuthorizationServerTest {
         // THEN
         verify(authServer.db).removeAccessToken(accessToken);
         assertTrue(revoked);
-    }
-
-    @Test
-    public void when_revoke_token_issued_with_other_client_id_do_not_expire_and_return_false()
-            throws Exception {
-        // GIVEN
-        String clientId = "203598599234220";
-        String clientSecret = "bb635eb22c5b5ce3de06e31bb88be7ae";
-        String accessToken = "9376e098e8190835a0b41d83355f92d66f425469";
-        HttpRequest req = mock(HttpRequest.class);
-        String content = "{\"access_token\":" + accessToken + "," +
-                "\"client_id\":" + clientId + ",\"client_secret\":" + clientSecret + "}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
-        willReturn(buf).given(req).getContent();
-        willReturn(true).given(authServer).isExistingClient(clientId);
-
-        AccessToken dbAccessToken = mock(AccessToken.class);
-        willReturn(false).given(dbAccessToken).tokenExpired();
-        willReturn("0345901231313").given(dbAccessToken).getClientId();
-        willReturn(dbAccessToken).given(authServer.db).findAccessToken(accessToken);
-
-        // WHEN
-        boolean revoked = authServer.revokeToken(req);
-
-        // THEN
-        verify(authServer.db, times(0)).updateAccessTokenValidStatus(dbAccessToken.getToken(), false);
-        assertFalse(revoked);
-    }
-
-    @Test
-    public void when_revoke_token_with_invalid_client_credentials_return_bad_request()
-            throws Exception {
-        // GIVEN
-        String clientId = "203598599234220";
-        String clientSecret = "bb635eb22c5b5ce3de06e31bb88be7ae";
-        String accessToken = "9376e098e8190835a0b41d83355f92d66f425469";
-        HttpRequest req = mock(HttpRequest.class);
-        String content = "{\"access_token\":" + accessToken + "," +
-                "\"client_id\":" + clientId + ",\"client_secret\":" + clientSecret + "}";
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
-        willReturn(buf).given(req).getContent();
-        willReturn(false).given(authServer).isExistingClient(clientId);
-
-        // WHEN
-        String errorMsg = null;
-        HttpResponseStatus status = null;
-        try {
-            authServer.revokeToken(req);
-        } catch(OAuthException e) {
-            errorMsg = e.getMessage();
-            status = e.getHttpStatus();
-        }
-
-        // THEN
-        assertEquals(errorMsg, Response.INVALID_CLIENT_ID);
-        assertEquals(status, HttpResponseStatus.BAD_REQUEST);
     }
 
     @Test

@@ -34,6 +34,8 @@ public class RevokeTokenRequest {
     protected static final String CLIENT_ID = "client_id";
 
     private String accessToken;
+
+    //TODO: remove it, not used anymore
     private String clientId;
 
     public RevokeTokenRequest(HttpRequest request) {
@@ -67,10 +69,6 @@ public class RevokeTokenRequest {
     protected void checkMandatoryParams() throws OAuthException {
         if (accessToken == null || accessToken.isEmpty()) {
             throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, ACCESS_TOKEN),
-                    HttpResponseStatus.BAD_REQUEST);
-        }
-        if (clientId == null || clientId.isEmpty()) {
-            throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CLIENT_ID),
                     HttpResponseStatus.BAD_REQUEST);
         }
     }

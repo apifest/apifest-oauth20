@@ -318,8 +318,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             invokeExceptionHandler(e, req);
             return Response.createOAuthExceptionResponse(e);
         }
-        String json = "{\"revoked\":\"" + revoked + "\"}";
-        HttpResponse response = Response.createOkResponse(json);
+        //String json = "{\"revoked\":\"" + revoked + "\"}";
+        JsonObject json = new JsonObject();
+        json.addProperty("revoked", revoked);
+        HttpResponse response = Response.createOkResponse(json.toString());
         return response;
     }
 
