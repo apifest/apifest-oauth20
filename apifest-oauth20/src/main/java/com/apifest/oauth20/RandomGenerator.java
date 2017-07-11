@@ -22,6 +22,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,19 +96,18 @@ public final class RandomGenerator {
 
     private static String generateRandomString(String algorithm) {
         SecureRandom rand = new SecureRandom();
-        int random = rand.nextInt();
-        long time = System.currentTimeMillis();
-        long id = Thread.currentThread().getId();
+        String random = String.valueOf(rand.nextInt());
+        String nanoTime = String.valueOf(System.nanoTime());
+        String id = String.valueOf(Thread.currentThread().getId());
+        String freeMemory = String.valueOf(Runtime.getRuntime().freeMemory());
         MessageDigest md = null;
         String result = null;
         try {
             md = MessageDigest.getInstance(algorithm);
-            String input = random + time + id + SALT;
-            byte [] hashed = md.digest(input.getBytes("UTF-8"));
+            String input = random + nanoTime + id + freeMemory + SALT;
+            byte [] hashed = md.digest(input.getBytes(CharsetUtil.UTF_8));
             result = new BigInteger(1, hashed).toString(16);
         } catch(NoSuchAlgorithmException e) {
-            log.error("cannot generate random string", e);
-        } catch (UnsupportedEncodingException e) {
             log.error("cannot generate random string", e);
         }
         return result;

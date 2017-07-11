@@ -72,22 +72,14 @@ public class ClientCredentials implements Serializable {
     private Map<String, String> applicationDetails = null;
 
     public ClientCredentials(String appName, String scope, String description, String uri, Map<String, String> applicationDetails) {
-        this.name = appName;
-        this.scope = scope;
-        this.descr = (description != null)? description : "";
-        this.uri = uri;
-        this.id = generateClientId();
-        this.secret = generateClientSecret();
-        this.created = (new Date()).getTime();
-        this.status = INACTIVE_STATUS;
-        this.applicationDetails = applicationDetails;
+        this(appName, scope, description, uri, generateClientId(), generateClientSecret(), applicationDetails);
     }
 
     public ClientCredentials(String appName, String scope, String description, String uri, String clientId, String clientSecret,
                              Map<String, String> applicationDetails) {
         this.name = appName;
         this.scope = scope;
-        this.descr = (description != null)? description : "";
+        this.descr = (description != null) ? description : "";
         this.uri = uri;
         this.id = clientId;
         this.secret = clientSecret;
@@ -180,11 +172,11 @@ public class ClientCredentials implements Serializable {
         this.applicationDetails = applicationDetails;
     }
 
-    private String generateClientId() {
+    private static String generateClientId() {
         return RandomGenerator.generateShortRandomString();
     }
 
-    private String generateClientSecret() {
+    private static String generateClientSecret() {
         return RandomGenerator.generateRandomString();
     }
 
