@@ -397,6 +397,15 @@ public class AuthorizationServer {
         return String.valueOf(scopeService.getExpiresIn(tokenGrantType, scope));
     }
 
+    public boolean revokeUserAccessTokens(HttpRequest req) throws OAuthException {
+        RevokeUserTokensRequest revokeRequest = new RevokeUserTokensRequest(req);
+        revokeRequest.checkMandatoryParams();
+        String userId = revokeRequest.getUserId();
+        db.removeUserTokens(userId);
+        log.debug("access tokens for user {} deleted", userId);
+        return true;
+    }
+
     public boolean revokeToken(HttpRequest req) throws OAuthException {
         RevokeTokenRequest revokeRequest = new RevokeTokenRequest(req);
         revokeRequest.checkMandatoryParams();

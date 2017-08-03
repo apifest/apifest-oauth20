@@ -169,4 +169,10 @@ public interface DBManager {
      */
     void removeAccessToken(String accessToken);
 
+    /**
+     * Remove all active access tokens for a user
+     * @param userId the id of the user
+     */
+    void removeUserTokens(String userId);
+
 }

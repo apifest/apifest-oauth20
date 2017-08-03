@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -43,12 +44,12 @@ import com.hazelcast.config.InMemoryFormat;
 import com.hazelcast.config.InterfacesConfig;
 import com.hazelcast.config.JoinConfig;
 import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.MapConfig.EvictionPolicy;
 import com.hazelcast.config.MaxSizeConfig;
+import com.hazelcast.config.MaxSizeConfig.MaxSizePolicy;
 import com.hazelcast.config.MulticastConfig;
 import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.TcpIpConfig;
-import com.hazelcast.config.MapConfig.EvictionPolicy;
-import com.hazelcast.config.MaxSizeConfig.MaxSizePolicy;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -84,6 +85,7 @@ public class HazelcastDBManager implements DBManager {
         hazelcastClient.getMap(APIFEST_AUTH_CODE).addIndex("codeURI", false);
         hazelcastClient.getMap(APIFEST_ACCESS_TOKEN).addIndex("refreshTokenByClient", false);
         hazelcastClient.getMap(APIFEST_ACCESS_TOKEN).addIndex("accessTokenByUserIdAndClient", false);
+        hazelcastClient.getMap(APIFEST_ACCESS_TOKEN).addIndex("userId", false);
     }
 
     private static Map<String, MapConfig> createMapConfigs() {
@@ -381,6 +383,20 @@ public class HazelcastDBManager implements DBManager {
             }
         }
         return accessTokens;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void removeUserTokens(String userId) {
+        EntryObject eo = new PredicateBuilder().getEntryObject();
+        Predicate<String, String> predicate = eo.get("userId").equal("userId");
+        IMap<String, PersistentAccessToken> container = getAccessTokenContainer();
+        Set<String> keys = container.keySet(predicate);
+        if (!keys.isEmpty()) {
+            for (String token : keys) {
+                container.remove(token);
+            }
+        }
     }
 
     @Override
