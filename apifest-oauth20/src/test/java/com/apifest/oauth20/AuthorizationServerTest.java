@@ -56,6 +56,7 @@ import org.testng.annotations.Test;
 
 import com.apifest.oauth20.api.UserDetails;
 
+
 /**
  * @author Rossitsa Borissova
  */
@@ -105,7 +106,8 @@ public class AuthorizationServerTest {
     public void when_response_type_not_supported_return_error_unsupported_response_type() {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
-        willReturn("http://localhost/oauth20/authorize?client_id=1232&response_type=no").given(req).getUri();
+        willReturn("http://localhost/oauth20/authorize?client_id=1232&response_type=no").given(req)
+            .getUri();
         willReturn(true).given(authServer).isActiveClientId("1232");
 
         // WHEN
@@ -239,10 +241,11 @@ public class AuthorizationServerTest {
                 mock(ClientCredentials.class));
         given(req.getUri())
         .willReturn("http://example.com/oauth20/authorize?client_id=" + clientId);
+        String response ="";
 
         // WHEN
         try {
-            authServer.issueAuthorizationCode(req);
+           authServer.issueAuthorizationCode(req);
         } catch (OAuthException e) {
             // nothing to do
         }
@@ -266,11 +269,39 @@ public class AuthorizationServerTest {
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
 
         // WHEN
-        authServer.issueAuthorizationCode(req);
+        String response = authServer.issueAuthorizationCode(req);
 
         // THEN
         verify(authServer).generateCode();
     }
+
+
+    @Test
+    public void when_issue_auth_code_verify_state_returned() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        ClientCredentials client = mock(ClientCredentials.class);
+        String state = "someState";
+        given(client.getStatus()).willReturn(ClientCredentials.ACTIVE_STATUS);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(client);
+
+        given(req.getUri())
+            .willReturn(
+                "http://example.com/oauth20/authorize?redirect_uri=http%3A%2F%2Fexample" +
+                    ".com&response_type=code&client_id" + clientId + "&state=" + state);
+        willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+
+        // WHEN
+        String response = authServer.issueAuthorizationCode(req);
+
+        // THEN
+        verify(authServer).generateCode();
+        assertTrue(response.contains(state));
+    }
+
+
+
+
 
     @Test
     public void when_issue_token_and_client_id_not_the_same_as_token_return_error()
@@ -1097,7 +1128,7 @@ public class AuthorizationServerTest {
 
         given(req.getUri()).willReturn(
                 "http://example.com/oauth20/authorize?redirect_uri=http%3A%2F%2Fexample.com&response_type=code&client_id="
-                        + clientId);
+                        + clientId + "&state=xyz");
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
 
         // WHEN
@@ -1106,6 +1137,7 @@ public class AuthorizationServerTest {
         // THEN
         verify(authServer).generateCode();
         verify(authServer.scopeService).getValidScope(null, clientId);
+
     }
 
     @Test
@@ -1730,6 +1762,10 @@ public class AuthorizationServerTest {
         assertTrue(accessToken.getApplicationDetails() != null);
         assertTrue(accessToken.getDetails() != null); // For backward compatability
     }
+
+
+
+
 
     @Test
     public void when_issuing_password_token_it_should_have_application_details() throws Exception {

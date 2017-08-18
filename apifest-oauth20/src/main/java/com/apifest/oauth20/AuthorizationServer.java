@@ -138,6 +138,11 @@ public class AuthorizationServer {
         // return redirect URI, append param code=[Authcode]
         QueryStringEncoder enc = new QueryStringEncoder(authRequest.getRedirectUri());
         enc.addParam("code", authCode.getCode());
+
+        if(authCode.getState()!=null){
+            enc.addParam("state", authCode.getState());
+        }
+        
         return enc.toString();
     }
 
