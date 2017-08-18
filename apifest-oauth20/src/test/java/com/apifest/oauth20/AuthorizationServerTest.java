@@ -275,6 +275,34 @@ public class AuthorizationServerTest {
         verify(authServer).generateCode();
     }
 
+
+    @Test
+    public void when_issue_auth_code_verify_state_returned() throws Exception {
+        // GIVEN
+        HttpRequest req = mock(HttpRequest.class);
+        ClientCredentials client = mock(ClientCredentials.class);
+        String state = "someState";
+        given(client.getStatus()).willReturn(ClientCredentials.ACTIVE_STATUS);
+        given(authServer.db.findClientCredentials(clientId)).willReturn(client);
+
+        given(req.getUri())
+            .willReturn(
+                "http://example.com/oauth20/authorize?redirect_uri=http%3A%2F%2Fexample" +
+                    ".com&response_type=code&client_id" + clientId + "&state=" + state);
+        willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
+
+        // WHEN
+        String response = authServer.issueAuthorizationCode(req);
+
+        // THEN
+        verify(authServer).generateCode();
+        assertTrue(response.contains(state));
+    }
+
+
+
+
+
     @Test
     public void when_issue_token_and_client_id_not_the_same_as_token_return_error()
             throws Exception {
@@ -1100,11 +1128,11 @@ public class AuthorizationServerTest {
 
         given(req.getUri()).willReturn(
                 "http://example.com/oauth20/authorize?redirect_uri=http%3A%2F%2Fexample.com&response_type=code&client_id="
-                        + clientId + "?state=xyz");
+                        + clientId + "&state=xyz");
         willReturn("basic").given(authServer.scopeService).getValidScope(null, clientId);
 
         // WHEN
-        String response = authServer.issueAuthorizationCode(req);
+        authServer.issueAuthorizationCode(req);
 
         // THEN
         verify(authServer).generateCode();
@@ -1734,6 +1762,10 @@ public class AuthorizationServerTest {
         assertTrue(accessToken.getApplicationDetails() != null);
         assertTrue(accessToken.getDetails() != null); // For backward compatability
     }
+
+
+
+
 
     @Test
     public void when_issuing_password_token_it_should_have_application_details() throws Exception {
