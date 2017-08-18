@@ -332,4 +332,11 @@ public class RedisDBManager implements DBManager {
         LuaScripts.runScript(ScriptType.DEL_TOKEN, Collections.<String>emptyList(), parameters);
     }
 
+    @Override
+    public void removeUserTokens(String userId) {
+        List<String> parameters = new ArrayList<String>(1);
+        parameters.add(userId);
+        LuaScripts.runScript(ScriptType.DEL_ALL_AT_BY_USER, Collections.<String>emptyList(), parameters);
+    }
+
 }

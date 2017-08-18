@@ -17,5 +17,6 @@ public enum ScriptType {
     UPDATE_ACCESS_TOKEN_STATUS,
     FIND_AUTH_CODE,
     GET_AT_BY_USER_AND_APP,
-    DEL_TOKEN
+    DEL_TOKEN,
+    DEL_ALL_AT_BY_USER
 }

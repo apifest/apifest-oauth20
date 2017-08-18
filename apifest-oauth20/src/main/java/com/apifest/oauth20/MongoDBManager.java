@@ -457,6 +457,19 @@ public class MongoDBManager implements DBManager {
     }
 
     @Override
+    public void removeUserTokens(String userId) {
+        BasicDBObject dbObject = new BasicDBObject();
+        // TODO: add indexes
+        dbObject.put(USER_ID, userId);
+        DBCollection coll = db.getCollection(ACCESS_TOKEN_COLLECTION_NAME);
+        List<DBObject> list = coll.find(dbObject).toArray();
+        for (DBObject object : list) {
+            coll.findAndModify(dbObject, object);
+            coll.remove(object);
+        }
+    }
+
+    @Override
     public void removeAccessToken(String accessToken) {
         BasicDBObject dbObject = new BasicDBObject();
         dbObject.put(ACCESS_TOKEN_ID_NAME, accessToken);

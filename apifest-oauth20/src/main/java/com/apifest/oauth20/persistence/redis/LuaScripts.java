@@ -181,6 +181,17 @@ public class LuaScripts {
             + "local token = ARGV[1]; "
             + "redis.call('EXPIRE','at:'..token, 0); ";
 
+    private static final String DEL_ALL_AT_BY_USER_SCRIPT = ""
+            + "local user_id = ARGV[1]; "
+            + "if redis.call('EXISTS','atuid:'..user_id..':') == 0 then "
+            + "  return nil; "
+            + "end "
+            + "local keys = redis.call('KEYS','atuid:'..user_id..':*'); "
+            + "for i,v in ipairs(keys) do "
+            + "  local token_id = redis.call('HGET', v, 'access_token'); "
+            + "  redis.call('EXPIRE','at:'..token_id, 0); "
+            + "end ";
+
     public static Object runScript(ScriptType scriptType, List<String> keys, List<String> args) {
         Object result;
         JedisSentinelPool pool = RedisConnector.getPool();
@@ -247,6 +258,8 @@ public class LuaScripts {
             return GET_AT_BY_USER_AND_APP_SCRIPT;
         case DEL_TOKEN:
             return DEL_TOKEN_SCRIPT;
+        case DEL_ALL_AT_BY_USER:
+            return DEL_ALL_AT_BY_USER_SCRIPT;
         default:
             throw new InvalidParameterException("Script " + scriptType + " cannot be found!");
 
