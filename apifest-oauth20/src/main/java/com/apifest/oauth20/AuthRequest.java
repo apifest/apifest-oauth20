@@ -95,7 +95,7 @@ public class AuthRequest {
             throw new OAuthException(Response.RESPONSE_TYPE_NOT_SUPPORTED,
                     HttpResponseStatus.BAD_REQUEST);
         }
-        if (!isValidURI(redirectUri)) {
+        if (redirectUri != null && !isValidURI(redirectUri)) {
             throw new OAuthException(Response.INVALID_REDIRECT_URI, HttpResponseStatus.BAD_REQUEST);
         }
     }
