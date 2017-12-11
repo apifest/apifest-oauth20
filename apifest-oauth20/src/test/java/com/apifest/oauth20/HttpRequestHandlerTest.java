@@ -733,7 +733,7 @@ public class HttpRequestHandlerTest {
     }
 
     @Test
-    public void when_get_tokens_client_id_invalid_return_invalid_client_id() throws Exception {
+    public void when_get_tokens_client_id_is_invalid_return_invalid_client_id() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
         String userId = "214331231";
@@ -741,7 +741,7 @@ public class HttpRequestHandlerTest {
         willReturn(HttpRequestHandler.ACCESS_TOKEN_URI + "?client_id=" + clientId + "&user_id=" + userId).given(req).getUri();
         AuthorizationServer auth = mock(AuthorizationServer.class);
         handler.auth = auth;
-        willReturn(false).given(handler.auth).isActiveClientId(clientId);
+        willReturn(false).given(handler.auth).isExistingClient(clientId);
 
 
         // WHEN
