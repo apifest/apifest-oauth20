@@ -39,18 +39,13 @@ public class MongoUtil {
 
     public static MongoClient getMongoClient() {
         if (mongoClient == null) {
-            try {
-                MongoClientOptions.Builder options = new MongoClientOptions.Builder()
-                        .connectionsPerHost(100).connectTimeout(2)
-                        .threadsAllowedToBlockForConnectionMultiplier(1);
-                final MongoClientURI mongoClientURI  = new MongoClientURI(OAuthServer.getDbURI(), options);
-                mongoClient = new MongoClient(mongoClientURI);
+            MongoClientOptions.Builder options = new MongoClientOptions.Builder().connectionsPerHost(100)
+                    .connectTimeout(2000).threadsAllowedToBlockForConnectionMultiplier(1);
+            final MongoClientURI mongoClientURI = new MongoClientURI(OAuthServer.getDbURI(), options);
+            mongoClient = new MongoClient(mongoClientURI);
 
-                if (mongoClientURI.getDatabase() != null) {
-                    database = mongoClientURI.getDatabase();
-                }
-            } catch (UnknownHostException e) {
-                log.error("Cannot connect to DB", e);
+            if (mongoClientURI.getDatabase() != null) {
+                database = mongoClientURI.getDatabase();
             }
         }
         return mongoClient;

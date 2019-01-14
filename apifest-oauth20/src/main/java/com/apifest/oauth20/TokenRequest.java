@@ -73,7 +73,7 @@ public class TokenRequest {
         this.redirectUri = params.get(REDIRECT_URI);
         this.clientId = params.get(CLIENT_ID);
         this.clientSecret = params.get(CLIENT_SECRET);
-        if (this.clientId == null && this.clientSecret == null) {
+        if (this.clientId == null || this.clientSecret == null) {
             String [] clientCredentials = AuthorizationServer.getBasicAuthorizationClientCredentials(request);
             this.clientId = clientCredentials [0];
             this.clientSecret = clientCredentials [1];
