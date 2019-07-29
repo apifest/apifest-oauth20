@@ -321,4 +321,44 @@ public class TokenRequestTest {
         assertNull(tokenReq.getClientId());
         assertNull(tokenReq.getClientSecret());
     }
+
+    @Test
+    public void when_client_secret_is_missing_then_get_client_id_and_client_secret_from_auth_basic_header() throws Exception {
+        // GIVEN
+        String content = "grant_type=client_credentials&client_id=b9db6d84dc98a895035e68f972e30503d3c724c8";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        given(req.getContent()).willReturn(buf);
+        String basicHeader = "Basic YjlkYjZkODRkYzk4YTg5NTAzNWU2OGY5NzJlMzA1MDNkM2M3MjRjODoxMDVlZjkzZTd"
+                + "iYjM4NmRhM2EyM2MzMmU4NTYzNDM0ZmFkMDA1ZmQwYTZhODgzMTVmY2RmOTQ2YWE3NjFjODM4";
+        HttpHeaders headers = new DefaultHttpHeaders();
+        headers.set(HttpHeaders.Names.AUTHORIZATION, basicHeader);
+        given(req.headers()).willReturn(headers);
+
+        // WHEN
+        TokenRequest tokenReq = new TokenRequest(req);
+
+        // THEN
+        assertNotNull(tokenReq.getClientId());
+        assertNotNull(tokenReq.getClientSecret());
+    }
+
+    @Test
+    public void when_client_id_is_missing_then_get_client_id_and_client_secret_from_auth_basic_header() throws Exception {
+        // GIVEN
+        String content = "grant_type=client_credentials&client_secret=105ef93e7bb386da3a23c32e8563434fad005fd0a6a88315fcdf946aa761c838";
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8));
+        given(req.getContent()).willReturn(buf);
+        String basicHeader = "Basic YjlkYjZkODRkYzk4YTg5NTAzNWU2OGY5NzJlMzA1MDNkM2M3MjRjODoxMDVlZjkzZTd"
+                + "iYjM4NmRhM2EyM2MzMmU4NTYzNDM0ZmFkMDA1ZmQwYTZhODgzMTVmY2RmOTQ2YWE3NjFjODM4";
+        HttpHeaders headers = new DefaultHttpHeaders();
+        headers.set(HttpHeaders.Names.AUTHORIZATION, basicHeader);
+        given(req.headers()).willReturn(headers);
+
+        // WHEN
+        TokenRequest tokenReq = new TokenRequest(req);
+
+        // THEN
+        assertNotNull(tokenReq.getClientId());
+        assertNotNull(tokenReq.getClientSecret());
+    }
 }
